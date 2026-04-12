@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Customer;
+use App\Models\Employee;
+use App\Models\Partner;
 use App\Models\User;
 
 return [
@@ -42,6 +45,21 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'employee' => [
+            'driver'   => 'session',
+            'provider' => 'employees',
+        ],
+
+        'customer' => [
+            'driver'   => 'session',
+            'provider' => 'customers',
+        ],
+
+        'partner' => [
+            'driver'   => 'session',
+            'provider' => 'partners',
+        ],
     ],
 
     /*
@@ -67,10 +85,20 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'employees' => [
+            'driver' => 'eloquent',
+            'model'  => Employee::class,
+        ],
+
+        'customers' => [
+            'driver' => 'eloquent',
+            'model'  => Customer::class,
+        ],
+
+        'partners' => [
+            'driver' => 'eloquent',
+            'model'  => Partner::class,
+        ],
     ],
 
     /*
