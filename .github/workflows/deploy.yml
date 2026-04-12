@@ -34,16 +34,21 @@ jobs:
           DHL_BILLING_NUMBER_DOMESTIC: ${{ secrets.DHL_BILLING_NUMBER_DOMESTIC }}
           DHL_BILLING_NUMBER_INTERNATIONAL: ${{ secrets.DHL_BILLING_NUMBER_INTERNATIONAL }}
           DHL_SANDBOX: ${{ secrets.DHL_SANDBOX }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         with:
           host: 217.160.255.189
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: REVERB_APP_ID,REVERB_APP_KEY,REVERB_APP_SECRET,MAIL_HOST,MAIL_PORT,MAIL_USERNAME,MAIL_PASSWORD,MAIL_ENCRYPTION,MAIL_FROM_ADDRESS,MAIL_FROM_NAME,DHL_API_KEY,DHL_API_SECRET,DHL_USERNAME,DHL_PASSWORD,DHL_EKP,DHL_BILLING_NUMBER_DOMESTIC,DHL_BILLING_NUMBER_INTERNATIONAL,DHL_SANDBOX
+          envs: REVERB_APP_ID,REVERB_APP_KEY,REVERB_APP_SECRET,MAIL_HOST,MAIL_PORT,MAIL_USERNAME,MAIL_PASSWORD,MAIL_ENCRYPTION,MAIL_FROM_ADDRESS,MAIL_FROM_NAME,DHL_API_KEY,DHL_API_SECRET,DHL_USERNAME,DHL_PASSWORD,DHL_EKP,DHL_BILLING_NUMBER_DOMESTIC,DHL_BILLING_NUMBER_INTERNATIONAL,DHL_SANDBOX,DB_HOST,DB_PORT,DB_DATABASE,DB_USERNAME,DB_PASSWORD
           script: |
             export COMPOSER_ALLOW_SUPERUSER=1
 
             # Install required PHP extensions and Redis if missing
-            apt install -y php8.4-dom php8.4-xml php8.4-mbstring php8.4-curl php8.4-zip php8.4-mysql php8.4-tokenizer php8.4-fpm php8.4-redis php8.4-sqlite3 redis-server
+            apt install -y php8.4-dom php8.4-xml php8.4-mbstring php8.4-curl php8.4-zip php8.4-mysql php8.4-tokenizer php8.4-fpm php8.4-redis redis-server
             systemctl enable redis-server
             systemctl start redis-server
 
@@ -69,11 +74,6 @@ jobs:
             if [ ! -f ".env" ]; then
               cp .env.example .env
               php8.4 artisan key:generate
-            fi
-
-            # Create SQLite database file if it doesn't exist
-            if [ ! -f "database/database.sqlite" ]; then
-              touch database/database.sqlite
             fi
 
             # Inject DHL variables into .env
@@ -116,6 +116,12 @@ jobs:
             set_env DHL_BILLING_NUMBER_DOMESTIC "$DHL_BILLING_NUMBER_DOMESTIC"
             set_env DHL_BILLING_NUMBER_INTERNATIONAL "$DHL_BILLING_NUMBER_INTERNATIONAL"
             set_env DHL_SANDBOX "$DHL_SANDBOX"
+            set_env DB_CONNECTION "mysql"
+            set_env DB_HOST "$DB_HOST"
+            set_env DB_PORT "$DB_PORT"
+            set_env DB_DATABASE "$DB_DATABASE"
+            set_env DB_USERNAME "$DB_USERNAME"
+            set_env DB_PASSWORD "$DB_PASSWORD"
 
             # Clear caches before migration
             php8.4 artisan config:clear
