@@ -59,6 +59,7 @@ jobs:
 
             # Install PHP dependencies
             composer install --no-dev --optimize-autoloader --no-interaction
+            composer dump-autoload --optimize
 
             # Install Node dependencies and build assets
             npm install
