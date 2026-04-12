@@ -43,7 +43,7 @@ jobs:
             export COMPOSER_ALLOW_SUPERUSER=1
 
             # Install required PHP extensions and Redis if missing
-            apt install -y php8.4-dom php8.4-xml php8.4-mbstring php8.4-curl php8.4-zip php8.4-mysql php8.4-tokenizer php8.4-fpm php8.4-redis redis-server
+            apt install -y php8.4-dom php8.4-xml php8.4-mbstring php8.4-curl php8.4-zip php8.4-mysql php8.4-tokenizer php8.4-fpm php8.4-redis php8.4-sqlite3 redis-server
             systemctl enable redis-server
             systemctl start redis-server
 
@@ -69,6 +69,11 @@ jobs:
             if [ ! -f ".env" ]; then
               cp .env.example .env
               php8.4 artisan key:generate
+            fi
+
+            # Create SQLite database file if it doesn't exist
+            if [ ! -f "database/database.sqlite" ]; then
+              touch database/database.sqlite
             fi
 
             # Inject DHL variables into .env
@@ -158,8 +163,7 @@ jobs:
             chown -R www-data:www-data storage bootstrap/cache
             chmod -R 775 storage bootstrap/cache
 
-            # Configure Nginx if PHP-FPM block is missing
-            if ! grep -q "fastcgi_pass" /etc/nginx/sites-available/msw.bizo.technology; then
-              cp /var/www/msw/deploy/nginx.conf /etc/nginx/sites-available/msw.bizo.technology
-              nginx -t && systemctl reload nginx
-            fi
+            # Update Nginx config and reload
+            cp /var/www/msw/deploy/nginx.conf /etc/nginx/sites-available/msw.bizo.technology
+            ln -sf /etc/nginx/sites-available/msw.bizo.technology /etc/nginx/sites-enabled/msw.bizo.technology
+            nginx -t && systemctl reload nginx
