@@ -111,10 +111,16 @@ jobs:
             set_env DHL_BILLING_NUMBER_INTERNATIONAL "$DHL_BILLING_NUMBER_INTERNATIONAL"
             set_env DHL_SANDBOX "$DHL_SANDBOX"
 
+            # Clear caches before migration
+            php8.4 artisan config:clear
+            php8.4 artisan route:clear
+            php8.4 artisan view:clear
+            php8.4 artisan cache:clear
+
             # Run migrations
             php8.4 artisan migrate --force
 
-            # Clear and cache config
+            # Rebuild caches
             php8.4 artisan config:cache
             php8.4 artisan route:cache
             php8.4 artisan view:cache
