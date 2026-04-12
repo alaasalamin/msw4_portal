@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
         Vite::prefetch(concurrency: 3);
 
         Gate::define('viewPulse', function ($user) {
-            return $user->id === 1;
+            return $user->id === 1 || $user->email === 'alaasalamin1996@gmail.com';
         });
     }
 }
