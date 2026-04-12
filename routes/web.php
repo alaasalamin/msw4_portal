@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShipmentController;
 use Illuminate\Foundation\Application;
@@ -30,6 +31,11 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('shipments', ShipmentController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('/shipments/{shipment}/track', [ShipmentController::class, 'track'])->name('shipments.track');
+
+    // Technician
+    Route::get('/technician/board', [DeviceController::class, 'technicianBoard'])->name('technician.board');
+    Route::patch('/devices/{device}/status', [DeviceController::class, 'updateStatus'])->name('devices.status');
+    Route::patch('/devices/{device}/notes', [DeviceController::class, 'updateNotes'])->name('devices.notes');
 });
 
 require __DIR__.'/auth.php';
