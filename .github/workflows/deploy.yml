@@ -120,9 +120,18 @@ jobs:
               systemctl start laravel-queue
             fi
 
-            # Restart queue workers so they pick up new code
+            # Setup Reverb WebSocket server as a systemd service if not exists
+            if [ ! -f /etc/systemd/system/laravel-reverb.service ]; then
+              cp /var/www/bizo.technology/deploy/laravel-reverb.service /etc/systemd/system/laravel-reverb.service
+              systemctl daemon-reload
+              systemctl enable laravel-reverb
+              systemctl start laravel-reverb
+            fi
+
+            # Restart workers so they pick up new code
             php8.4 artisan queue:restart
             systemctl restart laravel-queue
+            systemctl restart laravel-reverb
 
             # Fix permissions
             chown -R www-data:www-data storage bootstrap/cache
