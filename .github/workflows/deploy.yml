@@ -103,8 +103,39 @@ jobs:
             php8.4 artisan route:cache
             php8.4 artisan view:cache
 
-            # Restart queue workers if any
+            # Ensure queue jobs table exists
+            php8.4 artisan queue:table 2>/dev/null || true
+            php8.4 artisan migrate --force
+
+            # Set queue connection to database
+            set_env QUEUE_CONNECTION "database"
+
+            # Setup queue worker as a systemd service if not exists
+            if [ ! -f /etc/systemd/system/laravel-queue.service ]; then
+              cat > /etc/systemd/system/laravel-queue.service << 'SERVICE'
+[Unit]
+Description=Laravel Queue Worker
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+Restart=always
+ExecStart=/usr/bin/php8.4 /var/www/bizo.technology/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+StandardOutput=append:/var/log/laravel-queue.log
+StandardError=append:/var/log/laravel-queue.log
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+              systemctl daemon-reload
+              systemctl enable laravel-queue
+              systemctl start laravel-queue
+            fi
+
+            # Restart queue workers so they pick up new code
             php8.4 artisan queue:restart
+            systemctl restart laravel-queue
 
             # Fix permissions
             chown -R www-data:www-data storage bootstrap/cache
