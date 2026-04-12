@@ -1,0 +1,14 @@
+[Unit]
+Description=Laravel Queue Worker
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+Restart=always
+ExecStart=/usr/bin/php8.4 /var/www/bizo.technology/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+StandardOutput=append:/var/log/laravel-queue.log
+StandardError=append:/var/log/laravel-queue.log
+
+[Install]
+WantedBy=multi-user.target
