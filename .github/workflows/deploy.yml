@@ -48,11 +48,11 @@ jobs:
             systemctl start redis-server
 
             # Clone repo if it doesn't exist, otherwise pull
-            if [ ! -d "/var/www/bizo.technology/.git" ]; then
-              git clone git@github.com:alaasalamin/msw4_portal.git /var/www/bizo.technology
+            if [ ! -d "/var/www/msw/.git" ]; then
+              git clone git@github.com:alaasalamin/msw4_portal.git /var/www/msw
             fi
 
-            cd /var/www/bizo.technology
+            cd /var/www/msw
 
             # Pull latest code
             git pull origin main
@@ -87,11 +87,11 @@ jobs:
             set_env REVERB_APP_ID "$REVERB_APP_ID"
             set_env REVERB_APP_KEY "$REVERB_APP_KEY"
             set_env REVERB_APP_SECRET "$REVERB_APP_SECRET"
-            set_env REVERB_HOST "bizo.technology"
+            set_env REVERB_HOST "msw.bizo.technology"
             set_env REVERB_PORT "8080"
             set_env REVERB_SCHEME "https"
             set_env VITE_REVERB_APP_KEY "$REVERB_APP_KEY"
-            set_env VITE_REVERB_HOST "bizo.technology"
+            set_env VITE_REVERB_HOST "msw.bizo.technology"
             set_env VITE_REVERB_PORT "8080"
             set_env VITE_REVERB_SCHEME "https"
             set_env BROADCAST_CONNECTION "reverb"
@@ -135,7 +135,7 @@ jobs:
 
             # Setup queue worker as a systemd service if not exists
             if [ ! -f /etc/systemd/system/laravel-queue.service ]; then
-              cp /var/www/bizo.technology/deploy/laravel-queue.service /etc/systemd/system/laravel-queue.service
+              cp /var/www/msw/deploy/laravel-queue.service /etc/systemd/system/laravel-queue.service
               systemctl daemon-reload
               systemctl enable laravel-queue
               systemctl start laravel-queue
@@ -143,7 +143,7 @@ jobs:
 
             # Setup Reverb WebSocket server as a systemd service if not exists
             if [ ! -f /etc/systemd/system/laravel-reverb.service ]; then
-              cp /var/www/bizo.technology/deploy/laravel-reverb.service /etc/systemd/system/laravel-reverb.service
+              cp /var/www/msw/deploy/laravel-reverb.service /etc/systemd/system/laravel-reverb.service
               systemctl daemon-reload
               systemctl enable laravel-reverb
               systemctl start laravel-reverb
@@ -159,7 +159,7 @@ jobs:
             chmod -R 775 storage bootstrap/cache
 
             # Configure Nginx if PHP-FPM block is missing
-            if ! grep -q "fastcgi_pass" /etc/nginx/sites-available/bizo.technology; then
-              cp /var/www/bizo.technology/deploy/nginx.conf /etc/nginx/sites-available/bizo.technology
+            if ! grep -q "fastcgi_pass" /etc/nginx/sites-available/msw.bizo.technology; then
+              cp /var/www/msw/deploy/nginx.conf /etc/nginx/sites-available/msw.bizo.technology
               nginx -t && systemctl reload nginx
             fi
