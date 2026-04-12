@@ -39,8 +39,10 @@ jobs:
           script: |
             export COMPOSER_ALLOW_SUPERUSER=1
 
-            # Install required PHP extensions if missing
-            apt install -y php8.4-dom php8.4-xml php8.4-mbstring php8.4-curl php8.4-zip php8.4-mysql php8.4-tokenizer php8.4-fpm
+            # Install required PHP extensions and Redis if missing
+            apt install -y php8.4-dom php8.4-xml php8.4-mbstring php8.4-curl php8.4-zip php8.4-mysql php8.4-tokenizer php8.4-fpm php8.4-redis redis-server
+            systemctl enable redis-server
+            systemctl start redis-server
 
             # Clone repo if it doesn't exist, otherwise pull
             if [ ! -d "/var/www/bizo.technology/.git" ]; then
@@ -103,12 +105,12 @@ jobs:
             php8.4 artisan route:cache
             php8.4 artisan view:cache
 
-            # Ensure queue jobs table exists
-            php8.4 artisan queue:table 2>/dev/null || true
-            php8.4 artisan migrate --force
-
-            # Set queue connection to database
-            set_env QUEUE_CONNECTION "database"
+            # Set Redis as queue, cache and session driver
+            set_env QUEUE_CONNECTION "redis"
+            set_env CACHE_STORE "redis"
+            set_env SESSION_DRIVER "redis"
+            set_env REDIS_HOST "127.0.0.1"
+            set_env REDIS_PORT "6379"
 
             # Setup queue worker as a systemd service if not exists
             if [ ! -f /etc/systemd/system/laravel-queue.service ]; then
