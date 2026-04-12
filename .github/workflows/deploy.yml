@@ -20,6 +20,13 @@ jobs:
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            export COMPOSER_ALLOW_SUPERUSER=1
+
+            # Clone repo if it doesn't exist, otherwise pull
+            if [ ! -d "/var/www/bizo.technology/.git" ]; then
+              git clone git@github.com:alaasalamin/msw4_portal.git /var/www/bizo.technology
+            fi
+
             cd /var/www/bizo.technology
 
             # Pull latest code
@@ -29,8 +36,14 @@ jobs:
             composer install --no-dev --optimize-autoloader --no-interaction
 
             # Install Node dependencies and build assets
-            npm ci
+            npm install
             npm run build
+
+            # Copy .env if not exists
+            if [ ! -f ".env" ]; then
+              cp .env.example .env
+              php8.4 artisan key:generate
+            fi
 
             # Run migrations
             php8.4 artisan migrate --force
