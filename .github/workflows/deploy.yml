@@ -84,7 +84,7 @@ jobs:
             set_env MAIL_PASSWORD "$MAIL_PASSWORD"
             set_env MAIL_ENCRYPTION "$MAIL_ENCRYPTION"
             set_env MAIL_FROM_ADDRESS "$MAIL_FROM_ADDRESS"
-            set_env MAIL_FROM_NAME "Bizo Technology"
+            set_env MAIL_FROM_NAME "MSW Portal"
             set_env DHL_API_KEY "$DHL_API_KEY"
             set_env DHL_API_SECRET "$DHL_API_SECRET"
             set_env DHL_USERNAME "$DHL_USERNAME"
