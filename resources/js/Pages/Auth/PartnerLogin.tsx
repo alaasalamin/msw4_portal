@@ -42,20 +42,20 @@ interface PartnerLoginProps {
 
 const MoonLogo = () => (
     <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-600">
             <svg className="h-4 w-4 text-white" viewBox="0 0 32 32" fill="none">
                 <circle cx="14.5" cy="16" r="8.5" fill="white" />
-                <circle cx="18.5" cy="12.5" r="7" fill="#0284C7" />
+                <circle cx="18.5" cy="12.5" r="7" fill="#F59E0B" />
             </svg>
         </span>
         <span className="font-display text-xl font-normal text-white">
-            Moon<span className="text-blue-400">repair</span>
+            Moon<span className="text-amber-400">repair</span>
         </span>
     </div>
 );
 
 const IconCheck = () => (
-    <svg className="h-4 w-4 shrink-0 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+    <svg className="h-4 w-4 shrink-0 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
     </svg>
 );
@@ -87,7 +87,7 @@ const FormInput = ({ id, label, type = 'text', value, onChange, error, autoCompl
                 required={required}
                 onChange={onChange}
                 placeholder={placeholder}
-                className={`block w-full rounded-lg border px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`block w-full rounded-lg border px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                     error ? 'border-rose-400 bg-rose-50' : 'border-zinc-200 bg-white'
                 }`}
             />
@@ -151,14 +151,14 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
                         type="checkbox"
                         checked={data.remember}
                         onChange={(e) => setData('remember', e.target.checked)}
-                        className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                        className="h-4 w-4 rounded border-zinc-300 text-amber-600 focus:ring-amber-500"
                     />
                     Stay signed in
                 </label>
                 {canResetPassword && (
                     <Link
                         href={route('password.request')}
-                        className="text-sm text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:underline"
+                        className="text-sm text-amber-600 hover:text-amber-700 focus:outline-none focus-visible:underline"
                     >
                         Forgot password?
                     </Link>
@@ -282,7 +282,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
 
             {/* ── Left brand panel ───────────────────────────────────────── */}
             <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-zinc-900 p-10 lg:flex">
-                <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-blue-600/8 blur-3xl" />
+                <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-amber-600/8 blur-3xl" />
                 <div className="pointer-events-none absolute bottom-0 left-0 h-80 w-80 rounded-full bg-indigo-600/8 blur-3xl" />
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.025]"
@@ -293,7 +293,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                 />
 
                 <div className="relative">
-                    <Link href="/" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-md inline-block">
+                    <Link href="/" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-md inline-block">
                         <MoonLogo />
                     </Link>
                 </div>
@@ -362,7 +362,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                         <div className="flex rounded-xl bg-zinc-100 p-1 mb-6">
                             <button
                                 onClick={() => setTab('login')}
-                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                                     tab === 'login'
                                         ? 'bg-white text-zinc-900 shadow-sm'
                                         : 'text-zinc-500 hover:text-zinc-700'
@@ -372,7 +372,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                             </button>
                             <button
                                 onClick={() => setTab('register')}
-                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
                                     tab === 'register'
                                         ? 'bg-white text-zinc-900 shadow-sm'
                                         : 'text-zinc-500 hover:text-zinc-700'
@@ -402,7 +402,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                         Individual customer?{' '}
                         <Link
                             href={route('customer.login')}
-                            className="font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:underline"
+                            className="font-medium text-amber-600 hover:text-amber-700 focus:outline-none focus-visible:underline"
                         >
                             Sign in to the Customer Portal →
                         </Link>
