@@ -16,7 +16,7 @@ use Inertia\Response;
 class CustomerLoginController extends Controller
 {
     protected string $guard = 'customer';
-    protected string $redirectTo = '/dashboard';
+    protected string $redirectTo = '/customer/dashboard';
 
     public function showLoginForm(): Response
     {

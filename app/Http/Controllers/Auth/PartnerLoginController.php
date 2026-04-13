@@ -16,7 +16,7 @@ use Inertia\Response;
 class PartnerLoginController extends Controller
 {
     protected string $guard = 'partner';
-    protected string $redirectTo = '/dashboard';
+    protected string $redirectTo = '/partner/dashboard';
 
     public function showLoginForm(): Response
     {
