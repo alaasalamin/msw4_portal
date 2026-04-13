@@ -9,6 +9,12 @@ class Customer extends Authenticatable
 {
     protected $table = 'users';
 
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
     protected static function booted(): void
     {
         static::addGlobalScope('type', function (Builder $builder) {
