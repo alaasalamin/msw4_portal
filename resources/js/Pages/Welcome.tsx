@@ -481,7 +481,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                     ))}
                                 </div>
                                 <span className="text-sm text-zinc-400">
-                                    <strong className="text-white">4.7/5</strong> — über 2.400 Reparaturen
+                                    <strong className="text-white">4.7/5</strong> — über 13.810 Reparaturen
                                 </span>
                             </div>
                         </div>
