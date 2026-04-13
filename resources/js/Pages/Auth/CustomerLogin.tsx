@@ -49,7 +49,7 @@ const MoonLogo = () => (
             </svg>
         </span>
         <span className="font-display text-xl font-normal text-white">
-            Moon<span className="text-orange-400">repair</span>
+            Moon<span className="text-orange-400">.Repair</span>
         </span>
     </div>
 );
@@ -271,7 +271,7 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
 
     return (
         <div className="flex min-h-screen">
-            <Head title="Customer Login — Moonrepair" />
+            <Head title="Customer Login — Moon.Repair" />
 
             {/* ── Left brand panel ───────────────────────────────────────── */}
             <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-zinc-900 p-10 lg:flex">
@@ -333,13 +333,13 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                             ))}
                         </div>
                         <p className="text-sm text-zinc-400">
-                            <strong className="text-white">48,000+</strong> customers trust Moonrepair
+                            <strong className="text-white">48,000+</strong> customers trust Moon.Repair
                         </p>
                     </div>
                 </div>
 
                 <div className="relative">
-                    <p className="text-xs text-zinc-600">© {new Date().getFullYear()} Moonrepair · moon.repair</p>
+                    <p className="text-xs text-zinc-600">© {new Date().getFullYear()} Moon.Repair · moon.repair</p>
                 </div>
             </div>
 
@@ -385,7 +385,7 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
 
                         <div className="mb-5">
                             <h2 className="font-display text-xl font-normal text-zinc-900">
-                                {tab === 'login' ? 'Welcome back' : 'Join Moonrepair'}
+                                {tab === 'login' ? 'Welcome back' : 'Join Moon.Repair'}
                             </h2>
                             <p className="mt-0.5 text-sm text-zinc-500">
                                 {tab === 'login'
@@ -414,7 +414,7 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                             href="/"
                             className="text-zinc-400 hover:text-zinc-600 focus:outline-none focus-visible:underline"
                         >
-                            ← Back to moonrepair.com
+                            ← Back to moon.repair
                         </Link>
                     </p>
                 </div>

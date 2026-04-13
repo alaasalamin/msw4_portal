@@ -346,7 +346,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
 
     return (
         <>
-            <Head title="Moonrepair — Professional Device Repair" />
+            <Head title="Moon.Repair — Professional Device Repair" />
 
             {/* ── Sticky Navbar ─────────────────────────────────────────────── */}
             <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-zinc-900/90 backdrop-blur-md">
@@ -355,7 +355,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
                             <IconWrench className="h-4 w-4 text-white" />
                         </span>
-                        <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">repair</span></span>
+                        <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">.Repair</span></span>
                     </Link>
 
                     <nav className="hidden items-center gap-6 sm:flex">
@@ -470,7 +470,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                     ))}
                                 </div>
                                 <span className="text-sm text-zinc-400">
-                                    <strong className="text-white">4.9/5</strong> from 2,400+ repairs
+                                    <strong className="text-white">4.7/5</strong> from 2,400+ repairs
                                 </span>
                             </div>
                         </div>
@@ -586,7 +586,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                 Scale your repair operations with a trusted partner
                             </h2>
                             <p className="mt-4 text-lg text-zinc-400">
-                                Retail chains, insurers, and telecom operators rely on Moonrepair (moon.repair) to handle high-volume
+                                Retail chains, insurers, and telecom operators rely on Moon.Repair (moon.repair) to handle high-volume
                                 device repairs with predictable SLAs and complete visibility.
                             </p>
 
@@ -640,7 +640,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="grid gap-6 sm:grid-cols-3">
                         {[
-                            { quote: 'Moonrepair turned our device repair backlog from weeks into days. The partner portal is genuinely excellent.', name: 'Sarah M.', role: 'Operations Lead, TelecomPlus' },
+                            { quote: 'Moon.Repair turned our device repair backlog from weeks into days. The partner portal is genuinely excellent.', name: 'Sarah M.', role: 'Operations Lead, TelecomPlus' },
                             { quote: 'Dropped my phone in the morning, had a diagnosis by noon and it was ready by closing time. Incredible.',        name: 'Ahmed K.', role: 'Individual Customer' },
                             { quote: 'The real-time tracking and consolidated invoicing save us hours every month. Highly recommended.',              name: 'Lisa T.',  role: 'Procurement Manager, RetailChain AG' },
                         ].map(({ quote, name, role }) => (
@@ -670,7 +670,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
                                     <IconWrench className="h-4 w-4 text-white" />
                                 </span>
-                                <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">repair</span></span>
+                                <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">.Repair</span></span>
                             </div>
                             <p className="mt-4 text-sm leading-relaxed text-zinc-400">
                                 Professional device repair at moon.repair — trusted by individuals and businesses. Certified technicians, genuine parts.
@@ -714,7 +714,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                     </div>
 
                     <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-zinc-800 pt-8 sm:flex-row">
-                        <p className="text-xs text-zinc-500">© {new Date().getFullYear()} Moonrepair · moon.repair · All rights reserved.</p>
+                        <p className="text-xs text-zinc-500">© {new Date().getFullYear()} Moon.Repair · moon.repair · All rights reserved.</p>
                         <p className="text-xs text-zinc-600">Built with Laravel · Inertia.js · React</p>
                     </div>
                 </div>

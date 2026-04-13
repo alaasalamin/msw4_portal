@@ -48,7 +48,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
 
     return (
         <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-900 px-4 py-12">
-            <Head title="Staff Login — Moonrepair" />
+            <Head title="Staff Login — Moon.Repair" />
 
             {/* Background */}
             <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-orange-600/8 blur-3xl" />
@@ -71,7 +71,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                         </svg>
                     </span>
                     <span className="font-display text-2xl font-normal text-white">
-                        Moon<span className="text-orange-400">repair</span>
+                        Moon<span className="text-orange-400">.Repair</span>
                     </span>
                 </Link>
             </div>
@@ -113,7 +113,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                                 autoComplete="username"
                                 required
                                 onChange={(e) => setData('email', e.target.value)}
-                                placeholder="staff@moonrepair.com"
+                                placeholder="staff@moon.repair"
                                 className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                                     errors.email ? 'border-rose-500' : 'border-white/10'
                                 }`}
@@ -196,7 +196,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                     </p>
                     <p>
                         <Link href="/" className="hover:text-zinc-400 transition">
-                            ← moonrepair.com
+                            ← moon.repair
                         </Link>
                     </p>
                 </div>

@@ -49,7 +49,7 @@ const MoonLogo = () => (
             </svg>
         </span>
         <span className="font-display text-xl font-normal text-white">
-            Moon<span className="text-orange-400">repair</span>
+            Moon<span className="text-orange-400">.Repair</span>
         </span>
     </div>
 );
@@ -278,7 +278,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
 
     return (
         <div className="flex min-h-screen">
-            <Head title="Partner Portal — Moonrepair" />
+            <Head title="Partner Portal — Moon.Repair" />
 
             {/* ── Left brand panel ───────────────────────────────────────── */}
             <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-zinc-900 p-10 lg:flex">
@@ -339,7 +339,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                 </div>
 
                 <div className="relative">
-                    <p className="text-xs text-zinc-600">© {new Date().getFullYear()} Moonrepair · moon.repair</p>
+                    <p className="text-xs text-zinc-600">© {new Date().getFullYear()} Moon.Repair · moon.repair</p>
                 </div>
             </div>
 
@@ -412,7 +412,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                             href="/"
                             className="text-zinc-400 hover:text-zinc-600 focus:outline-none focus-visible:underline"
                         >
-                            ← Back to moonrepair.com
+                            ← Back to moon.repair
                         </Link>
                     </p>
                 </div>
