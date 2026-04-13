@@ -42,10 +42,14 @@ interface PartnerLoginProps {
 
 const MoonLogo = () => (
     <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
-            <svg className="h-4 w-4 text-white" viewBox="0 0 32 32" fill="none">
-                <circle cx="14.5" cy="16" r="8.5" fill="white" />
-                <circle cx="18.5" cy="12.5" r="7" fill="#EA580C" />
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900">
+            <svg viewBox="0 0 28 28" fill="none" className="h-7 w-7">
+                <circle cx="14" cy="14" r="13" fill="#EA580C" opacity="0.18"/>
+                <circle cx="14" cy="14" r="10" fill="#FB923C"/>
+                <rect x="9.5" y="7.5" width="9" height="13.5" rx="1.5" stroke="white" strokeWidth="1.5" fill="none"/>
+                <rect x="11" y="9.5" width="6" height="8.5" rx="0.5" fill="white" fillOpacity="0.3"/>
+                <rect x="12.5" y="8.4" width="3" height="0.7" rx="0.35" fill="white" fillOpacity="0.6"/>
+                <circle cx="14" cy="20.2" r="0.85" fill="white" fillOpacity="0.85"/>
             </svg>
         </span>
         <span className="font-display text-xl font-normal text-white">

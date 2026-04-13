@@ -64,10 +64,14 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
             {/* Logo */}
             <div className="relative mb-8">
                 <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-md">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-600 shadow-lg shadow-orange-600/30">
-                        <svg className="h-5 w-5 text-white" viewBox="0 0 32 32" fill="none">
-                            <circle cx="14.5" cy="16" r="8.5" fill="white" />
-                            <circle cx="18.5" cy="12.5" r="7" fill="#EA580C" />
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 shadow-lg shadow-orange-500/20">
+                        <svg viewBox="0 0 28 28" fill="none" className="h-8 w-8">
+                            <circle cx="14" cy="14" r="13" fill="#EA580C" opacity="0.18"/>
+                            <circle cx="14" cy="14" r="10" fill="#FB923C"/>
+                            <rect x="9.5" y="7.5" width="9" height="13.5" rx="1.5" stroke="white" strokeWidth="1.5" fill="none"/>
+                            <rect x="11" y="9.5" width="6" height="8.5" rx="0.5" fill="white" fillOpacity="0.3"/>
+                            <rect x="12.5" y="8.4" width="3" height="0.7" rx="0.35" fill="white" fillOpacity="0.6"/>
+                            <circle cx="14" cy="20.2" r="0.85" fill="white" fillOpacity="0.85"/>
                         </svg>
                     </span>
                     <span className="font-display text-2xl font-normal text-white">
