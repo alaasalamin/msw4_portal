@@ -364,10 +364,6 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                 <circle cx="13" cy="8" r="2.2" fill="#C0A878"/><circle cx="13" cy="8" r="1.2" fill="#A8906A"/>
                                 <circle cx="34" cy="21" r="1.6" fill="#C0A878"/><circle cx="34" cy="21" r="0.9" fill="#A8906A"/>
                                 <circle cx="15" cy="34" r="1.3" fill="#C0A878"/><circle cx="15" cy="34" r="0.7" fill="#A8906A"/>
-                                <rect x="14" y="13" width="12" height="17" rx="2" stroke="white" strokeWidth="1.5" fill="white" fillOpacity="0.1"/>
-                                <rect x="15.5" y="15.5" width="9" height="10.5" rx="0.7" fill="white" fillOpacity="0.28"/>
-                                <rect x="18" y="14.5" width="4" height="0.8" rx="0.4" fill="white" fillOpacity="0.8"/>
-                                <circle cx="20" cy="28.5" r="1.2" stroke="white" strokeWidth="1" strokeOpacity="0.8" fill="none"/>
                             </svg>
                         </span>
                         <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">.Repair</span></span>
