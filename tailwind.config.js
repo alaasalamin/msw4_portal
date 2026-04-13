@@ -29,7 +29,7 @@ export default {
                     muted:   '#64748B', // slate-500
                 },
                 accent: {
-                    DEFAULT: '#F59E0B', // amber-500 — repair shop accent
+                    DEFAULT: '#7C3AED', // violet-600 — premium tech accent
                 },
                 surface: {
                     DEFAULT: '#F8FAFC', // slate-50  — page background
