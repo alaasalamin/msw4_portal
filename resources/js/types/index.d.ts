@@ -10,6 +10,9 @@ export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
     auth: {
-        user: User;
+        user:     User | null;
+        customer: User | null;
+        partner:  User | null;
+        employee: User | null;
     };
 };

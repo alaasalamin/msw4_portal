@@ -352,6 +352,13 @@ type WelcomeProps = PageProps<{
 }>;
 
 export default function Welcome({ auth, canLogin, canRegister, canResetPassword }: WelcomeProps) {
+    const portalLink = auth?.customer
+        ? { href: '/customer/dashboard', label: 'Kundenbereich' }
+        : auth?.partner
+        ? { href: '/partner/dashboard', label: 'Partnerbereich' }
+        : auth?.employee
+        ? { href: '/employee/dashboard', label: 'Mitarbeiterbereich' }
+        : null;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -386,12 +393,12 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                     </nav>
 
                     <div className="flex items-center gap-2">
-                        {auth?.user ? (
+                        {portalLink ? (
                             <Link
-                                href={route('dashboard')}
+                                href={portalLink.href}
                                 className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
                             >
-                                Dashboard
+                                {portalLink.label}
                             </Link>
                         ) : (
                             <>
@@ -400,14 +407,14 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                         href={route('customer.login')}
                                         className="hidden cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-zinc-300 transition hover:text-white sm:block focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
                                     >
-                                        Customer Login
+                                        Kundenportal
                                     </Link>
                                 )}
                                 <Link
                                     href={route('partner.login')}
                                     className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
                                 >
-                                    Partner Portal
+                                    Partnerportal
                                 </Link>
                             </>
                         )}
