@@ -304,16 +304,16 @@ export default function CustomerDashboard() {
                                     role="alert"
                                     aria-live="polite"
                                 >
-                                    {/* Unread dot */}
-                                    {notif.unread && (
-                                        <span className="absolute right-4 top-4 h-2 w-2 rounded-full"
-                                            style={{ background: notif.accent.dot }} />
-                                    )}
-
-                                    {/* Icon */}
-                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                                        style={{ background: notif.accent.icon, color: notif.accent.iconColor }}>
-                                        {notif.icon}
+                                    {/* Icon with unread dot badge */}
+                                    <div className="relative mt-0.5 shrink-0">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl"
+                                            style={{ background: notif.accent.icon, color: notif.accent.iconColor }}>
+                                            {notif.icon}
+                                        </div>
+                                        {notif.unread && (
+                                            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2"
+                                                style={{ background: notif.accent.dot, borderColor: 'rgba(10,10,15,0.9)' }} />
+                                        )}
                                     </div>
 
                                     {/* Content */}
