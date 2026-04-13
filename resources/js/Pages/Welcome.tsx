@@ -144,10 +144,10 @@ const SERVICES: Service[] = [
 ];
 
 const colorMap: Record<ServiceColor, { bg: string; icon: string; border: string }> = {
-    sky:     { bg: 'bg-violet-50',     icon: 'text-violet-600',     border: 'border-violet-100' },
-    violet:  { bg: 'bg-violet-50',  icon: 'text-violet-600',  border: 'border-violet-100' },
+    sky:     { bg: 'bg-red-50',     icon: 'text-red-600',     border: 'border-red-100' },
+    violet:  { bg: 'bg-red-50',  icon: 'text-red-600',  border: 'border-red-100' },
     emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
-    amber:   { bg: 'bg-violet-50',   icon: 'text-violet-600',   border: 'border-violet-100' },
+    amber:   { bg: 'bg-red-50',   icon: 'text-red-600',   border: 'border-red-100' },
     rose:    { bg: 'bg-rose-50',    icon: 'text-rose-600',    border: 'border-rose-100' },
 };
 
@@ -217,7 +217,7 @@ function LoginWidget({ canResetPassword }: LoginWidgetProps) {
                     onClick={() => handleTabChange('partner')}
                     className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
                         tab === 'partner'
-                            ? 'bg-violet-600 text-white shadow-sm'
+                            ? 'bg-red-600 text-white shadow-sm'
                             : 'text-zinc-400 hover:text-white'
                     }`}
                 >
@@ -231,7 +231,7 @@ function LoginWidget({ canResetPassword }: LoginWidgetProps) {
                 {tab === 'customer' ? (
                     <p className="text-sm text-zinc-400">Track your repairs and manage your devices.</p>
                 ) : (
-                    <p className="text-sm text-violet-400">Access the B2B portal — bulk submissions, SLAs, and reporting.</p>
+                    <p className="text-sm text-red-400">Access the B2B portal — bulk submissions, SLAs, and reporting.</p>
                 )}
             </div>
 
@@ -249,7 +249,7 @@ function LoginWidget({ canResetPassword }: LoginWidgetProps) {
                         autoComplete="username"
                         required
                         onChange={(e) => setData('email', e.target.value)}
-                        className={`block w-full rounded-lg border bg-white/10 px-3 py-2.5 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                        className={`block w-full rounded-lg border bg-white/10 px-3 py-2.5 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-red-500 ${
                             errors.email ? 'border-rose-500' : 'border-white/10'
                         }`}
                         placeholder="you@example.com"
@@ -270,7 +270,7 @@ function LoginWidget({ canResetPassword }: LoginWidgetProps) {
                             autoComplete="current-password"
                             required
                             onChange={(e) => setData('password', e.target.value)}
-                            className={`block w-full rounded-lg border bg-white/10 px-3 py-2.5 pr-10 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                            className={`block w-full rounded-lg border bg-white/10 px-3 py-2.5 pr-10 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-red-500 ${
                                 errors.password ? 'border-rose-500' : 'border-white/10'
                             }`}
                             placeholder="••••••••"
@@ -293,14 +293,14 @@ function LoginWidget({ canResetPassword }: LoginWidgetProps) {
                             type="checkbox"
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
-                            className="h-3.5 w-3.5 rounded border-white/20 bg-white/10 text-violet-500 focus:ring-violet-500 focus:ring-offset-0"
+                            className="h-3.5 w-3.5 rounded border-white/20 bg-white/10 text-red-500 focus:ring-red-500 focus:ring-offset-0"
                         />
                         Remember me
                     </label>
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="text-xs text-violet-400 hover:text-violet-300 focus:outline-none focus-visible:underline"
+                            className="text-xs text-red-400 hover:text-red-300 focus:outline-none focus-visible:underline"
                         >
                             Forgot password?
                         </Link>
@@ -310,9 +310,9 @@ function LoginWidget({ canResetPassword }: LoginWidgetProps) {
                 <button
                     type="submit"
                     disabled={processing}
-                    className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 disabled:opacity-60 ${
+                    className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 disabled:opacity-60 ${
                         tab === 'partner'
-                            ? 'bg-violet-600 hover:bg-violet-500 active:scale-[0.98]'
+                            ? 'bg-red-600 hover:bg-red-500 active:scale-[0.98]'
                             : 'bg-zinc-600 hover:bg-zinc-500 active:scale-[0.98]'
                     }`}
                 >
@@ -351,11 +351,11 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
             {/* ── Sticky Navbar ─────────────────────────────────────────────── */}
             <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-zinc-900/90 backdrop-blur-md">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded-md">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600">
+                    <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded-md">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600">
                             <IconWrench className="h-4 w-4 text-white" />
                         </span>
-                        <span className="font-display text-xl font-normal text-white">Moon<span className="text-violet-400">repair</span></span>
+                        <span className="font-display text-xl font-normal text-white">Moon<span className="text-red-400">repair</span></span>
                     </Link>
 
                     <nav className="hidden items-center gap-6 sm:flex">
@@ -368,7 +368,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                         {auth?.user ? (
                             <Link
                                 href={route('dashboard')}
-                                className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                             >
                                 Dashboard
                             </Link>
@@ -377,14 +377,14 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                 {canLogin && (
                                     <Link
                                         href={route('customer.login')}
-                                        className="hidden cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-zinc-300 transition hover:text-white sm:block focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                                        className="hidden cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-zinc-300 transition hover:text-white sm:block focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                                     >
                                         Customer Login
                                     </Link>
                                 )}
                                 <Link
                                     href={route('partner.login')}
-                                    className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                                 >
                                     Partner Portal
                                 </Link>
@@ -394,7 +394,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen((v) => !v)}
-                            className="ml-1 flex cursor-pointer items-center rounded-md p-2 text-zinc-400 hover:text-white sm:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                            className="ml-1 flex cursor-pointer items-center rounded-md p-2 text-zinc-400 hover:text-white sm:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                             aria-label="Toggle menu"
                         >
                             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -426,20 +426,20 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                         backgroundSize: '48px 48px',
                     }}
                 />
-                <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-violet-600/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-violet-600/10 blur-3xl" />
+                <div className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-red-600/10 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-red-600/10 blur-3xl" />
 
                 <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-32">
                     <div className="grid items-center gap-12 lg:grid-cols-2">
                         <div>
-                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5">
-                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-400" />
-                                <span className="text-xs font-medium text-violet-300">Certified Repair Centre</span>
+                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-1.5">
+                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+                                <span className="text-xs font-medium text-red-300">Certified Repair Centre</span>
                             </div>
 
                             <h1 className="font-display text-4xl font-normal leading-tight text-white sm:text-5xl lg:text-6xl">
                                 Professional Device Repair,{' '}
-                                <span className="text-violet-400">Done Right</span>
+                                <span className="text-red-400">Done Right</span>
                             </h1>
 
                             <p className="mt-6 text-lg leading-relaxed text-zinc-400">
@@ -455,8 +455,8 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                     'Dedicated B2B partner portal',
                                 ].map((item) => (
                                     <li key={item} className="flex items-center gap-3 text-sm text-zinc-300">
-                                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-600/20">
-                                            <IconCheck className="h-3 w-3 text-violet-400" />
+                                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-600/20">
+                                            <IconCheck className="h-3 w-3 text-red-400" />
                                         </span>
                                         {item}
                                     </li>
@@ -466,7 +466,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                             <div className="mt-10 flex items-center gap-3">
                                 <div className="flex">
                                     {[...Array(5)].map((_, i) => (
-                                        <IconStar key={i} className="h-4 w-4 text-violet-400" />
+                                        <IconStar key={i} className="h-4 w-4 text-red-400" />
                                     ))}
                                 </div>
                                 <span className="text-sm text-zinc-400">
@@ -485,7 +485,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                     New customer?{' '}
                                     <Link
                                         href={route('customer.register')}
-                                        className="font-medium text-violet-400 hover:text-violet-300 focus:outline-none focus-visible:underline"
+                                        className="font-medium text-red-400 hover:text-red-300 focus:outline-none focus-visible:underline"
                                     >
                                         Create a free account
                                     </Link>
@@ -517,7 +517,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
             <section id="services" className="bg-zinc-50 py-20 sm:py-28">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-2xl text-center">
-                        <p className="text-sm font-semibold uppercase tracking-widest text-violet-600">What we repair</p>
+                        <p className="text-sm font-semibold uppercase tracking-widest text-red-600">What we repair</p>
                         <h2 className="font-display mt-3 text-3xl font-normal text-zinc-900 sm:text-4xl">Every device, every problem</h2>
                         <p className="mt-4 text-lg text-zinc-500">
                             Our certified technicians handle everything from cracked screens to complex motherboard issues.
@@ -548,7 +548,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
             <section id="how-it-works" className="bg-white py-20 sm:py-28">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-2xl text-center">
-                        <p className="text-sm font-semibold uppercase tracking-widest text-violet-600">The process</p>
+                        <p className="text-sm font-semibold uppercase tracking-widest text-red-600">The process</p>
                         <h2 className="font-display mt-3 text-3xl font-normal text-zinc-900 sm:text-4xl">Simple from start to finish</h2>
                     </div>
 
@@ -573,12 +573,12 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
 
             {/* ── B2B Partner section ────────────────────────────────────────── */}
             <section id="partners" className="relative overflow-hidden bg-zinc-900 py-20 sm:py-28">
-                <div className="pointer-events-none absolute -top-32 right-0 h-[500px] w-[500px] rounded-full bg-violet-600/10 blur-3xl" />
+                <div className="pointer-events-none absolute -top-32 right-0 h-[500px] w-[500px] rounded-full bg-red-600/10 blur-3xl" />
 
                 <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="grid items-center gap-12 lg:grid-cols-2">
                         <div>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-300">
                                 <IconBuilding className="h-3.5 w-3.5" />
                                 B2B Partner Programme
                             </span>
@@ -593,8 +593,8 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                             <ul className="mt-8 grid gap-3 sm:grid-cols-2">
                                 {PARTNER_BENEFITS.map((benefit) => (
                                     <li key={benefit} className="flex items-start gap-2.5 text-sm text-zinc-300">
-                                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-violet-600/30">
-                                            <IconCheck className="h-2.5 w-2.5 text-violet-400" />
+                                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-600/30">
+                                            <IconCheck className="h-2.5 w-2.5 text-red-400" />
                                         </span>
                                         {benefit}
                                     </li>
@@ -604,14 +604,14 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                             <div className="mt-10 flex flex-wrap gap-3">
                                 <a
                                     href="#login"
-                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-violet-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                                 >
                                     Access Partner Portal
                                     <IconArrowRight className="h-4 w-4" />
                                 </a>
                                 <a
                                     href="mailto:partners@moon.repair"
-                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 px-6 py-3 text-sm font-medium text-zinc-300 transition hover:border-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 px-6 py-3 text-sm font-medium text-zinc-300 transition hover:border-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                                 >
                                     Contact Sales
                                 </a>
@@ -647,7 +647,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                             <blockquote key={name} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
                                 <div className="mb-4 flex">
                                     {[...Array(5)].map((_, i) => (
-                                        <IconStar key={i} className="h-4 w-4 text-violet-400" />
+                                        <IconStar key={i} className="h-4 w-4 text-red-400" />
                                     ))}
                                 </div>
                                 <p className="text-sm leading-relaxed text-zinc-600">"{quote}"</p>
@@ -667,10 +667,10 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                     <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
                             <div className="flex items-center gap-2.5">
-                                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600">
+                                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600">
                                     <IconWrench className="h-4 w-4 text-white" />
                                 </span>
-                                <span className="font-display text-xl font-normal text-white">Moon<span className="text-violet-400">repair</span></span>
+                                <span className="font-display text-xl font-normal text-white">Moon<span className="text-red-400">repair</span></span>
                             </div>
                             <p className="mt-4 text-sm leading-relaxed text-zinc-400">
                                 Professional device repair at moon.repair — trusted by individuals and businesses. Certified technicians, genuine parts.
@@ -704,7 +704,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                             <div className="mt-6">
                                 <a
                                     href="#login"
-                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-violet-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                                 >
                                     Sign in
                                     <IconArrowRight className="h-3.5 w-3.5" />
