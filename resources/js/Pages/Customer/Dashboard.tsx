@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -63,7 +63,65 @@ const IcoChevron = () => (
     </svg>
 );
 
+const IcoBell = () => (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+    </svg>
+);
+
+const IcoChat = () => (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+    </svg>
+);
+
+const IcoTruck = () => (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+    </svg>
+);
+
+const IcoX = () => (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+);
+
 // ── Data ──────────────────────────────────────────────────────────────────────
+
+const NOTIFICATIONS = [
+    {
+        id: 1,
+        type: 'comment',
+        icon: <IcoChat />,
+        title: 'Neuer Kommentar zu Ihrem Gerät',
+        body: 'Techniker Lukas M.: „Display wurde getauscht. Touchscreen läuft einwandfrei. Bitte um Bestätigung."',
+        device: 'iPhone 14 Pro · REP-2025-041',
+        time: 'Vor 12 Min.',
+        unread: true,
+        accent: { bg: 'rgba(234,88,12,0.1)', border: 'rgba(234,88,12,0.2)', dot: '#EA580C', icon: 'rgba(234,88,12,0.15)', iconColor: '#fb923c' },
+    },
+    {
+        id: 2,
+        type: 'status',
+        icon: <IcoTruck />,
+        title: 'Ihr Gerät ist unterwegs',
+        body: 'Samsung Galaxy S23 wurde versandt und wird voraussichtlich morgen geliefert.',
+        device: 'Galaxy S23 · REP-2025-028',
+        time: 'Gestern, 14:32',
+        unread: false,
+        accent: { bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.15)', dot: '#818cf8', icon: 'rgba(99,102,241,0.12)', iconColor: '#a5b4fc' },
+    },
+];
+
+const REPAIR_STAGES = [
+    { key: 'received',  label: 'Eingegangen',      icon: '📥' },
+    { key: 'diagnosis', label: 'Diagnose',          icon: '🔍' },
+    { key: 'repair',    label: 'In Reparatur',      icon: '🔧' },
+    { key: 'qa',        label: 'Qualitätsprüfung',  icon: '✅' },
+    { key: 'shipping',  label: 'Versandbereit',     icon: '📦' },
+    { key: 'delivered', label: 'Zugestellt',        icon: '🏠' },
+];
 
 const DEVICES = [
     {
@@ -78,6 +136,7 @@ const DEVICES = [
         eta: '15. Apr 2025',
         progress: 50,
         currentStage: 'Reparatur läuft',
+        stageIndex: 2,
     },
     {
         id: 'REP-2025-028',
@@ -90,7 +149,8 @@ const DEVICES = [
         submitted: '21. Mär 2025',
         eta: '24. Mär 2025',
         progress: 100,
-        currentStage: 'Abgeholt',
+        currentStage: 'Zugestellt',
+        stageIndex: 5,
     },
 ];
 
@@ -126,6 +186,8 @@ const INVOICES = [
 export default function CustomerDashboard() {
     const { post } = useForm({});
     const logout = (e: React.FormEvent) => { e.preventDefault(); post(route('customer.logout')); };
+    const [dismissed, setDismissed] = useState<number[]>([]);
+    const visibleNotifs = NOTIFICATIONS.filter((n) => !dismissed.includes(n.id));
 
     return (
         <div className="relative min-h-dvh overflow-x-hidden" style={{ background: 'linear-gradient(135deg, #0a0a0f 0%, #0f0d14 50%, #0a0a0f 100%)' }}>
@@ -223,6 +285,161 @@ export default function CustomerDashboard() {
                         <p className="mt-3 text-xs text-orange-400/80">1 offen · 149,00 €</p>
                     </div>
                 </div>
+
+                {/* ── Notifications ────────────────────────────────────────── */}
+                {visibleNotifs.length > 0 && (
+                    <section className="mb-8" aria-label="Benachrichtigungen">
+                        <div className="mb-3 flex items-center gap-2">
+                            <span className="text-sm font-semibold text-white">Benachrichtigungen</span>
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                                style={{ background: '#EA580C' }}>
+                                {visibleNotifs.filter(n => n.unread).length}
+                            </span>
+                        </div>
+                        <div className="space-y-3">
+                            {visibleNotifs.map((notif) => (
+                                <div key={notif.id}
+                                    className="relative flex items-start gap-4 rounded-2xl p-4 transition-all"
+                                    style={{ background: notif.accent.bg, border: `1px solid ${notif.accent.border}`, backdropFilter: 'blur(10px)' }}
+                                    role="alert"
+                                    aria-live="polite"
+                                >
+                                    {/* Unread dot */}
+                                    {notif.unread && (
+                                        <span className="absolute right-4 top-4 h-2 w-2 rounded-full"
+                                            style={{ background: notif.accent.dot }} />
+                                    )}
+
+                                    {/* Icon */}
+                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                                        style={{ background: notif.accent.icon, color: notif.accent.iconColor }}>
+                                        {notif.icon}
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0 pr-6">
+                                        <p className="text-sm font-semibold text-white">{notif.title}</p>
+                                        <p className="mt-1 text-sm leading-relaxed text-white/50 line-clamp-2">{notif.body}</p>
+                                        <div className="mt-2 flex flex-wrap items-center gap-3">
+                                            <span className="text-xs text-white/25 font-mono">{notif.device}</span>
+                                            <span className="h-1 w-1 rounded-full bg-white/15" />
+                                            <span className="text-xs text-white/25">{notif.time}</span>
+                                            <Link href="/shipments"
+                                                className="cursor-pointer text-xs font-semibold transition-colors focus:outline-none focus-visible:underline"
+                                                style={{ color: notif.accent.iconColor }}>
+                                                Jetzt ansehen →
+                                            </Link>
+                                        </div>
+                                    </div>
+
+                                    {/* Dismiss */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setDismissed((d) => [...d, notif.id])}
+                                        aria-label="Benachrichtigung schließen"
+                                        className="absolute right-3 top-3 cursor-pointer rounded-lg p-1 text-white/20 transition hover:bg-white/[0.06] hover:text-white/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                                    >
+                                        <IcoX />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* ── Device Status Tracker ─────────────────────────────────── */}
+                <section className="mb-8" aria-labelledby="tracker-heading">
+                    <h2 id="tracker-heading" className="mb-4 text-base font-semibold text-white">Reparaturstatus</h2>
+                    <div className="space-y-4">
+                        {DEVICES.filter(d => d.status === 'in_progress').map((device) => (
+                            <div key={device.id} className="overflow-hidden rounded-2xl p-5"
+                                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(10px)' }}>
+                                {/* Device label */}
+                                <div className="mb-5 flex items-center justify-between">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-xl text-white/40"
+                                            style={{ background: device.color, border: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <IcoPhone />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-white">{device.name}</p>
+                                            <p className="text-xs text-white/30 font-mono">{device.id}</p>
+                                        </div>
+                                    </div>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+                                        style={{ background: 'rgba(234,88,12,0.12)', border: '1px solid rgba(234,88,12,0.2)', color: '#fdba74' }}>
+                                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
+                                        {device.statusLabel}
+                                    </span>
+                                </div>
+
+                                {/* Stage timeline */}
+                                <div className="relative flex items-start justify-between">
+                                    {/* Connecting line */}
+                                    <div className="absolute left-0 right-0 top-4 mx-5 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                                    <div className="absolute left-0 top-4 mx-5 h-px transition-all duration-700"
+                                        style={{
+                                            width: `${(device.stageIndex / (REPAIR_STAGES.length - 1)) * 100}%`,
+                                            background: 'linear-gradient(90deg, #EA580C, #fb923c)',
+                                        }} />
+
+                                    {REPAIR_STAGES.map((stage, i) => {
+                                        const done = i < device.stageIndex;
+                                        const active = i === device.stageIndex;
+                                        return (
+                                            <div key={stage.key} className="relative z-10 flex flex-col items-center gap-2" style={{ width: `${100 / REPAIR_STAGES.length}%` }}>
+                                                <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                                                    active
+                                                        ? 'text-white shadow-lg shadow-orange-600/30'
+                                                        : done
+                                                        ? 'text-white'
+                                                        : 'text-white/20'
+                                                }`}
+                                                    style={{
+                                                        background: active
+                                                            ? 'linear-gradient(135deg, #EA580C, #fb923c)'
+                                                            : done
+                                                            ? 'rgba(234,88,12,0.4)'
+                                                            : 'rgba(255,255,255,0.05)',
+                                                        border: active
+                                                            ? '2px solid rgba(234,88,12,0.5)'
+                                                            : done
+                                                            ? '1px solid rgba(234,88,12,0.3)'
+                                                            : '1px solid rgba(255,255,255,0.08)',
+                                                    }}>
+                                                    {done && !active ? (
+                                                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                        </svg>
+                                                    ) : (
+                                                        <span>{i + 1}</span>
+                                                    )}
+                                                </div>
+                                                <span className={`text-center text-[10px] leading-tight hidden sm:block ${
+                                                    active ? 'font-semibold text-orange-300' : done ? 'text-white/40' : 'text-white/20'
+                                                }`}>
+                                                    {stage.label}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Active stage callout */}
+                                <div className="mt-5 rounded-xl px-4 py-3 flex items-center gap-3"
+                                    style={{ background: 'rgba(234,88,12,0.07)', border: '1px solid rgba(234,88,12,0.12)' }}>
+                                    <IcoWrench />
+                                    <div className="text-sm">
+                                        <span className="font-medium text-orange-300">Aktuell: </span>
+                                        <span className="text-white/60">{device.currentStage}</span>
+                                        <span className="text-white/30"> · ETA </span>
+                                        <span className="text-orange-300/80">{device.eta}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
                 {/* ── Devices ──────────────────────────────────────────────── */}
                 <section className="mb-8" aria-labelledby="devices-heading">
