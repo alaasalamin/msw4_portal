@@ -52,15 +52,16 @@ jobs:
             systemctl enable redis-server
             systemctl start redis-server
 
-            # Clone repo if it doesn't exist, otherwise pull
+            # Clone repo if it doesn't exist, otherwise force-update
             if [ ! -d "/var/www/msw/.git" ]; then
               git clone git@github.com:alaasalamin/msw4_portal.git /var/www/msw
             fi
 
             cd /var/www/msw
 
-            # Pull latest code
-            git pull origin main
+            # Force update to latest — discards any local changes to tracked files
+            git fetch origin main
+            git reset --hard origin/main
 
             # Install PHP dependencies
             composer install --no-dev --optimize-autoloader --no-interaction
