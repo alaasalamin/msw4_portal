@@ -166,6 +166,61 @@ const PARTNER_BENEFITS = [
     'API integration available',
 ];
 
+// ── Logged-in card ─────────────────────────────────────────────────────────────
+
+const PORTAL_META = {
+    customer: { label: 'Kundenportal', color: 'text-orange-400', badge: 'bg-orange-600/15 border-orange-500/20 text-orange-300' },
+    partner:  { label: 'Partnerportal', color: 'text-orange-400', badge: 'bg-orange-600/15 border-orange-500/20 text-orange-300' },
+    employee: { label: 'Mitarbeiterportal', color: 'text-orange-400', badge: 'bg-orange-600/15 border-orange-500/20 text-orange-300' },
+};
+
+interface LoggedInCardProps {
+    name: string;
+    portalLink: { href: string; label: string };
+    portalType: 'customer' | 'partner' | 'employee';
+}
+
+function LoggedInCard({ name, portalLink, portalType }: LoggedInCardProps) {
+    const meta = PORTAL_META[portalType];
+    const firstName = name.split(' ')[0];
+
+    return (
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-800/60 shadow-2xl backdrop-blur-xl">
+            {/* Top accent */}
+            <div className="h-0.5 w-full bg-gradient-to-r from-orange-500 via-orange-400 to-transparent" />
+
+            <div className="p-7">
+                {/* Greeting */}
+                <div className="mb-6">
+                    <p className="text-xs font-medium uppercase tracking-widest text-zinc-500 mb-2">Willkommen zurück</p>
+                    <h3 className="font-display text-2xl font-normal text-white">
+                        Hey, <span className="text-orange-400">{firstName}</span> 👋
+                    </h3>
+                    <p className="mt-1 text-sm text-zinc-400">
+                        Sie sind angemeldet im{' '}
+                        <span className={meta.color}>{meta.label}</span>.
+                    </p>
+                </div>
+
+                {/* User badge */}
+                <div className={`mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${meta.badge}`}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
+                    {name}
+                </div>
+
+                {/* CTA */}
+                <Link
+                    href={portalLink.href}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                >
+                    {portalLink.label} öffnen
+                    <IconArrowRight className="h-4 w-4" />
+                </Link>
+            </div>
+        </div>
+    );
+}
+
 // ── Login form ─────────────────────────────────────────────────────────────────
 
 type LoginFormData = { email: string; password: string; remember: boolean };
@@ -504,24 +559,34 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                         </div>
 
                         <div id="login" className="lg:pl-8">
-                            <LoginWidget canResetPassword={canResetPassword} />
-                            {canRegister && (
-                                <p className="mt-4 text-center text-sm text-zinc-500">
-                                    Noch kein Konto?{' '}
-                                    <Link
-                                        href={route('customer.register')}
-                                        className="font-medium text-orange-400 hover:text-orange-300 focus:outline-none focus-visible:underline"
-                                    >
-                                        Jetzt registrieren
-                                    </Link>
-                                    {' '}·{' '}
-                                    <Link
-                                        href={route('partner.register')}
-                                        className="font-medium text-zinc-400 hover:text-zinc-300 focus:outline-none focus-visible:underline"
-                                    >
-                                        Partner werden
-                                    </Link>
-                                </p>
+                            {portalLink ? (
+                                <LoggedInCard
+                                    name={(auth.customer ?? auth.partner ?? auth.employee)!.name}
+                                    portalLink={portalLink}
+                                    portalType={auth.customer ? 'customer' : auth.partner ? 'partner' : 'employee'}
+                                />
+                            ) : (
+                                <>
+                                    <LoginWidget canResetPassword={canResetPassword} />
+                                    {canRegister && (
+                                        <p className="mt-4 text-center text-sm text-zinc-500">
+                                            Noch kein Konto?{' '}
+                                            <Link
+                                                href={route('customer.register')}
+                                                className="font-medium text-orange-400 hover:text-orange-300 focus:outline-none focus-visible:underline"
+                                            >
+                                                Jetzt registrieren
+                                            </Link>
+                                            {' '}·{' '}
+                                            <Link
+                                                href={route('partner.register')}
+                                                className="font-medium text-zinc-400 hover:text-zinc-300 focus:outline-none focus-visible:underline"
+                                            >
+                                                Partner werden
+                                            </Link>
+                                        </p>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
