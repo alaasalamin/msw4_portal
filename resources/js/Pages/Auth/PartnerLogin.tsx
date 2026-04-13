@@ -25,6 +25,10 @@ interface AddressData {
     city: string;
 }
 
+interface CrmData {
+    contact_name: string;
+}
+
 interface LoginFormProps {
     canResetPassword: boolean;
 }
@@ -219,6 +223,7 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
 function RegisterForm() {
     const [step, setStep] = useState<RegisterStep>(1);
     const [showPw, setShowPw] = useState(false);
+    const [crm, setCrm] = useState<CrmData>({ contact_name: '' });
     const [address, setAddress] = useState<AddressData>({
         street: '',
         house_number: '',
@@ -255,6 +260,12 @@ function RegisterForm() {
                         value={data.name} autoComplete="organization" required
                         placeholder="Mustermann GmbH" error={errors.name}
                         onChange={(e) => setData('name', e.target.value)}
+                    />
+                    <Field
+                        id="reg-contact" label="Ansprechpartner"
+                        value={crm.contact_name} autoComplete="name" required
+                        placeholder="Max Mustermann"
+                        onChange={(e) => setCrm((c) => ({ ...c, contact_name: e.target.value }))}
                     />
                     <Field
                         id="reg-email" label="Geschäftliche E-Mail" type="email"
