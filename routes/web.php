@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
 
 // Employee auth routes
 Route::prefix('employee')->name('employee.')->group(function () {
+    Route::get('/',       fn() => redirect()->route('employee.login'));
     Route::get('login',   [EmployeeLoginController::class, 'showLoginForm'])->name('login');
     Route::post('login',  [EmployeeLoginController::class, 'login']);
     Route::post('logout', [EmployeeLoginController::class, 'logout'])->name('logout');
