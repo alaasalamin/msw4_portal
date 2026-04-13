@@ -64,14 +64,22 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
             {/* Logo */}
             <div className="relative mb-8">
                 <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-md">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 shadow-lg shadow-orange-500/20">
-                        <svg viewBox="0 0 28 28" fill="none" className="h-8 w-8">
-                            <circle cx="14" cy="14" r="13" fill="#EA580C" opacity="0.18"/>
-                            <circle cx="14" cy="14" r="10" fill="#FB923C"/>
-                            <rect x="9.5" y="7.5" width="9" height="13.5" rx="1.5" stroke="white" strokeWidth="1.5" fill="none"/>
-                            <rect x="11" y="9.5" width="6" height="8.5" rx="0.5" fill="white" fillOpacity="0.3"/>
-                            <rect x="12.5" y="8.4" width="3" height="0.7" rx="0.35" fill="white" fillOpacity="0.6"/>
-                            <circle cx="14" cy="20.2" r="0.85" fill="white" fillOpacity="0.85"/>
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl overflow-hidden shadow-lg shadow-orange-900/40">
+                        <svg viewBox="0 0 40 40" fill="none" className="h-12 w-12">
+                            <rect width="40" height="40" fill="#1C0800"/>
+                            <circle cx="20" cy="24" r="24" fill="#EA580C" opacity="0.22"/>
+                            <circle cx="20" cy="20" r="17" fill="#EDE0C4"/>
+                            <circle cx="22" cy="18" r="17" fill="#C8B48A" opacity="0.22"/>
+                            <circle cx="28" cy="11" r="4.5" fill="#C0A878"/><circle cx="28" cy="11" r="3" fill="#A8906A"/><circle cx="27.4" cy="10.4" r="1.4" fill="#DDD0B0" fillOpacity="0.7"/>
+                            <circle cx="10" cy="21" r="3.2" fill="#C0A878"/><circle cx="10" cy="21" r="1.9" fill="#A8906A"/><circle cx="9.6" cy="20.6" r="0.9" fill="#DDD0B0" fillOpacity="0.6"/>
+                            <circle cx="27" cy="30" r="3.5" fill="#C0A878"/><circle cx="27" cy="30" r="2.2" fill="#A8906A"/><circle cx="26.5" cy="29.5" r="1" fill="#DDD0B0" fillOpacity="0.6"/>
+                            <circle cx="13" cy="8" r="2.2" fill="#C0A878"/><circle cx="13" cy="8" r="1.2" fill="#A8906A"/>
+                            <circle cx="34" cy="21" r="1.6" fill="#C0A878"/><circle cx="34" cy="21" r="0.9" fill="#A8906A"/>
+                            <circle cx="15" cy="34" r="1.3" fill="#C0A878"/><circle cx="15" cy="34" r="0.7" fill="#A8906A"/>
+                            <rect x="14" y="13" width="12" height="17" rx="2" stroke="white" strokeWidth="1.5" fill="white" fillOpacity="0.1"/>
+                            <rect x="15.5" y="15.5" width="9" height="10.5" rx="0.7" fill="white" fillOpacity="0.28"/>
+                            <rect x="18" y="14.5" width="4" height="0.8" rx="0.4" fill="white" fillOpacity="0.8"/>
+                            <circle cx="20" cy="28.5" r="1.2" stroke="white" strokeWidth="1" strokeOpacity="0.8" fill="none"/>
                         </svg>
                     </span>
                     <span className="font-display text-2xl font-normal text-white">
