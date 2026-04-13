@@ -47,11 +47,11 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
     };
 
     return (
-        <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-900 px-4 py-12">
+        <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-900 px-4 py-12">
             <Head title="Staff Login — Moonrepair" />
 
             {/* Background */}
-            <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-sky-600/8 blur-3xl" />
+            <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-blue-600/8 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-40 left-1/4 h-80 w-80 rounded-full bg-indigo-600/6 blur-3xl" />
             <div
                 className="pointer-events-none absolute inset-0 opacity-[0.02]"
@@ -63,15 +63,15 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
 
             {/* Logo */}
             <div className="relative mb-8">
-                <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 rounded-md">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 shadow-lg shadow-sky-600/30">
+                <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-md">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30">
                         <svg className="h-5 w-5 text-white" viewBox="0 0 32 32" fill="none">
                             <circle cx="14.5" cy="16" r="8.5" fill="white" />
                             <circle cx="18.5" cy="12.5" r="7" fill="#0284C7" />
                         </svg>
                     </span>
                     <span className="font-display text-2xl font-normal text-white">
-                        Moon<span className="text-sky-400">repair</span>
+                        Moon<span className="text-blue-400">repair</span>
                     </span>
                 </Link>
             </div>
@@ -89,7 +89,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                     <h1 className="font-display text-2xl font-normal text-white mb-1">
                         Employee Sign In
                     </h1>
-                    <p className="mb-6 text-sm text-slate-400">
+                    <p className="mb-6 text-sm text-zinc-400">
                         Internal portal. Authorised personnel only.
                     </p>
 
@@ -102,7 +102,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                     <form onSubmit={submit} className="space-y-4">
                         {/* Email */}
                         <div>
-                            <label htmlFor="email" className="block text-xs font-medium text-slate-400 mb-1.5">
+                            <label htmlFor="email" className="block text-xs font-medium text-zinc-400 mb-1.5">
                                 Email address
                             </label>
                             <input
@@ -114,7 +114,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                                 required
                                 onChange={(e) => setData('email', e.target.value)}
                                 placeholder="staff@moonrepair.com"
-                                className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+                                className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                                     errors.email ? 'border-rose-500' : 'border-white/10'
                                 }`}
                             />
@@ -125,7 +125,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
 
                         {/* Password */}
                         <div>
-                            <label htmlFor="password" className="block text-xs font-medium text-slate-400 mb-1.5">
+                            <label htmlFor="password" className="block text-xs font-medium text-zinc-400 mb-1.5">
                                 Password
                             </label>
                             <div className="relative">
@@ -138,14 +138,14 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                                     required
                                     onChange={(e) => setData('password', e.target.value)}
                                     placeholder="••••••••"
-                                    className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 pr-11 text-sm text-white placeholder-slate-500 transition focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+                                    className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                                         errors.password ? 'border-rose-500' : 'border-white/10'
                                     }`}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPw((v) => !v)}
-                                    className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-slate-400 hover:text-slate-200"
+                                    className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-zinc-400 hover:text-zinc-200"
                                     aria-label={showPw ? 'Hide password' : 'Show password'}
                                 >
                                     {showPw ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
@@ -157,12 +157,12 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                         </div>
 
                         {/* Remember */}
-                        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-400">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-400">
                             <input
                                 type="checkbox"
                                 checked={data.remember}
                                 onChange={(e) => setData('remember', e.target.checked)}
-                                className="h-4 w-4 rounded border-white/20 bg-white/10 text-sky-500 focus:ring-sky-500 focus:ring-offset-0 focus:ring-offset-transparent"
+                                className="h-4 w-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 focus:ring-offset-transparent"
                             />
                             Keep me signed in on this device
                         </label>
@@ -170,7 +170,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-60"
+                            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 disabled:opacity-60"
                         >
                             {processing ? (
                                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -183,19 +183,19 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                 </div>
 
                 {/* Footer links */}
-                <div className="mt-6 space-y-2 text-center text-xs text-slate-600">
+                <div className="mt-6 space-y-2 text-center text-xs text-zinc-600">
                     <p>
                         Not an employee?{' '}
-                        <Link href={route('customer.login')} className="text-slate-400 hover:text-slate-200 transition">
+                        <Link href={route('customer.login')} className="text-zinc-400 hover:text-zinc-200 transition">
                             Customer login
                         </Link>
                         {' · '}
-                        <Link href={route('partner.login')} className="text-slate-400 hover:text-slate-200 transition">
+                        <Link href={route('partner.login')} className="text-zinc-400 hover:text-zinc-200 transition">
                             Partner login
                         </Link>
                     </p>
                     <p>
-                        <Link href="/" className="hover:text-slate-400 transition">
+                        <Link href="/" className="hover:text-zinc-400 transition">
                             ← moonrepair.com
                         </Link>
                     </p>

@@ -42,20 +42,20 @@ interface PartnerLoginProps {
 
 const MoonLogo = () => (
     <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-600">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <svg className="h-4 w-4 text-white" viewBox="0 0 32 32" fill="none">
                 <circle cx="14.5" cy="16" r="8.5" fill="white" />
                 <circle cx="18.5" cy="12.5" r="7" fill="#0284C7" />
             </svg>
         </span>
         <span className="font-display text-xl font-normal text-white">
-            Moon<span className="text-sky-400">repair</span>
+            Moon<span className="text-blue-400">repair</span>
         </span>
     </div>
 );
 
 const IconCheck = () => (
-    <svg className="h-4 w-4 shrink-0 text-sky-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+    <svg className="h-4 w-4 shrink-0 text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
     </svg>
 );
@@ -75,7 +75,7 @@ const IconEyeOff = ({ className }: IconProps) => (
 
 const FormInput = ({ id, label, type = 'text', value, onChange, error, autoComplete, placeholder, required, children }: FormInputProps) => (
     <div>
-        <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label htmlFor={id} className="block text-sm font-medium text-zinc-700 mb-1.5">
             {label} {required && <span className="text-rose-500">*</span>}
         </label>
         <div className="relative">
@@ -87,8 +87,8 @@ const FormInput = ({ id, label, type = 'text', value, onChange, error, autoCompl
                 required={required}
                 onChange={onChange}
                 placeholder={placeholder}
-                className={`block w-full rounded-lg border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 ${
-                    error ? 'border-rose-400 bg-rose-50' : 'border-slate-200 bg-white'
+                className={`block w-full rounded-lg border px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    error ? 'border-rose-400 bg-rose-50' : 'border-zinc-200 bg-white'
                 }`}
             />
             {children}
@@ -138,7 +138,7 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
                 <button
                     type="button"
                     onClick={() => setShowPw((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-slate-400 hover:text-slate-600"
+                    className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-zinc-400 hover:text-zinc-600"
                     aria-label={showPw ? 'Hide password' : 'Show password'}
                 >
                     {showPw ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
@@ -146,19 +146,19 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
             </FormInput>
 
             <div className="flex items-center justify-between">
-                <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-600">
                     <input
                         type="checkbox"
                         checked={data.remember}
                         onChange={(e) => setData('remember', e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                        className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                     />
                     Stay signed in
                 </label>
                 {canResetPassword && (
                     <Link
                         href={route('password.request')}
-                        className="text-sm text-sky-600 hover:text-sky-700 focus:outline-none focus-visible:underline"
+                        className="text-sm text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:underline"
                     >
                         Forgot password?
                     </Link>
@@ -168,7 +168,7 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
             <button
                 type="submit"
                 disabled={processing}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 disabled:opacity-60"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 focus-visible:ring-offset-2 disabled:opacity-60"
             >
                 {processing ? (
                     <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -232,7 +232,7 @@ function RegisterForm() {
                 <button
                     type="button"
                     onClick={() => setShowPw((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-slate-400 hover:text-slate-600"
+                    className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-zinc-400 hover:text-zinc-600"
                     aria-label={showPw ? 'Hide password' : 'Show password'}
                 >
                     {showPw ? <IconEyeOff className="h-4 w-4" /> : <IconEye className="h-4 w-4" />}
@@ -250,17 +250,17 @@ function RegisterForm() {
                 onChange={(e) => setData('password_confirmation', e.target.value)}
             />
 
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-zinc-500 leading-relaxed">
                 By registering, you agree to our{' '}
-                <a href="#" className="underline hover:text-slate-700">Partner Terms</a>{' '}
+                <a href="#" className="underline hover:text-zinc-700">Partner Terms</a>{' '}
                 and{' '}
-                <a href="#" className="underline hover:text-slate-700">Privacy Policy</a>.
+                <a href="#" className="underline hover:text-zinc-700">Privacy Policy</a>.
             </p>
 
             <button
                 type="submit"
                 disabled={processing}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 disabled:opacity-60"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-700 focus-visible:ring-offset-2 disabled:opacity-60"
             >
                 {processing ? (
                     <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -281,8 +281,8 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
             <Head title="Partner Portal — Moonrepair" />
 
             {/* ── Left brand panel ───────────────────────────────────────── */}
-            <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-slate-900 p-10 lg:flex">
-                <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-sky-600/8 blur-3xl" />
+            <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-zinc-900 p-10 lg:flex">
+                <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-blue-600/8 blur-3xl" />
                 <div className="pointer-events-none absolute bottom-0 left-0 h-80 w-80 rounded-full bg-indigo-600/8 blur-3xl" />
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.025]"
@@ -293,7 +293,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                 />
 
                 <div className="relative">
-                    <Link href="/" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 rounded-md inline-block">
+                    <Link href="/" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-md inline-block">
                         <MoonLogo />
                     </Link>
                 </div>
@@ -306,7 +306,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                     <h1 className="font-display mt-2 text-3xl font-normal leading-tight text-white">
                         Scale your repair<br />operations with us
                     </h1>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                    <p className="mt-3 text-sm leading-relaxed text-zinc-400">
                         Manage bulk submissions, track SLAs, and get consolidated invoicing — all from one portal built for your business.
                     </p>
 
@@ -318,7 +318,7 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                             'Consolidated invoicing & reporting',
                             'Dedicated account manager',
                         ].map((item) => (
-                            <li key={item} className="flex items-center gap-2.5 text-sm text-slate-300">
+                            <li key={item} className="flex items-center gap-2.5 text-sm text-zinc-300">
                                 <IconCheck />
                                 {item}
                             </li>
@@ -327,10 +327,10 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
 
                     {/* Partner logos / trust signal */}
                     <div className="mt-10 border-t border-white/5 pt-8">
-                        <p className="mb-3 text-xs text-slate-500 uppercase tracking-widest">Trusted by 320+ partners</p>
+                        <p className="mb-3 text-xs text-zinc-500 uppercase tracking-widest">Trusted by 320+ partners</p>
                         <div className="flex flex-wrap gap-2">
                             {['Retail Chains', 'Insurers', 'Telecoms', 'MSPs'].map((cat) => (
-                                <span key={cat} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-400">
+                                <span key={cat} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-400">
                                     {cat}
                                 </span>
                             ))}
@@ -339,12 +339,12 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                 </div>
 
                 <div className="relative">
-                    <p className="text-xs text-slate-600">© {new Date().getFullYear()} Moonrepair · moon.repair</p>
+                    <p className="text-xs text-zinc-600">© {new Date().getFullYear()} Moonrepair · moon.repair</p>
                 </div>
             </div>
 
             {/* ── Right form panel ───────────────────────────────────────── */}
-            <div className="flex flex-1 flex-col items-center justify-center bg-slate-50 px-6 py-12">
+            <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-12">
                 {/* Mobile logo */}
                 <div className="mb-8 lg:hidden">
                     <Link href="/"><MoonLogo /></Link>
@@ -357,25 +357,25 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                         </div>
                     )}
 
-                    <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+                    <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
                         {/* Tabs */}
-                        <div className="flex rounded-xl bg-slate-100 p-1 mb-6">
+                        <div className="flex rounded-xl bg-zinc-100 p-1 mb-6">
                             <button
                                 onClick={() => setTab('login')}
-                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                                     tab === 'login'
-                                        ? 'bg-white text-slate-900 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
+                                        ? 'bg-white text-zinc-900 shadow-sm'
+                                        : 'text-zinc-500 hover:text-zinc-700'
                                 }`}
                             >
                                 Sign In
                             </button>
                             <button
                                 onClick={() => setTab('register')}
-                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                                     tab === 'register'
-                                        ? 'bg-white text-slate-900 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700'
+                                        ? 'bg-white text-zinc-900 shadow-sm'
+                                        : 'text-zinc-500 hover:text-zinc-700'
                                 }`}
                             >
                                 Apply for Access
@@ -383,10 +383,10 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                         </div>
 
                         <div className="mb-5">
-                            <h2 className="font-display text-xl font-normal text-slate-900">
+                            <h2 className="font-display text-xl font-normal text-zinc-900">
                                 {tab === 'login' ? 'Partner Portal' : 'Register your business'}
                             </h2>
-                            <p className="mt-0.5 text-sm text-slate-500">
+                            <p className="mt-0.5 text-sm text-zinc-500">
                                 {tab === 'login'
                                     ? 'Sign in to access your B2B dashboard.'
                                     : 'Apply for access to our partner programme.'}
@@ -398,19 +398,19 @@ export default function PartnerLogin({ status, defaultTab = 'login' }: PartnerLo
                             : <RegisterForm />}
                     </div>
 
-                    <p className="mt-6 text-center text-sm text-slate-500">
+                    <p className="mt-6 text-center text-sm text-zinc-500">
                         Individual customer?{' '}
                         <Link
                             href={route('customer.login')}
-                            className="font-medium text-sky-600 hover:text-sky-700 focus:outline-none focus-visible:underline"
+                            className="font-medium text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:underline"
                         >
                             Sign in to the Customer Portal →
                         </Link>
                     </p>
-                    <p className="mt-2 text-center text-sm text-slate-500">
+                    <p className="mt-2 text-center text-sm text-zinc-500">
                         <Link
                             href="/"
-                            className="text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:underline"
+                            className="text-zinc-400 hover:text-zinc-600 focus:outline-none focus-visible:underline"
                         >
                             ← Back to moonrepair.com
                         </Link>
