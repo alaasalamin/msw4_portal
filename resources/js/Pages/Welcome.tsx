@@ -346,7 +346,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
 
     return (
         <>
-            <Head title="Moon.Repair — Professional Device Repair" />
+            <Head title="Moon.Repair — Handy Reparatur & Datenrettung in Forchheim" />
 
             {/* ── Sticky Navbar ─────────────────────────────────────────────── */}
             <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-zinc-900/90 backdrop-blur-md">
@@ -359,9 +359,9 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                     </Link>
 
                     <nav className="hidden items-center gap-6 sm:flex">
-                        <a href="#services" className="text-sm text-zinc-400 transition hover:text-white">Services</a>
-                        <a href="#how-it-works" className="text-sm text-zinc-400 transition hover:text-white">How it works</a>
-                        <a href="#partners" className="text-sm text-zinc-400 transition hover:text-white">Partners</a>
+                        <a href="#services" className="text-sm text-zinc-400 transition hover:text-white">Reparaturen</a>
+                        <a href="#how-it-works" className="text-sm text-zinc-400 transition hover:text-white">So funktioniert's</a>
+                        <a href="#login" className="text-sm text-zinc-400 transition hover:text-white">Repair Anfrage</a>
                     </nav>
 
                     <div className="flex items-center gap-2">
@@ -409,9 +409,9 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                 {mobileMenuOpen && (
                     <div className="border-t border-white/5 bg-zinc-900 px-4 pb-4 pt-2 sm:hidden">
                         <nav className="flex flex-col gap-1">
-                            <a href="#services"    onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Services</a>
-                            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">How it works</a>
-                            <a href="#partners"    onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Partners</a>
+                            <a href="#services"     onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Reparaturen</a>
+                            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">So funktioniert's</a>
+                            <a href="#login"        onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Repair Anfrage</a>
                         </nav>
                     </div>
                 )}
@@ -434,25 +434,25 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                         <div>
                             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5">
                                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
-                                <span className="text-xs font-medium text-orange-300">Certified Repair Centre</span>
+                                <span className="text-xs font-medium text-orange-300">Forchheim, Bayern · Zertifizierter Reparaturbetrieb</span>
                             </div>
 
                             <h1 className="font-display text-4xl font-normal leading-tight text-white sm:text-5xl lg:text-6xl">
-                                Professional Device Repair,{' '}
-                                <span className="text-orange-400">Done Right</span>
+                                Handy Reparatur &amp;{' '}
+                                <span className="text-orange-400">Datenrettung</span>
                             </h1>
 
                             <p className="mt-6 text-lg leading-relaxed text-zinc-400">
-                                From smartphones to laptops — we handle repairs for individual customers
-                                and B2B partners with certified technicians, genuine parts, and transparent pricing.
+                                Moon.Repair ist dein professionelles Reparatur- und Datenrettungszentrum in Forchheim.
+                                Ob Displayschaden, Akkutausch oder verlorene Daten — wir reparieren schnell, zuverlässig und mit Garantie.
                             </p>
 
                             <ul className="mt-8 space-y-3">
                                 {[
-                                    'Same-day diagnosis on most devices',
-                                    '90-day warranty on all repairs',
-                                    'Real-time repair tracking',
-                                    'Dedicated B2B partner portal',
+                                    'Diagnose meist noch am selben Tag',
+                                    '90 Tage Garantie auf alle Reparaturen',
+                                    'Professionelle Datenrettung bei Wasserschäden & Defekten',
+                                    'Transparente Preise — keine versteckten Kosten',
                                 ].map((item) => (
                                     <li key={item} className="flex items-center gap-3 text-sm text-zinc-300">
                                         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-600/20">
@@ -470,24 +470,24 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
                                     ))}
                                 </div>
                                 <span className="text-sm text-zinc-400">
-                                    <strong className="text-white">4.7/5</strong> from 2,400+ repairs
+                                    <strong className="text-white">4.7/5</strong> — über 2.400 Reparaturen
                                 </span>
                             </div>
                         </div>
 
                         <div id="login" className="lg:pl-8">
                             <p className="mb-3 text-center text-xs font-medium uppercase tracking-widest text-zinc-500">
-                                Sign in to your portal
+                                Repair Anfrage / Kundenportal
                             </p>
                             <LoginWidget canResetPassword={canResetPassword} />
                             {canRegister && (
                                 <p className="mt-4 text-center text-sm text-zinc-500">
-                                    New customer?{' '}
+                                    Noch kein Konto?{' '}
                                     <Link
                                         href={route('customer.register')}
                                         className="font-medium text-orange-400 hover:text-orange-300 focus:outline-none focus-visible:underline"
                                     >
-                                        Create a free account
+                                        Kostenlos registrieren
                                     </Link>
                                 </p>
                             )}
