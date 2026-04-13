@@ -12,7 +12,7 @@ use Inertia\Response;
 class EmployeeLoginController extends Controller
 {
     protected string $guard = 'employee';
-    protected string $redirectTo = '/dashboard';
+    protected string $redirectTo = '/employee/dashboard';
 
     public function showLoginForm(): Response
     {
