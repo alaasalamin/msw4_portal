@@ -42,20 +42,20 @@ interface CustomerLoginProps {
 
 const MoonLogo = () => (
     <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
             <svg className="h-4 w-4 text-white" viewBox="0 0 32 32" fill="none">
                 <circle cx="14.5" cy="16" r="8.5" fill="white" />
-                <circle cx="18.5" cy="12.5" r="7" fill="#DC2626" />
+                <circle cx="18.5" cy="12.5" r="7" fill="#EA580C" />
             </svg>
         </span>
         <span className="font-display text-xl font-normal text-white">
-            Moon<span className="text-red-400">repair</span>
+            Moon<span className="text-orange-400">repair</span>
         </span>
     </div>
 );
 
 const IconCheck = () => (
-    <svg className="h-4 w-4 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+    <svg className="h-4 w-4 shrink-0 text-orange-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
     </svg>
 );
@@ -87,7 +87,7 @@ const FormInput = ({ id, label, type = 'text', value, onChange, error, autoCompl
                 required={required}
                 onChange={onChange}
                 placeholder={placeholder}
-                className={`block w-full rounded-lg border px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 ${
+                className={`block w-full rounded-lg border px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
                     error ? 'border-rose-400 bg-rose-50' : 'border-zinc-200 bg-white'
                 }`}
             />
@@ -151,14 +151,14 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
                         type="checkbox"
                         checked={data.remember}
                         onChange={(e) => setData('remember', e.target.checked)}
-                        className="h-4 w-4 rounded border-zinc-300 text-red-600 focus:ring-red-500"
+                        className="h-4 w-4 rounded border-zinc-300 text-orange-600 focus:ring-orange-500"
                     />
                     Remember me
                 </label>
                 {canResetPassword && (
                     <Link
                         href={route('password.request')}
-                        className="text-sm text-red-600 hover:text-red-700 focus:outline-none focus-visible:underline"
+                        className="text-sm text-orange-600 hover:text-orange-700 focus:outline-none focus-visible:underline"
                     >
                         Forgot password?
                     </Link>
@@ -168,7 +168,7 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
             <button
                 type="submit"
                 disabled={processing}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-60"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:opacity-60"
             >
                 {processing ? (
                     <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -253,7 +253,7 @@ function RegisterForm() {
             <button
                 type="submit"
                 disabled={processing}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-60"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 disabled:opacity-60"
             >
                 {processing ? (
                     <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -276,8 +276,8 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
             {/* ── Left brand panel ───────────────────────────────────────── */}
             <div className="relative hidden w-[45%] flex-col justify-between overflow-hidden bg-zinc-900 p-10 lg:flex">
                 {/* Background blobs */}
-                <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-red-600/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-32 -right-10 h-80 w-80 rounded-full bg-red-600/8 blur-3xl" />
+                <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-orange-600/10 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-32 -right-10 h-80 w-80 rounded-full bg-orange-600/8 blur-3xl" />
                 {/* Grid overlay */}
                 <div
                     className="pointer-events-none absolute inset-0 opacity-[0.025]"
@@ -288,14 +288,14 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                 />
 
                 <div className="relative">
-                    <Link href="/" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-md inline-block">
+                    <Link href="/" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-md inline-block">
                         <MoonLogo />
                     </Link>
                 </div>
 
                 <div className="relative">
-                    <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-300">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+                    <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-medium text-orange-300">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
                         Customer Portal
                     </span>
 
@@ -363,7 +363,7 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                         <div className="flex rounded-xl bg-zinc-100 p-1 mb-6">
                             <button
                                 onClick={() => setTab('login')}
-                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
                                     tab === 'login'
                                         ? 'bg-white text-zinc-900 shadow-sm'
                                         : 'text-zinc-500 hover:text-zinc-700'
@@ -373,7 +373,7 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                             </button>
                             <button
                                 onClick={() => setTab('register')}
-                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                                className={`flex-1 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
                                     tab === 'register'
                                         ? 'bg-white text-zinc-900 shadow-sm'
                                         : 'text-zinc-500 hover:text-zinc-700'
@@ -404,7 +404,7 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                         Are you a B2B partner?{' '}
                         <Link
                             href={route('partner.login')}
-                            className="font-medium text-red-600 hover:text-red-700 focus:outline-none focus-visible:underline"
+                            className="font-medium text-orange-600 hover:text-orange-700 focus:outline-none focus-visible:underline"
                         >
                             Sign in to the Partner Portal →
                         </Link>

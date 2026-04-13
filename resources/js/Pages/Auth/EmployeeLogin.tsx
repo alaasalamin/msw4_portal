@@ -27,7 +27,7 @@ const IconEyeOff = ({ className }: IconProps) => (
 );
 
 const IconLock = () => (
-    <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <svg className="h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
     </svg>
 );
@@ -51,7 +51,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
             <Head title="Staff Login — Moonrepair" />
 
             {/* Background */}
-            <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-red-600/8 blur-3xl" />
+            <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-orange-600/8 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-40 left-1/4 h-80 w-80 rounded-full bg-indigo-600/6 blur-3xl" />
             <div
                 className="pointer-events-none absolute inset-0 opacity-[0.02]"
@@ -63,15 +63,15 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
 
             {/* Logo */}
             <div className="relative mb-8">
-                <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded-md">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600 shadow-lg shadow-red-600/30">
+                <Link href="/" className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-md">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-600 shadow-lg shadow-orange-600/30">
                         <svg className="h-5 w-5 text-white" viewBox="0 0 32 32" fill="none">
                             <circle cx="14.5" cy="16" r="8.5" fill="white" />
-                            <circle cx="18.5" cy="12.5" r="7" fill="#DC2626" />
+                            <circle cx="18.5" cy="12.5" r="7" fill="#EA580C" />
                         </svg>
                     </span>
                     <span className="font-display text-2xl font-normal text-white">
-                        Moon<span className="text-red-400">repair</span>
+                        Moon<span className="text-orange-400">repair</span>
                     </span>
                 </Link>
             </div>
@@ -83,7 +83,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                     {/* Staff badge */}
                     <div className="mb-6 flex items-center gap-2">
                         <IconLock />
-                        <span className="text-sm font-medium text-red-300">Staff Access Only</span>
+                        <span className="text-sm font-medium text-orange-300">Staff Access Only</span>
                     </div>
 
                     <h1 className="font-display text-2xl font-normal text-white mb-1">
@@ -114,7 +114,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                                 required
                                 onChange={(e) => setData('email', e.target.value)}
                                 placeholder="staff@moonrepair.com"
-                                className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                                className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                                     errors.email ? 'border-rose-500' : 'border-white/10'
                                 }`}
                             />
@@ -138,7 +138,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                                     required
                                     onChange={(e) => setData('password', e.target.value)}
                                     placeholder="••••••••"
-                                    className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                                    className={`block w-full rounded-lg border bg-white/10 px-3.5 py-2.5 pr-11 text-sm text-white placeholder-zinc-500 transition focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                                         errors.password ? 'border-rose-500' : 'border-white/10'
                                     }`}
                                 />
@@ -162,7 +162,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                                 type="checkbox"
                                 checked={data.remember}
                                 onChange={(e) => setData('remember', e.target.checked)}
-                                className="h-4 w-4 rounded border-white/20 bg-white/10 text-red-500 focus:ring-red-500 focus:ring-offset-0 focus:ring-offset-transparent"
+                                className="h-4 w-4 rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-500 focus:ring-offset-0 focus:ring-offset-transparent"
                             />
                             Keep me signed in on this device
                         </label>
@@ -170,7 +170,7 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 disabled:opacity-60"
+                            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 disabled:opacity-60"
                         >
                             {processing ? (
                                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
