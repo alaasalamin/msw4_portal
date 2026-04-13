@@ -511,7 +511,7 @@ export default function Welcome({ auth, canLogin, canRegister, canResetPassword 
             <section className="border-y border-zinc-200 bg-white">
                 <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-zinc-200 sm:grid-cols-4">
                     {[
-                        { value: '48,000+', label: 'Devices Repaired' },
+                        { value: '13,810',  label: 'Devices Repaired' },
                         { value: '320+',    label: 'B2B Partners' },
                         { value: '98.6%',   label: 'Satisfaction Rate' },
                         { value: '< 24h',   label: 'Avg. Turnaround' },

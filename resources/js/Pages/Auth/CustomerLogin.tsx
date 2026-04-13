@@ -341,7 +341,7 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                             ))}
                         </div>
                         <p className="text-sm text-zinc-400">
-                            <strong className="text-white">48,000+</strong> customers trust Moon.Repair
+                            <strong className="text-white">13,810</strong> customers trust Moon.Repair
                         </p>
                     </div>
                 </div>
