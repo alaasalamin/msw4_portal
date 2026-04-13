@@ -1,14 +1,29 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
-const statusColors = {
+interface Shipment {
+    id: number;
+    tracking_number: string | null;
+    recipient_name: string;
+    recipient_city: string;
+    recipient_country: string;
+    type: string;
+    status: string;
+    created_at: string;
+}
+
+interface IndexProps {
+    shipments: Shipment[];
+}
+
+const statusColors: Record<string, string> = {
     created: 'bg-gray-100 text-gray-700',
     label_created: 'bg-blue-100 text-blue-700',
     in_transit: 'bg-yellow-100 text-yellow-700',
     delivered: 'bg-green-100 text-green-700',
 };
 
-export default function Index({ shipments }) {
+export default function Index({ shipments }: IndexProps) {
     return (
         <AuthenticatedLayout
             header={
@@ -48,7 +63,7 @@ export default function Index({ shipments }) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 bg-white">
-                                    {shipments.map((s) => (
+                                    {shipments.map((s: Shipment) => (
                                         <tr key={s.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 font-mono text-sm text-gray-900">
                                                 {s.tracking_number ?? '—'}

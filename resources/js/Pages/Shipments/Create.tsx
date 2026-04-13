@@ -4,8 +4,12 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, useForm } from '@inertiajs/react';
+import React, { ReactNode } from 'react';
 
-function Section({ title, children }) {
+interface SectionProps { title: string; children: ReactNode; }
+interface FieldProps { label: string; error?: string; children: ReactNode; }
+
+function Section({ title, children }: SectionProps) {
     return (
         <div className="bg-white p-6 shadow sm:rounded-lg">
             <h3 className="mb-4 text-base font-semibold text-gray-700">{title}</h3>
@@ -14,7 +18,7 @@ function Section({ title, children }) {
     );
 }
 
-function Field({ label, error, children }) {
+function Field({ label, error, children }: FieldProps) {
     return (
         <div>
             <InputLabel value={label} />
@@ -24,7 +28,31 @@ function Field({ label, error, children }) {
     );
 }
 
-const TEST_DATA = {
+type ShipmentFormData = {
+    type: string;
+    sender_name: string;
+    sender_company: string;
+    sender_street: string;
+    sender_house_number: string;
+    sender_postal_code: string;
+    sender_city: string;
+    sender_country: string;
+    sender_email: string;
+    sender_phone: string;
+    recipient_name: string;
+    recipient_company: string;
+    recipient_street: string;
+    recipient_house_number: string;
+    recipient_postal_code: string;
+    recipient_city: string;
+    recipient_country: string;
+    recipient_email: string;
+    recipient_phone: string;
+    weight_kg: string;
+    reference: string;
+};
+
+const TEST_DATA: ShipmentFormData = {
     type: 'domestic',
     sender_name: 'Max Mustermann',
     sender_company: 'Moon Repair GmbH',
@@ -49,7 +77,7 @@ const TEST_DATA = {
 };
 
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<ShipmentFormData>({
         type: 'domestic',
         sender_name: '',
         sender_company: '',
@@ -73,7 +101,7 @@ export default function Create() {
         reference: '',
     });
 
-    const submit = (e) => {
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         post(route('shipments.store'));
     };
@@ -85,7 +113,7 @@ export default function Create() {
                     <h2 className="text-xl font-semibold leading-tight text-gray-800">New Shipment</h2>
                     <button
                         type="button"
-                        onClick={() => Object.entries(TEST_DATA).forEach(([k, v]) => setData(k, v))}
+                        onClick={() => (Object.entries(TEST_DATA) as [keyof ShipmentFormData, string][]).forEach(([k, v]) => setData(k, v))}
                         className="rounded-md border border-dashed border-yellow-400 bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 hover:bg-yellow-100"
                     >
                         Fill Test Data

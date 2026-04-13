@@ -1,9 +1,16 @@
+import { ButtonHTMLAttributes, ReactNode } from 'react';
+
+interface PrimaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    className?: string;
+    children?: ReactNode;
+}
+
 export default function PrimaryButton({
     className = '',
     disabled,
     children,
     ...props
-}) {
+}: PrimaryButtonProps) {
     return (
         <button
             {...props}

@@ -4,16 +4,21 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
+import React from 'react';
 
-export default function ResetPassword({ token, email }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+interface ResetPasswordProps { token: string; email: string; }
+
+export default function ResetPassword({ token, email }: ResetPasswordProps) {
+    const { data, setData, post, processing, errors, reset } = useForm<{
+        token: string; email: string; password: string; password_confirmation: string;
+    }>({
         token: token,
         email: email,
         password: '',
         password_confirmation: '',
     });
 
-    const submit = (e) => {
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         post(route('password.store'), {

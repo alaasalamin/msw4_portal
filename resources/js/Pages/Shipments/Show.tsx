@@ -1,7 +1,44 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 
-function InfoRow({ label, value }) {
+interface InfoRowProps {
+    label: string;
+    value?: string | null;
+}
+
+interface AddressCardProps {
+    title: string;
+    data: Record<string, string>;
+    prefix: string;
+}
+
+interface TrackingEvent {
+    timestamp: string;
+    description: string;
+    location?: { address?: { addressLocality?: string } };
+}
+
+interface TrackingData {
+    events?: TrackingEvent[];
+}
+
+interface Shipment extends Record<string, unknown> {
+    id: number;
+    tracking_number: string | null;
+    type: string;
+    status: string;
+    label_url: string | null;
+    weight_kg: string;
+    reference?: string | null;
+    created_at: string;
+}
+
+interface ShowProps {
+    shipment: Shipment;
+    tracking?: TrackingData[];
+}
+
+function InfoRow({ label, value }: InfoRowProps) {
     if (!value) return null;
     return (
         <div className="flex justify-between py-2 text-sm">
@@ -11,7 +48,7 @@ function InfoRow({ label, value }) {
     );
 }
 
-function AddressCard({ title, data, prefix }) {
+function AddressCard({ title, data, prefix }: AddressCardProps) {
     return (
         <div className="rounded-lg border border-gray-200 p-4">
             <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">{title}</h4>
@@ -28,12 +65,10 @@ function AddressCard({ title, data, prefix }) {
     );
 }
 
-export default function Show({ shipment, tracking }) {
+export default function Show({ shipment, tracking }: ShowProps) {
     const handleTrack = () => {
         router.get(route('shipments.track', shipment.id));
     };
-
-    const latestEvent = tracking?.[0]?.events?.[0];
 
     return (
         <AuthenticatedLayout
@@ -91,7 +126,7 @@ export default function Show({ shipment, tracking }) {
                         <div className="bg-white p-6 shadow sm:rounded-lg">
                             <h3 className="mb-4 text-base font-semibold text-gray-700">Tracking Events</h3>
                             <ol className="relative border-l border-gray-200">
-                                {tracking[0].events?.map((event, i) => (
+                                {tracking[0].events?.map((event: TrackingEvent, i: number) => (
                                     <li key={i} className="mb-6 ml-4">
                                         <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-indigo-500" />
                                         <time className="text-xs text-gray-500">
@@ -110,10 +145,10 @@ export default function Show({ shipment, tracking }) {
                     {/* Addresses */}
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div className="bg-white p-6 shadow sm:rounded-lg">
-                            <AddressCard title="Sender" data={shipment} prefix="sender" />
+                            <AddressCard title="Sender" data={shipment as Record<string, string>} prefix="sender" />
                         </div>
                         <div className="bg-white p-6 shadow sm:rounded-lg">
-                            <AddressCard title="Recipient" data={shipment} prefix="recipient" />
+                            <AddressCard title="Recipient" data={shipment as Record<string, string>} prefix="recipient" />
                         </div>
                     </div>
 
@@ -122,7 +157,7 @@ export default function Show({ shipment, tracking }) {
                         <h3 className="mb-3 text-base font-semibold text-gray-700">Parcel Details</h3>
                         <div className="divide-y divide-gray-100">
                             <InfoRow label="Weight" value={`${shipment.weight_kg} kg`} />
-                            <InfoRow label="Reference" value={shipment.reference} />
+                            <InfoRow label="Reference" value={shipment.reference ?? undefined} />
                             <InfoRow label="Created" value={new Date(shipment.created_at).toLocaleString()} />
                         </div>
                     </div>

@@ -2,16 +2,38 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type Priority = 'urgent' | 'high' | 'normal' | 'low';
+type Status = 'received' | 'diagnosing' | 'waiting_approval' | 'in_repair' | 'waiting_parts' | 'ready' | 'completed';
+
+interface Device {
+    id: number;
+    ticket_number: string;
+    brand: string;
+    model: string;
+    color?: string;
+    customer_name: string;
+    customer_phone?: string;
+    issue_description: string;
+    status: Status;
+    priority: Priority;
+    days_in_shop: number;
+    internal_notes?: string;
+    serial_number?: string;
+    estimated_cost?: string | number;
+}
+
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const PRIORITY_BAR = {
+const PRIORITY_BAR: Record<Priority, string> = {
     urgent: 'bg-rose-400',
     high:   'bg-amber-400',
     normal: 'bg-sky-400',
     low:    'bg-gray-300',
 };
 
-const STATUS_LABEL = {
+const STATUS_LABEL: Record<Status, string> = {
     received:         'Received',
     diagnosing:       'Diagnosing',
     waiting_approval: 'Waiting Approval',
@@ -21,7 +43,7 @@ const STATUS_LABEL = {
     completed:        'Completed',
 };
 
-const NEXT_STEP = {
+const NEXT_STEP: Partial<Record<Status, { status: string; label: string }>> = {
     received:         { status: 'diagnosing',       label: 'Start Diagnosing'   },
     diagnosing:       { status: 'waiting_approval', label: 'Send Quote'         },
     waiting_approval: { status: 'in_repair',        label: 'Start Repair'       },
@@ -30,17 +52,17 @@ const NEXT_STEP = {
     ready:            { status: 'completed',        label: 'Close Job'          },
 };
 
-const ALL_STATUSES = ['received','diagnosing','waiting_approval','in_repair','waiting_parts','ready','completed'];
+const ALL_STATUSES: Status[] = ['received','diagnosing','waiting_approval','in_repair','waiting_parts','ready','completed'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function agingText(days) {
+function agingText(days: number): string {
     if (days === 0) return 'Arrived today';
     if (days === 1) return '1 day in shop';
     return `${days} days in shop`;
 }
 
-function advance(id, status) {
+function advance(id: number, status: string): void {
     router.patch(route('devices.status', id), { status }, {
         preserveScroll: true,
         preserveState: true,
@@ -49,7 +71,7 @@ function advance(id, status) {
 
 // ─── Device Row ───────────────────────────────────────────────────────────────
 
-function DeviceRow({ device }) {
+function DeviceRow({ device }: { device: Device }) {
     const [open, setOpen]     = useState(false);
     const [notes, setNotes]   = useState(device.internal_notes ?? '');
     const [saving, setSaving] = useState(false);
@@ -216,12 +238,14 @@ function DeviceRow({ device }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-const PRIORITY_ORDER = { urgent: 0, high: 1, normal: 2, low: 3 };
+const PRIORITY_ORDER: Record<Priority, number> = { urgent: 0, high: 1, normal: 2, low: 3 };
 
-export default function Board({ devices }) {
+interface BoardProps { devices: Device[]; }
+
+export default function Board({ devices }: BoardProps) {
     const { auth } = usePage().props;
     const [search, setSearch] = useState('');
-    const [status, setStatus] = useState('all');
+    const [status, setStatus] = useState<Status | 'all'>('all');
 
     const filtered = useMemo(() => {
         let d = [...devices];
@@ -247,10 +271,13 @@ export default function Board({ devices }) {
     }, [devices, search, status]);
 
     const counts = useMemo(() => {
-        const c = {};
+        const c: Record<string, number> = {};
         ALL_STATUSES.forEach(s => { c[s] = devices.filter(d => d.status === s).length; });
         return c;
     }, [devices]);
+
+    // suppress unused warning — auth is available for future use
+    void auth;
 
     return (
         <AuthenticatedLayout

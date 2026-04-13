@@ -4,21 +4,28 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
+import React from 'react';
+
+interface UpdateProfileInformationProps {
+    mustVerifyEmail: boolean;
+    status?: string;
+    className?: string;
+}
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
     className = '',
-}) {
+}: UpdateProfileInformationProps) {
     const user = usePage().props.auth.user;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
-        useForm({
+        useForm<{ name: string; email: string }>({
             name: user.name,
             email: user.email,
         });
 
-    const submit = (e) => {
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         patch(route('profile.update'));
@@ -69,7 +76,7 @@ export default function UpdateProfileInformation({
                     <InputError className="mt-2" message={errors.email} />
                 </div>
 
-                {mustVerifyEmail && user.email_verified_at === null && (
+                {mustVerifyEmail && user.email_verified_at === undefined && (
                     <div>
                         <p className="mt-2 text-sm text-gray-800">
                             Your email address is unverified.

@@ -3,13 +3,16 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
+import React from 'react';
 
-export default function ForgotPassword({ status }) {
-    const { data, setData, post, processing, errors } = useForm({
+interface ForgotPasswordProps { status?: string; }
+
+export default function ForgotPassword({ status }: ForgotPasswordProps) {
+    const { data, setData, post, processing, errors } = useForm<{ email: string }>({
         email: '',
     });
 
-    const submit = (e) => {
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         post(route('password.email'));
