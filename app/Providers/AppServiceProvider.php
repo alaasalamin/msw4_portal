@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Post;
 use App\Models\Setting;
+use App\Models\SitePage;
 use App\Models\UserTypePermission;
+use App\Observers\PostObserver;
+use App\Observers\SitePageObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        Post::observe(PostObserver::class);
+        SitePage::observe(SitePageObserver::class);
 
         $this->applyMailSettingsFromDatabase();
 

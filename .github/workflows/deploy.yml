@@ -140,6 +140,9 @@ jobs:
             php8.4 artisan route:cache
             php8.4 artisan view:cache
 
+            # Regenerate sitemap
+            php8.4 artisan sitemap:generate
+
             # Set Redis as queue, cache and session driver
             set_env QUEUE_CONNECTION "redis"
             set_env CACHE_STORE "redis"
