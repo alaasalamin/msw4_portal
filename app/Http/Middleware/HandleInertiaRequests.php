@@ -34,6 +34,15 @@ class HandleInertiaRequests extends Middleware
                 'name'        => Setting::get('site_name', config('app.name')),
                 'description' => Setting::get('site_description'),
                 'logo'        => $logo ? asset('storage/' . $logo) : null,
+                'socials'     => array_filter([
+                    'facebook'  => Setting::get('social_facebook'),
+                    'instagram' => Setting::get('social_instagram'),
+                    'twitter'   => Setting::get('social_twitter'),
+                    'linkedin'  => Setting::get('social_linkedin'),
+                    'youtube'   => Setting::get('social_youtube'),
+                    'tiktok'    => Setting::get('social_tiktok'),
+                    'whatsapp'  => Setting::get('social_whatsapp'),
+                ]),
             ],
             'nav_pages' => SitePage::where('status', 'published')
                 ->orderBy('created_at')

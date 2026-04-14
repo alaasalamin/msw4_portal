@@ -39,6 +39,13 @@ class SiteSettings extends Page
             'logo'             => Setting::get('logo'),
             'favicon'          => Setting::get('favicon'),
             'google_analytics' => Setting::get('google_analytics'),
+            'social_facebook'  => Setting::get('social_facebook'),
+            'social_instagram' => Setting::get('social_instagram'),
+            'social_twitter'   => Setting::get('social_twitter'),
+            'social_linkedin'  => Setting::get('social_linkedin'),
+            'social_youtube'   => Setting::get('social_youtube'),
+            'social_tiktok'    => Setting::get('social_tiktok'),
+            'social_whatsapp'  => Setting::get('social_whatsapp'),
         ]);
     }
 
@@ -113,6 +120,16 @@ class SiteSettings extends Page
                         ->helperText('e.g. G-XXXXXXXXXX')
                         ->maxLength(50),
                 ])->columns(1),
+
+                Section::make('Social Media')->schema([
+                    TextInput::make('social_facebook') ->label('Facebook URL') ->url()->maxLength(200)->placeholder('https://facebook.com/yourpage'),
+                    TextInput::make('social_instagram')->label('Instagram URL')->url()->maxLength(200)->placeholder('https://instagram.com/yourhandle'),
+                    TextInput::make('social_twitter')  ->label('X / Twitter URL')->url()->maxLength(200)->placeholder('https://x.com/yourhandle'),
+                    TextInput::make('social_linkedin') ->label('LinkedIn URL') ->url()->maxLength(200)->placeholder('https://linkedin.com/company/yourcompany'),
+                    TextInput::make('social_youtube')  ->label('YouTube URL')  ->url()->maxLength(200)->placeholder('https://youtube.com/@yourchannel'),
+                    TextInput::make('social_tiktok')   ->label('TikTok URL')   ->url()->maxLength(200)->placeholder('https://tiktok.com/@yourhandle'),
+                    TextInput::make('social_whatsapp') ->label('WhatsApp URL') ->url()->maxLength(200)->placeholder('https://wa.me/491234567890'),
+                ])->columns(2),
             ]);
     }
 
