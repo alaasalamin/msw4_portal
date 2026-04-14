@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { IconArrowRight, IconBuilding, IconUser } from './icons';
+import { Link, usePage } from '@inertiajs/react';
+import { IconBuilding, IconUser } from './icons';
+
+interface NavPage { label: string; href: string }
 
 interface Props {
     portalLink: { href: string; label: string } | null;
@@ -9,6 +11,7 @@ interface Props {
 
 export default function Navbar({ portalLink, canLogin }: Props) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { nav_pages = [] } = usePage<{ nav_pages: NavPage[] }>().props;
 
     return (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-zinc-900/90 backdrop-blur-md">
@@ -32,8 +35,14 @@ export default function Navbar({ portalLink, canLogin }: Props) {
                     <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">.Repair</span></span>
                 </Link>
 
-                {/* Desktop nav — intentionally empty; add nav links via page sections */}
-                <nav className="hidden items-center gap-6 sm:flex" />
+                {/* Desktop nav — published pages */}
+                <nav className="hidden items-center gap-6 sm:flex">
+                    {nav_pages.map((p) => (
+                        <Link key={p.href} href={p.href} className="text-sm text-zinc-400 transition hover:text-white">
+                            {p.label}
+                        </Link>
+                    ))}
+                </nav>
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
@@ -83,7 +92,12 @@ export default function Navbar({ portalLink, canLogin }: Props) {
             {mobileMenuOpen && (
                 <div className="border-t border-white/5 bg-zinc-900 px-4 pb-4 pt-2 sm:hidden">
                     <nav className="flex flex-col gap-1">
-                        <a href="/" onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Home</a>
+                        <Link href="/" onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Home</Link>
+                        {nav_pages.map((p) => (
+                            <Link key={p.href} href={p.href} onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">
+                                {p.label}
+                            </Link>
+                        ))}
                     </nav>
                 </div>
             )}
