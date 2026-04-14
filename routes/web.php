@@ -5,6 +5,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Auth\EmployeeLoginController;
 use App\Http\Controllers\Auth\PartnerLoginController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShipmentController;
 use App\Models\Setting;
@@ -78,5 +79,10 @@ Route::get('/blog',                     [BlogController::class, 'index'])->name(
 Route::get('/blog/category/{category}', [BlogController::class, 'category'])->name('blog.category');
 Route::get('/blog/{category}/{slug}',   [BlogController::class, 'show'])->name('blog.show');
 Route::get('/blog/{slug}',              [BlogController::class, 'showLegacy'])->name('blog.show.legacy');
+
+// Dynamic CMS pages — must be last to avoid shadowing named routes
+Route::get('/{slug}', [PageController::class, 'show'])
+    ->name('page.show')
+    ->where('slug', '[a-z0-9][a-z0-9\-]*');
 
 require __DIR__.'/auth.php';

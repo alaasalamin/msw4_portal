@@ -32,12 +32,8 @@ export default function Navbar({ portalLink, canLogin }: Props) {
                     <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">.Repair</span></span>
                 </Link>
 
-                {/* Desktop nav */}
-                <nav className="hidden items-center gap-6 sm:flex">
-                    <a href="#services"     className="text-sm text-zinc-400 transition hover:text-white">Reparaturen</a>
-                    <a href="#how-it-works" className="text-sm text-zinc-400 transition hover:text-white">So funktioniert's</a>
-                    <a href="#login"        className="text-sm text-zinc-400 transition hover:text-white">Repair Anfrage</a>
-                </nav>
+                {/* Desktop nav — intentionally empty; add nav links via page sections */}
+                <nav className="hidden items-center gap-6 sm:flex" />
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
@@ -87,9 +83,7 @@ export default function Navbar({ portalLink, canLogin }: Props) {
             {mobileMenuOpen && (
                 <div className="border-t border-white/5 bg-zinc-900 px-4 pb-4 pt-2 sm:hidden">
                     <nav className="flex flex-col gap-1">
-                        <a href="#services"     onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Reparaturen</a>
-                        <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">So funktioniert's</a>
-                        <a href="#login"        onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Repair Anfrage</a>
+                        <a href="/" onClick={() => setMobileMenuOpen(false)} className="rounded-md px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 hover:text-white">Home</a>
                     </nav>
                 </div>
             )}
