@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\CustomerLoginController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Auth\EmployeeLoginController;
 use App\Http\Controllers\Auth\PartnerLoginController;
 use App\Http\Controllers\DeviceController;
@@ -31,13 +32,17 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('shipments', ShipmentController::class)->only(['index', 'create', 'store', 'show']);
-    Route::get('/shipments/{shipment}/track', [ShipmentController::class, 'track'])->name('shipments.track');
+    // Customer routes
+    Route::get('/shipments', [ShipmentController::class, 'index'])->name('shipments.index');
+    Route::get('/shipments/{shipment}', [ShipmentController::class, 'show'])->name('shipments.show');
+    Route::get('/shipments/create', [ShipmentController::class, 'create'])->middleware('type.can:submit_repair')->name('shipments.create');
+    Route::post('/shipments', [ShipmentController::class, 'store'])->middleware('type.can:submit_repair')->name('shipments.store');
+    Route::get('/shipments/{shipment}/track', [ShipmentController::class, 'track'])->middleware('type.can:track_shipments')->name('shipments.track');
 
-    // Technician
-    Route::get('/technician/board', [DeviceController::class, 'technicianBoard'])->name('technician.board');
-    Route::patch('/devices/{device}/status', [DeviceController::class, 'updateStatus'])->name('devices.status');
-    Route::patch('/devices/{device}/notes', [DeviceController::class, 'updateNotes'])->name('devices.notes');
+    // Technician (employee)
+    Route::get('/technician/board', [DeviceController::class, 'technicianBoard'])->middleware('type.can:technician_board')->name('technician.board');
+    Route::patch('/devices/{device}/status', [DeviceController::class, 'updateStatus'])->middleware('type.can:update_repair_status')->name('devices.status');
+    Route::patch('/devices/{device}/notes', [DeviceController::class, 'updateNotes'])->middleware('type.can:add_repair_notes')->name('devices.notes');
 });
 
 // Employee auth routes
@@ -65,5 +70,11 @@ Route::prefix('partner')->name('partner.')->group(function () {
     Route::post('register',  [PartnerLoginController::class, 'register']);
     Route::post('logout',    [PartnerLoginController::class, 'logout'])->name('logout');
 });
+
+// Public blog (order matters: static segments first)
+Route::get('/blog',                     [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/category/{category}', [BlogController::class, 'category'])->name('blog.category');
+Route::get('/blog/{category}/{slug}',   [BlogController::class, 'show'])->name('blog.show');
+Route::get('/blog/{slug}',              [BlogController::class, 'showLegacy'])->name('blog.show.legacy');
 
 require __DIR__.'/auth.php';

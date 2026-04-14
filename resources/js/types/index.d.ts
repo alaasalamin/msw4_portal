@@ -6,6 +6,12 @@ export interface User {
     type?: 'customer' | 'partner' | 'employee';
 }
 
+export interface SiteProps {
+    name: string;
+    description: string | null;
+    logo: string | null;
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -15,4 +21,5 @@ export type PageProps<
         partner:  User | null;
         employee: User | null;
     };
+    site: SiteProps;
 };

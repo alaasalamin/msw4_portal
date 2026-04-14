@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Admin;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\Partner;
@@ -60,6 +61,11 @@ return [
             'driver'   => 'session',
             'provider' => 'partners',
         ],
+
+        'admin' => [
+            'driver'   => 'session',
+            'provider' => 'admins',
+        ],
     ],
 
     /*
@@ -98,6 +104,11 @@ return [
         'partners' => [
             'driver' => 'eloquent',
             'model'  => Partner::class,
+        ],
+
+        'admins' => [
+            'driver' => 'eloquent',
+            'model'  => Admin::class,
         ],
     ],
 

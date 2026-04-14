@@ -4,9 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Device extends Model
 {
+    use LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'priority', 'ticket_number', 'customer_name', 'brand', 'model'])
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName) => "Device {$eventName}");
+    }
+
     protected $fillable = [
         'ticket_number',
         'technician_id',

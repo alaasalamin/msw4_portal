@@ -4,9 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Shipment extends Model
 {
+    use LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'tracking_number', 'sender_name', 'recipient_name'])
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn (string $eventName) => "Shipment {$eventName}");
+    }
+
     protected $fillable = [
         'user_id',
         'tracking_number',

@@ -1,9 +1,25 @@
+import { usePage } from '@inertiajs/react';
+import { PageProps } from '@/types';
 import { SVGProps } from 'react';
 
-export default function ApplicationLogo(props: SVGProps<SVGSVGElement>) {
+export default function ApplicationLogo({ className, ...props }: SVGProps<SVGSVGElement> & { className?: string }) {
+    const { site } = usePage<PageProps>().props;
+
+    if (site.logo) {
+        return (
+            <img
+                src={site.logo}
+                alt={site.name}
+                className={className}
+                style={{ height: '2.25rem', width: 'auto', objectFit: 'contain' }}
+            />
+        );
+    }
+
     return (
         <svg
             {...props}
+            className={className}
             viewBox="0 0 316 316"
             xmlns="http://www.w3.org/2000/svg"
         >
