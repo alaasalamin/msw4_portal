@@ -113,7 +113,7 @@ export default function FooterSection({ footer }: Props) {
                     <p className="text-xs text-zinc-500">
                         © {new Date().getFullYear()} Moon.Repair · moon.repair · All rights reserved.
                     </p>
-                    <p className="text-xs text-zinc-600">Built with Laravel · Inertia.js · React</p>
+                    <p className="text-xs text-zinc-600">Built with MSW4</p>
                 </div>
             </div>
         </footer>
