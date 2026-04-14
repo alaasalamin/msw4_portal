@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PartnerLoginController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShipmentController;
+use App\Models\Setting;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,9 +18,10 @@ Route::get('/', function () {
     }
 
     return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+        'canLogin'         => Route::has('login'),
+        'canRegister'      => Route::has('register'),
         'canResetPassword' => Route::has('password.request'),
+        'homepage'         => \App\Http\Controllers\HomepageController::content(),
     ]);
 });
 
