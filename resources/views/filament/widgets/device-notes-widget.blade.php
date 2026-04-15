@@ -190,6 +190,32 @@
         }
         .dn-note-img:hover { opacity: .9; }
 
+        /* ── Lightbox ─────────────────────────────────────────────────── */
+        .dn-lightbox {
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,.88); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            animation: dn-fade-in .15s ease;
+            cursor: zoom-out;
+        }
+        .dn-lightbox img {
+            max-width: 100%; max-height: 90dvh;
+            border-radius: 10px;
+            box-shadow: 0 32px 80px rgba(0,0,0,.7);
+            object-fit: contain;
+            cursor: default;
+            animation: dn-modal-in .2s cubic-bezier(.175,.885,.32,1.275);
+        }
+        .dn-lightbox-close {
+            position: absolute; top: 16px; right: 20px;
+            background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+            color: #fff; font-size: 20px; width: 36px; height: 36px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background .15s;
+        }
+        .dn-lightbox-close:hover { background: rgba(255,255,255,.2); }
+
         .dn-note-footer {
             display: flex; justify-content: flex-end;
             padding: 6px 14px 10px;
@@ -294,6 +320,12 @@
             'partner'  => 'Partner',
         ];
     @endphp
+
+    {{-- Lightbox overlay (pure JS, no Livewire round-trip needed) --}}
+    <div id="dn-lightbox" class="dn-lightbox" style="display:none;" onclick="dnCloseLightbox()">
+        <button class="dn-lightbox-close" onclick="event.stopPropagation(); dnCloseLightbox()">✕</button>
+        <img id="dn-lightbox-img" src="" alt="Foto" onclick="event.stopPropagation()">
+    </div>
 
     {{-- QR / photo upload modal --}}
     @if($showPhotoModal)
@@ -432,14 +464,13 @@
                     </div>
 
                     @if($note->type === 'image')
-                        <a href="{{ Storage::url($note->content) }}" target="_blank">
-                            <img
-                                src="{{ Storage::url($note->content) }}"
-                                alt="Gerät Foto"
-                                class="dn-note-img"
-                                loading="lazy"
-                            >
-                        </a>
+                        <img
+                            src="{{ Storage::url($note->content) }}"
+                            alt="Gerät Foto"
+                            class="dn-note-img"
+                            loading="lazy"
+                            onclick="dnOpenLightbox('{{ Storage::url($note->content) }}')"
+                        >
                     @else
                         <div class="dn-note-body">{{ $note->content }}</div>
                     @endif
@@ -464,4 +495,21 @@
         </div>
     </div>
 
+    <script>
+        function dnOpenLightbox(src) {
+            const lb  = document.getElementById('dn-lightbox');
+            const img = document.getElementById('dn-lightbox-img');
+            img.src = src;
+            lb.style.display = 'flex';
+            document.addEventListener('keydown', dnLightboxKeyHandler);
+        }
+        function dnCloseLightbox() {
+            document.getElementById('dn-lightbox').style.display = 'none';
+            document.getElementById('dn-lightbox-img').src = '';
+            document.removeEventListener('keydown', dnLightboxKeyHandler);
+        }
+        function dnLightboxKeyHandler(e) {
+            if (e.key === 'Escape') dnCloseLightbox();
+        }
+    </script>
 </x-filament-widgets::widget>
