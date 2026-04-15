@@ -36,7 +36,7 @@ class DeviceNotesWidget extends Widget
     {
         $device = $this->getDevice();
         if (! $device) {
-            return collect();
+            return DeviceNote::whereNull('id')->get(); // typed empty collection
         }
 
         return DeviceNote::where('device_id', $device->id)
