@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Device;
 use App\Models\Post;
 use App\Models\Setting;
 use App\Models\SitePage;
 use App\Models\UserTypePermission;
+use App\Observers\DeviceObserver;
 use App\Observers\PostObserver;
 use App\Observers\SitePageObserver;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
+        Device::observe(DeviceObserver::class);
         Post::observe(PostObserver::class);
         SitePage::observe(SitePageObserver::class);
 

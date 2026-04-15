@@ -33,11 +33,11 @@ class Admin extends Authenticatable implements FilamentUser
     protected static function booted(): void
     {
         static::addGlobalScope('type', function (Builder $builder) {
-            $builder->where('type', 'admin');
+            $builder->whereIn('type', ['admin', 'employee']);
         });
 
         static::creating(function ($model) {
-            $model->type = 'admin';
+            $model->type ??= 'admin';
         });
     }
 

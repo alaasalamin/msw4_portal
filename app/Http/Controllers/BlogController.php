@@ -26,6 +26,7 @@ class BlogController extends Controller
         return Inertia::render('Blog/Index', [
             'posts'      => $posts,
             'categories' => $categories,
+            'homepage'   => HomepageController::content(),
         ]);
     }
 
@@ -40,7 +41,8 @@ class BlogController extends Controller
             ->firstOrFail();
 
         return Inertia::render('Blog/Show', [
-            'post' => $post,
+            'post'     => $post,
+            'homepage' => HomepageController::content(),
         ]);
     }
 
@@ -58,7 +60,8 @@ class BlogController extends Controller
         }
 
         return Inertia::render('Blog/Show', [
-            'post' => $post,
+            'post'     => $post,
+            'homepage' => HomepageController::content(),
         ]);
     }
 
@@ -82,6 +85,7 @@ class BlogController extends Controller
             'posts'           => $posts,
             'categories'      => $categories,
             'activeCategory'  => $cat,
+            'homepage'        => HomepageController::content(),
         ]);
     }
 }

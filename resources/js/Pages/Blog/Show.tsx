@@ -1,19 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { PageProps } from '@/types';
+import { HomepageContent } from '@/Pages/Welcome/types';
+import Navbar        from '@/Pages/Welcome/Navbar';
+import FooterSection from '@/Pages/Welcome/FooterSection';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-
-const MoonLogo = () => (
-    <svg viewBox="0 0 40 40" fill="none" className="h-8 w-8">
-        <rect width="40" height="40" fill="#1C0800"/>
-        <circle cx="20" cy="24" r="24" fill="#EA580C" opacity="0.22"/>
-        <circle cx="20" cy="20" r="17" fill="#EDE0C4"/>
-        <circle cx="22" cy="18" r="17" fill="#C8B48A" opacity="0.22"/>
-        <circle cx="28" cy="11" r="4.5" fill="#C0A878"/><circle cx="28" cy="11" r="3" fill="#A8906A"/><circle cx="27.4" cy="10.4" r="1.4" fill="#DDD0B0" fillOpacity="0.7"/>
-        <circle cx="10" cy="21" r="3.2" fill="#C0A878"/><circle cx="10" cy="21" r="1.9" fill="#A8906A"/><circle cx="9.6" cy="20.6" r="0.9" fill="#DDD0B0" fillOpacity="0.6"/>
-        <circle cx="27" cy="30" r="3.5" fill="#C0A878"/><circle cx="27" cy="30" r="2.2" fill="#A8906A"/><circle cx="26.5" cy="29.5" r="1" fill="#DDD0B0" fillOpacity="0.6"/>
-    </svg>
-);
 
 const IcoArrowLeft = () => (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -57,13 +48,22 @@ interface Post {
 
 interface Props extends PageProps {
     post: Post;
+    homepage: HomepageContent;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function BlogShow({ post, site }: Props) {
+export default function BlogShow({ auth, post, homepage }: Props) {
     const metaTitle = post.meta_title || post.title;
     const metaDesc  = post.meta_description || post.excerpt || undefined;
+
+    const portalLink = auth?.customer
+        ? { href: '/customer/dashboard', label: 'Kundenbereich' }
+        : auth?.partner
+        ? { href: '/partner/dashboard', label: 'Partnerbereich' }
+        : auth?.employee
+        ? { href: '/employee/dashboard', label: 'Mitarbeiterbereich' }
+        : null;
 
     return (
         <>
@@ -77,70 +77,41 @@ export default function BlogShow({ post, site }: Props) {
                 )}
             </Head>
 
-            <div
-                className="min-h-dvh"
-                style={{ background: 'linear-gradient(135deg, #09090b 0%, #0f0a1e 50%, #09090b 100%)' }}
-            >
-                {/* Ambient orbs */}
-                <div className="pointer-events-none fixed inset-0 overflow-hidden">
-                    <div style={{ position:'absolute', top:'-10%', left:'-5%', width:'45%', height:'45%', background:'radial-gradient(circle, rgba(234,88,12,0.06) 0%, transparent 70%)', borderRadius:'50%' }} />
-                    <div style={{ position:'absolute', bottom:'10%', right:'-5%', width:'40%', height:'40%', background:'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', borderRadius:'50%' }} />
-                </div>
+            <Navbar portalLink={portalLink} canLogin={true} />
 
-                {/* ── Nav ─────────────────────────────────────────────────── */}
-                <nav style={{ borderBottom:'1px solid rgba(255,255,255,0.06)', backdropFilter:'blur(16px)', background:'rgba(9,9,11,0.7)' }} className="sticky top-0 z-40">
-                    <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
-                        <Link href="/" className="flex items-center gap-2.5">
-                            <MoonLogo />
-                            <span className="text-sm font-semibold tracking-wide text-white/90">
-                                {site?.name ?? 'MSW4'}
-                            </span>
-                        </Link>
-                        <div className="flex items-center gap-4">
-                            <Link
-                                href={route('blog.index')}
-                                className="text-xs text-zinc-400 hover:text-white transition-colors duration-200"
-                            >
+            <div className="min-h-dvh bg-zinc-50 pt-16">
+
+                {/* ── Breadcrumb bar ──────────────────────────────────────── */}
+                <div className="bg-white border-b border-zinc-200">
+                    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 h-11 flex items-center">
+                        <div className="flex items-center gap-2 text-sm text-zinc-400">
+                            <Link href={route('blog.index')} className="hover:text-orange-500 transition-colors duration-200 flex items-center gap-1.5 font-medium">
+                                <IcoArrowLeft />
                                 Blog
                             </Link>
-                            <Link
-                                href={route('customer.login')}
-                                style={{ background:'rgba(234,88,12,0.15)', border:'1px solid rgba(234,88,12,0.3)' }}
-                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-orange-300 hover:bg-orange-500/20 transition-all duration-200"
-                            >
-                                Customer Portal
-                            </Link>
+                            {post.category && (
+                                <>
+                                    <span className="text-zinc-300">/</span>
+                                    <Link
+                                        href={route('blog.category', { category: post.category.slug })}
+                                        className="hover:text-orange-500 transition-colors duration-200"
+                                    >
+                                        {post.category.name}
+                                    </Link>
+                                </>
+                            )}
+                            <span className="text-zinc-300">/</span>
+                            <span className="text-zinc-500 truncate max-w-xs">{post.title}</span>
                         </div>
-                    </div>
-                </nav>
-
-                {/* ── Breadcrumb ──────────────────────────────────────────── */}
-                <div className="mx-auto max-w-3xl px-6 pt-8">
-                    <div className="flex items-center gap-2 text-sm text-zinc-600">
-                        <Link href={route('blog.index')} className="hover:text-orange-400 transition-colors duration-200 flex items-center gap-1.5">
-                            <IcoArrowLeft />
-                            Blog
-                        </Link>
-                        {post.category && (
-                            <>
-                                <span>/</span>
-                                <Link
-                                    href={route('blog.category', { category: post.category.slug })}
-                                    className="hover:text-orange-400 transition-colors duration-200"
-                                >
-                                    {post.category.name}
-                                </Link>
-                            </>
-                        )}
                     </div>
                 </div>
 
                 {/* ── Article ─────────────────────────────────────────────── */}
-                <article className="mx-auto max-w-3xl px-6 py-8 pb-24">
+                <article className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10 pb-24">
 
                     {/* Featured image */}
                     {post.featured_image && (
-                        <div className="relative overflow-hidden rounded-2xl mb-10">
+                        <div className="overflow-hidden rounded-2xl mb-10 shadow-sm border border-zinc-200">
                             <img
                                 src={`/storage/${post.featured_image}`}
                                 alt={post.title}
@@ -148,36 +119,25 @@ export default function BlogShow({ post, site }: Props) {
                                 width={768}
                                 height={384}
                             />
-                            <div
-                                className="absolute inset-0"
-                                style={{ boxShadow:'inset 0 0 0 1px rgba(255,255,255,0.08)', borderRadius:'1rem', pointerEvents:'none' }}
-                            />
                         </div>
                     )}
 
-                    {/* Meta pill */}
+                    {/* Meta pills */}
                     <div className="mb-5 flex items-center gap-2 flex-wrap">
                         {post.category && (
                             <Link
                                 href={route('blog.category', { category: post.category.slug })}
-                                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors duration-200"
-                                style={{ background:'rgba(234,88,12,0.12)', border:'1px solid rgba(234,88,12,0.25)', color:'#fb923c' }}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200 px-3 py-1 text-xs font-medium text-orange-600 transition-colors duration-200 hover:bg-orange-100"
                             >
                                 <IcoTag />
                                 {post.category.name}
                             </Link>
                         )}
-                        <span
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs text-zinc-400"
-                            style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)' }}
-                        >
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-zinc-200 px-3 py-1 text-xs text-zinc-500">
                             <IcoUser />
                             {post.author.name}
                         </span>
-                        <span
-                            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs text-zinc-400"
-                            style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)' }}
-                        >
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-zinc-200 px-3 py-1 text-xs text-zinc-500">
                             <IcoCalendar />
                             {new Date(post.published_at).toLocaleDateString('en-GB', {
                                 day: 'numeric', month: 'long', year: 'numeric',
@@ -186,25 +146,19 @@ export default function BlogShow({ post, site }: Props) {
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-3xl sm:text-4xl font-bold leading-tight text-white">
+                    <h1 className="text-3xl sm:text-4xl font-bold leading-tight text-zinc-900">
                         {post.title}
                     </h1>
 
                     {/* Excerpt */}
                     {post.excerpt && (
-                        <p
-                            className="mt-5 text-lg leading-relaxed text-zinc-400 pl-4 italic"
-                            style={{ borderLeft:'3px solid rgba(234,88,12,0.5)' }}
-                        >
+                        <p className="mt-5 text-lg leading-relaxed text-zinc-500 pl-4 border-l-2 border-orange-400">
                             {post.excerpt}
                         </p>
                     )}
 
                     {/* Divider */}
-                    <div
-                        className="my-8"
-                        style={{ height:'1px', background:'linear-gradient(90deg, rgba(234,88,12,0.3), rgba(255,255,255,0.05), transparent)' }}
-                    />
+                    <div className="my-8 h-px bg-zinc-200" />
 
                     {/* Content */}
                     {post.content && (
@@ -214,14 +168,11 @@ export default function BlogShow({ post, site }: Props) {
                         />
                     )}
 
-                    {/* Back footer */}
-                    <div
-                        className="mt-16 pt-8"
-                        style={{ borderTop:'1px solid rgba(255,255,255,0.06)' }}
-                    >
+                    {/* Back link */}
+                    <div className="mt-16 pt-8 border-t border-zinc-200">
                         <Link
                             href={route('blog.index')}
-                            className="inline-flex items-center gap-2 text-sm font-medium text-orange-400 hover:text-orange-300 transition-colors duration-200"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors duration-200"
                         >
                             <IcoArrowLeft />
                             All articles
@@ -230,17 +181,19 @@ export default function BlogShow({ post, site }: Props) {
                 </article>
             </div>
 
-            {/* ── Prose styles (injected once per page) ─────────────────── */}
+            <FooterSection footer={homepage.footer} />
+
+            {/* ── Prose styles ──────────────────────────────────────────── */}
             <style>{`
                 .blog-prose {
-                    color: #a1a1aa;
+                    color: #3f3f46;
                     font-size: 1.0625rem;
-                    line-height: 1.8;
+                    line-height: 1.85;
                 }
                 .blog-prose h2 {
                     font-size: 1.5rem;
                     font-weight: 700;
-                    color: #fff;
+                    color: #18181b;
                     margin-top: 2.5rem;
                     margin-bottom: 0.75rem;
                     letter-spacing: -0.01em;
@@ -248,7 +201,7 @@ export default function BlogShow({ post, site }: Props) {
                 .blog-prose h3 {
                     font-size: 1.2rem;
                     font-weight: 600;
-                    color: #e4e4e7;
+                    color: #27272a;
                     margin-top: 2rem;
                     margin-bottom: 0.5rem;
                 }
@@ -257,14 +210,14 @@ export default function BlogShow({ post, site }: Props) {
                     margin-bottom: 1.4rem;
                 }
                 .blog-prose a {
-                    color: #fb923c;
+                    color: #ea580c;
                     text-decoration: underline;
                     text-underline-offset: 3px;
                     transition: color 0.15s;
                 }
-                .blog-prose a:hover { color: #fdba74; }
-                .blog-prose strong { color: #e4e4e7; font-weight: 600; }
-                .blog-prose em { color: #d4d4d8; }
+                .blog-prose a:hover { color: #c2410c; }
+                .blog-prose strong { color: #18181b; font-weight: 600; }
+                .blog-prose em { color: #52525b; }
                 .blog-prose ul {
                     list-style: none;
                     padding: 0;
@@ -274,6 +227,7 @@ export default function BlogShow({ post, site }: Props) {
                     padding-left: 1.4rem;
                     position: relative;
                     margin-bottom: 0.4rem;
+                    color: #3f3f46;
                 }
                 .blog-prose ul li::before {
                     content: '';
@@ -283,34 +237,35 @@ export default function BlogShow({ post, site }: Props) {
                     width: 5px;
                     height: 5px;
                     border-radius: 50%;
-                    background: rgba(234,88,12,0.7);
+                    background: #ea580c;
+                    opacity: 0.6;
                 }
                 .blog-prose ol {
                     padding-left: 1.4rem;
                     margin-bottom: 1.4rem;
                 }
-                .blog-prose ol li { margin-bottom: 0.4rem; color: #a1a1aa; }
+                .blog-prose ol li { margin-bottom: 0.4rem; color: #3f3f46; }
                 .blog-prose blockquote {
-                    border-left: 3px solid rgba(234,88,12,0.4);
+                    border-left: 3px solid #fdba74;
                     padding: 0.75rem 1.25rem;
                     margin: 1.75rem 0;
-                    background: rgba(234,88,12,0.05);
+                    background: #fff7ed;
                     border-radius: 0 0.5rem 0.5rem 0;
-                    color: #d4d4d8;
+                    color: #78350f;
                     font-style: italic;
                 }
                 .blog-prose code {
-                    background: rgba(255,255,255,0.07);
-                    border: 1px solid rgba(255,255,255,0.1);
+                    background: #f4f4f5;
+                    border: 1px solid #e4e4e7;
                     border-radius: 0.3rem;
                     padding: 0.15em 0.45em;
                     font-size: 0.875em;
-                    color: #fb923c;
+                    color: #ea580c;
                     font-family: ui-monospace, 'Cascadia Code', monospace;
                 }
                 .blog-prose pre {
-                    background: rgba(255,255,255,0.04);
-                    border: 1px solid rgba(255,255,255,0.08);
+                    background: #18181b;
+                    border: 1px solid #27272a;
                     border-radius: 0.75rem;
                     padding: 1.25rem 1.5rem;
                     overflow-x: auto;
@@ -325,7 +280,7 @@ export default function BlogShow({ post, site }: Props) {
                 }
                 .blog-prose img {
                     border-radius: 0.75rem;
-                    border: 1px solid rgba(255,255,255,0.08);
+                    border: 1px solid #e4e4e7;
                     max-width: 100%;
                     height: auto;
                     margin: 1.5rem 0;
@@ -333,9 +288,29 @@ export default function BlogShow({ post, site }: Props) {
                 .blog-prose hr {
                     border: none;
                     height: 1px;
-                    background: linear-gradient(90deg, rgba(234,88,12,0.3), rgba(255,255,255,0.05), transparent);
+                    background: #e4e4e7;
                     margin: 2rem 0;
                 }
+                .blog-prose table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 1.4rem;
+                    font-size: 0.9375rem;
+                }
+                .blog-prose th {
+                    background: #f4f4f5;
+                    border: 1px solid #e4e4e7;
+                    padding: 0.5rem 0.75rem;
+                    text-align: left;
+                    font-weight: 600;
+                    color: #18181b;
+                }
+                .blog-prose td {
+                    border: 1px solid #e4e4e7;
+                    padding: 0.5rem 0.75rem;
+                    color: #3f3f46;
+                }
+                .blog-prose tr:nth-child(even) td { background: #fafafa; }
             `}</style>
         </>
     );

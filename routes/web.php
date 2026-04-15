@@ -30,6 +30,11 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Broadcasting auth for the admin/employee panel (uses 'admin' guard)
+Route::post('/admin/broadcasting/auth', function (\Illuminate\Http\Request $request) {
+    return \Illuminate\Support\Facades\Broadcast::auth($request);
+})->middleware(['web', 'auth:admin'])->name('admin.broadcasting.auth');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -50,9 +55,9 @@ Route::middleware('auth')->group(function () {
 
 // Employee auth routes
 Route::prefix('employee')->name('employee.')->group(function () {
-    Route::get('/',       fn() => redirect()->route('employee.login'));
-    Route::get('login',   [EmployeeLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login',  [EmployeeLoginController::class, 'login']);
+    Route::get('/',       fn() => redirect('/admin/login'));
+    Route::get('login',   fn() => redirect('/admin/login'))->name('login');
+    Route::post('login',  fn() => redirect('/admin/login'));
     Route::post('logout', [EmployeeLoginController::class, 'logout'])->name('logout');
 });
 

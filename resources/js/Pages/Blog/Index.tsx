@@ -1,19 +1,10 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
+import { HomepageContent } from '@/Pages/Welcome/types';
+import Navbar        from '@/Pages/Welcome/Navbar';
+import FooterSection from '@/Pages/Welcome/FooterSection';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-
-const MoonLogo = () => (
-    <svg viewBox="0 0 40 40" fill="none" className="h-8 w-8">
-        <rect width="40" height="40" fill="#1C0800"/>
-        <circle cx="20" cy="24" r="24" fill="#EA580C" opacity="0.22"/>
-        <circle cx="20" cy="20" r="17" fill="#EDE0C4"/>
-        <circle cx="22" cy="18" r="17" fill="#C8B48A" opacity="0.22"/>
-        <circle cx="28" cy="11" r="4.5" fill="#C0A878"/><circle cx="28" cy="11" r="3" fill="#A8906A"/><circle cx="27.4" cy="10.4" r="1.4" fill="#DDD0B0" fillOpacity="0.7"/>
-        <circle cx="10" cy="21" r="3.2" fill="#C0A878"/><circle cx="10" cy="21" r="1.9" fill="#A8906A"/><circle cx="9.6" cy="20.6" r="0.9" fill="#DDD0B0" fillOpacity="0.6"/>
-        <circle cx="27" cy="30" r="3.5" fill="#C0A878"/><circle cx="27" cy="30" r="2.2" fill="#A8906A"/><circle cx="26.5" cy="29.5" r="1" fill="#DDD0B0" fillOpacity="0.6"/>
-    </svg>
-);
 
 const IcoPen = () => (
     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -85,7 +76,10 @@ interface Props extends PageProps {
     };
     categories: Category[];
     activeCategory?: Category | null;
+    homepage: HomepageContent;
 }
+
+interface SharedProps { site: { name: string } }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -101,107 +95,87 @@ function postHref(post: Post): string {
 }
 
 const GRADIENTS = [
-    'linear-gradient(135deg, #1a1035 0%, #2d1b69 50%, #0f0a1e 100%)',
-    'linear-gradient(135deg, #0f1e35 0%, #1b3a69 50%, #0a0f1e 100%)',
-    'linear-gradient(135deg, #1e0f0f 0%, #6b1f1f 50%, #0f0a0a 100%)',
-    'linear-gradient(135deg, #0a1e14 0%, #1b6941 50%, #0a1e0f 100%)',
-    'linear-gradient(135deg, #1e1a0f 0%, #694e1b 50%, #0f0e0a 100%)',
-    'linear-gradient(135deg, #0f0a1e 0%, #3d1b69 50%, #1a0f35 100%)',
+    'linear-gradient(135deg, #fde68a 0%, #fb923c 100%)',
+    'linear-gradient(135deg, #bfdbfe 0%, #6366f1 100%)',
+    'linear-gradient(135deg, #bbf7d0 0%, #059669 100%)',
+    'linear-gradient(135deg, #fecdd3 0%, #e11d48 100%)',
+    'linear-gradient(135deg, #e9d5ff 0%, #7c3aed 100%)',
+    'linear-gradient(135deg, #fed7aa 0%, #ea580c 100%)',
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function BlogIndex({ posts, site, categories, activeCategory }: Props) {
+export default function BlogIndex({ auth, posts, categories, activeCategory, homepage }: Props) {
+    const { site } = usePage<SharedProps>().props;
+    const siteName = site?.name ?? 'Blog';
     const pageTitle = activeCategory ? `${activeCategory.name} — Blog` : 'Blog';
+
+    const portalLink = auth?.customer
+        ? { href: '/customer/dashboard', label: 'Kundenbereich' }
+        : auth?.partner
+        ? { href: '/partner/dashboard', label: 'Partnerbereich' }
+        : auth?.employee
+        ? { href: '/employee/dashboard', label: 'Mitarbeiterbereich' }
+        : null;
 
     return (
         <>
             <Head title={pageTitle} />
 
-            <div
-                className="min-h-dvh"
-                style={{ background: 'linear-gradient(135deg, #09090b 0%, #0f0a1e 50%, #09090b 100%)' }}
-            >
-                {/* Ambient orbs */}
-                <div className="pointer-events-none fixed inset-0 overflow-hidden">
-                    <div style={{ position:'absolute', top:'-10%', left:'-5%', width:'45%', height:'45%', background:'radial-gradient(circle, rgba(234,88,12,0.06) 0%, transparent 70%)', borderRadius:'50%' }} />
-                    <div style={{ position:'absolute', bottom:'10%', right:'-5%', width:'40%', height:'40%', background:'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)', borderRadius:'50%' }} />
-                </div>
+            <Navbar portalLink={portalLink} canLogin={true} />
 
-                {/* ── Nav ─────────────────────────────────────────────────── */}
-                <nav style={{ borderBottom:'1px solid rgba(255,255,255,0.06)', backdropFilter:'blur(16px)', background:'rgba(9,9,11,0.7)' }} className="sticky top-0 z-40">
-                    <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
-                        <Link href="/" className="flex items-center gap-2.5">
-                            <MoonLogo />
-                            <span className="text-sm font-semibold tracking-wide text-white/90">
-                                {site?.name ?? 'MSW4'}
-                            </span>
-                        </Link>
-                        <div className="flex items-center gap-4">
-                            <Link href="/" className="text-xs text-zinc-400 hover:text-white transition-colors duration-200">Home</Link>
-                            <Link
-                                href={route('customer.login')}
-                                style={{ background:'rgba(234,88,12,0.15)', border:'1px solid rgba(234,88,12,0.3)' }}
-                                className="rounded-lg px-3 py-1.5 text-xs font-medium text-orange-300 hover:bg-orange-500/20 transition-all duration-200"
-                            >
-                                Customer Portal
-                            </Link>
-                        </div>
-                    </div>
-                </nav>
+            <div className="min-h-dvh bg-zinc-50 pt-16">
 
                 {/* ── Hero ────────────────────────────────────────────────── */}
-                <div className="mx-auto max-w-6xl px-6 pt-16 pb-10 text-center">
-                    <div
-                        className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-5"
-                        style={{ background:'rgba(234,88,12,0.1)', border:'1px solid rgba(234,88,12,0.2)' }}
-                    >
-                        <IcoPen />
-                        <span className="text-xs font-medium text-orange-300 tracking-wider uppercase">Journal</span>
-                    </div>
+                <div className="bg-white border-b border-zinc-200">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 text-center">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 border border-orange-200 px-3.5 py-1.5 mb-5">
+                            <span className="text-orange-500"><IcoPen /></span>
+                            <span className="text-xs font-semibold text-orange-600 tracking-wider uppercase">Journal</span>
+                        </div>
 
-                    {activeCategory ? (
-                        <>
-                            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white">
-                                {activeCategory.name}
-                            </h1>
-                            <p className="mt-3 text-zinc-500 text-sm">
-                                <Link href={route('blog.index')} className="hover:text-orange-400 transition-colors">Blog</Link>
-                                <span className="mx-2 text-zinc-700">/</span>
-                                {activeCategory.name}
+                        {activeCategory ? (
+                            <>
+                                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900">
+                                    {activeCategory.name}
+                                </h1>
+                                <p className="mt-3 text-zinc-400 text-sm">
+                                    <Link href={route('blog.index')} className="hover:text-orange-500 transition-colors">Blog</Link>
+                                    <span className="mx-2 text-zinc-300">/</span>
+                                    <span className="text-zinc-500">{activeCategory.name}</span>
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900">
+                                    Latest from{' '}
+                                    <span className="text-orange-500">{siteName}</span>
+                                </h1>
+                                <p className="mt-4 text-zinc-500 max-w-xl mx-auto text-base leading-relaxed">
+                                    Insights, updates and stories from our team.
+                                </p>
+                            </>
+                        )}
+
+                        {posts.total > 0 && (
+                            <p className="mt-3 text-xs text-zinc-400">
+                                {posts.total} {posts.total === 1 ? 'article' : 'articles'}
                             </p>
-                        </>
-                    ) : (
-                        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white">
-                            Latest from the{' '}
-                            <span
-                                style={{ background:'linear-gradient(90deg, #fb923c, #f59e0b)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}
-                            >
-                                MSW4 Blog
-                            </span>
-                        </h1>
-                    )}
-
-                    {site?.description && !activeCategory && (
-                        <p className="mt-4 text-zinc-400 max-w-xl mx-auto text-base leading-relaxed">{site.description}</p>
-                    )}
-                    {posts.total > 0 && (
-                        <p className="mt-3 text-xs text-zinc-600">
-                            {posts.total} {posts.total === 1 ? 'article' : 'articles'}
-                        </p>
-                    )}
+                        )}
+                    </div>
                 </div>
 
-                {/* ── Category tabs ───────────────────────────────────────── */}
-                {categories.length > 0 && (
-                    <div className="mx-auto max-w-6xl px-6 pb-8">
-                        <div className="flex flex-wrap gap-2">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+
+                    {/* ── Category tabs ───────────────────────────────────── */}
+                    {categories.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-10">
                             <Link
                                 href={route('blog.index')}
                                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200"
                                 style={!activeCategory
-                                    ? { background:'rgba(234,88,12,0.2)', border:'1px solid rgba(234,88,12,0.4)', color:'#fb923c' }
-                                    : { background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)', color:'#71717a' }
+                                    ? { background:'#fff7ed', border:'1px solid #fed7aa', color:'#ea580c' }
+                                    : { background:'#fff', border:'1px solid #e4e4e7', color:'#71717a' }
                                 }
                             >
                                 All
@@ -212,31 +186,26 @@ export default function BlogIndex({ posts, site, categories, activeCategory }: P
                                     href={route('blog.category', { category: cat.slug })}
                                     className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200"
                                     style={activeCategory?.id === cat.id
-                                        ? { background:'rgba(234,88,12,0.2)', border:'1px solid rgba(234,88,12,0.4)', color:'#fb923c' }
-                                        : { background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)', color:'#71717a' }
+                                        ? { background:'#fff7ed', border:'1px solid #fed7aa', color:'#ea580c' }
+                                        : { background:'#fff', border:'1px solid #e4e4e7', color:'#71717a' }
                                     }
                                 >
                                     <IcoTag />
                                     {cat.name}
                                     {cat.posts_count !== undefined && (
-                                        <span className="opacity-50">{cat.posts_count}</span>
+                                        <span className="opacity-60 ml-0.5">{cat.posts_count}</span>
                                     )}
                                 </Link>
                             ))}
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* ── Posts grid ──────────────────────────────────────────── */}
-                <div className="mx-auto max-w-6xl px-6 pb-20">
+                    {/* ── Posts grid ──────────────────────────────────────── */}
                     {posts.data.length === 0 ? (
-                        <div
-                            className="rounded-2xl p-16 text-center"
-                            style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)' }}
-                        >
-                            <p className="text-zinc-500 text-sm">No articles published yet.</p>
+                        <div className="rounded-2xl bg-white border border-zinc-200 p-16 text-center">
+                            <p className="text-zinc-400 text-sm">No articles published yet.</p>
                             {activeCategory && (
-                                <Link href={route('blog.index')} className="mt-3 inline-block text-xs text-orange-400 hover:text-orange-300">
+                                <Link href={route('blog.index')} className="mt-3 inline-block text-xs text-orange-500 hover:text-orange-600">
                                     View all posts
                                 </Link>
                             )}
@@ -260,8 +229,7 @@ export default function BlogIndex({ posts, site, categories, activeCategory }: P
                                     return (
                                         <span
                                             key={i}
-                                            className="flex items-center justify-center h-9 px-3 rounded-lg text-sm text-zinc-700 cursor-not-allowed"
-                                            style={{ border:'1px solid rgba(255,255,255,0.05)' }}
+                                            className="flex items-center justify-center h-9 px-3 rounded-lg text-sm text-zinc-300 cursor-not-allowed border border-zinc-200 bg-white"
                                         >
                                             {isPrev ? <IcoChevronLeft /> : isNext ? <IcoChevronRight /> : (
                                                 <span dangerouslySetInnerHTML={{ __html: link.label }} />
@@ -276,8 +244,8 @@ export default function BlogIndex({ posts, site, categories, activeCategory }: P
                                         href={link.url}
                                         className="flex items-center justify-center h-9 px-3 rounded-lg text-sm transition-all duration-200"
                                         style={link.active
-                                            ? { background:'rgba(234,88,12,0.2)', border:'1px solid rgba(234,88,12,0.4)', color:'#fb923c' }
-                                            : { background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'#a1a1aa' }
+                                            ? { background:'#fff7ed', border:'1px solid #fed7aa', color:'#ea580c' }
+                                            : { background:'#fff', border:'1px solid #e4e4e7', color:'#52525b' }
                                         }
                                     >
                                         {isPrev ? <IcoChevronLeft /> : isNext ? <IcoChevronRight /> : (
@@ -290,6 +258,8 @@ export default function BlogIndex({ posts, site, categories, activeCategory }: P
                     )}
                 </div>
             </div>
+
+            <FooterSection footer={homepage.footer} />
         </>
     );
 }
@@ -300,19 +270,10 @@ function PostCard({ post, gradientIndex, href }: { post: Post; gradientIndex: nu
     return (
         <Link
             href={href}
-            className="group flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-1"
-            style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)' }}
-            onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.border = '1px solid rgba(234,88,12,0.25)';
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 8px 32px rgba(234,88,12,0.08)';
-            }}
-            onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.border = '1px solid rgba(255,255,255,0.08)';
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
-            }}
+            className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-zinc-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-zinc-200/80 hover:border-orange-200"
         >
             {/* Image / placeholder */}
-            <div className="relative h-44 overflow-hidden">
+            <div className="relative h-48 overflow-hidden bg-zinc-100">
                 {post.featured_image ? (
                     <img
                         src={`/storage/${post.featured_image}`}
@@ -320,20 +281,13 @@ function PostCard({ post, gradientIndex, href }: { post: Post; gradientIndex: nu
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                         width={400}
-                        height={176}
+                        height={192}
                     />
                 ) : (
-                    <div className="h-full w-full" style={{ background: GRADIENTS[gradientIndex] }} />
+                    <div className="h-full w-full opacity-60" style={{ background: GRADIENTS[gradientIndex] }} />
                 )}
-                <div
-                    className="absolute inset-x-0 bottom-0 h-16"
-                    style={{ background:'linear-gradient(to top, rgba(9,9,11,0.9), transparent)' }}
-                />
                 {post.category && (
-                    <span
-                        className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
-                        style={{ background:'rgba(9,9,11,0.8)', border:'1px solid rgba(255,255,255,0.12)', color:'#fb923c', backdropFilter:'blur(8px)' }}
-                    >
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm border border-orange-200 px-2.5 py-1 text-xs font-medium text-orange-600 shadow-sm">
                         <IcoTag />
                         {post.category.name}
                     </span>
@@ -342,25 +296,25 @@ function PostCard({ post, gradientIndex, href }: { post: Post; gradientIndex: nu
 
             {/* Content */}
             <div className="flex flex-1 flex-col p-5">
-                <h2 className="text-base font-semibold leading-snug text-white/90 group-hover:text-orange-300 transition-colors duration-200 line-clamp-2">
+                <h2 className="text-base font-semibold leading-snug text-zinc-900 group-hover:text-orange-600 transition-colors duration-200 line-clamp-2">
                     {post.title}
                 </h2>
                 {post.excerpt && (
                     <p className="mt-2 text-sm text-zinc-500 line-clamp-3 leading-relaxed">{post.excerpt}</p>
                 )}
 
-                <div className="mt-auto pt-5 flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-xs text-zinc-600">
+                <div className="mt-auto pt-5 flex items-center justify-between border-t border-zinc-100">
+                    <div className="flex items-center gap-3 text-xs text-zinc-400">
                         <span className="flex items-center gap-1">
                             <IcoUser />
-                            <span className="text-zinc-500">{post.author.name}</span>
+                            {post.author.name}
                         </span>
                         <span className="flex items-center gap-1">
                             <IcoCalendar />
-                            <span>{formatDate(post.published_at)}</span>
+                            {formatDate(post.published_at)}
                         </span>
                     </div>
-                    <span className="text-orange-400/60 group-hover:text-orange-400 transition-colors duration-200">
+                    <span className="text-zinc-300 group-hover:text-orange-500 transition-colors duration-200">
                         <IcoArrow />
                     </span>
                 </div>

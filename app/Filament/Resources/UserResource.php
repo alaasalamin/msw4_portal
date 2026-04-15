@@ -10,6 +10,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -79,10 +82,13 @@ class UserResource extends Resource
                         'customer' => 'Customer',
                         'partner'  => 'Partner',
                     ]),
+                TrashedFilter::make(),
             ])
             ->actions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()->requiresConfirmation(),
+                RestoreAction::make(),
+                ForceDeleteAction::make()->requiresConfirmation(),
             ]);
     }
 

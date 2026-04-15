@@ -14,7 +14,7 @@ class Device extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['status', 'priority', 'ticket_number', 'customer_name', 'brand', 'model'])
+            ->logOnly(['workflow_step_id', 'priority', 'ticket_number', 'customer_name', 'brand', 'model'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn (string $eventName) => "Device {$eventName}");
     }
@@ -23,6 +23,7 @@ class Device extends Model
         'ticket_number',
         'technician_id',
         'coordinator_id',
+        'workflow_step_id',
         'customer_name',
         'customer_email',
         'customer_phone',
@@ -32,7 +33,6 @@ class Device extends Model
         'color',
         'issue_description',
         'internal_notes',
-        'status',
         'priority',
         'estimated_cost',
         'final_cost',
@@ -71,6 +71,11 @@ class Device extends Model
     public function coordinator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'coordinator_id');
+    }
+
+    public function workflowStep(): BelongsTo
+    {
+        return $this->belongsTo(WorkflowStep::class, 'workflow_step_id');
     }
 
     public function getDaysInShopAttribute(): int

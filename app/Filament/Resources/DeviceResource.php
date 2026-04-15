@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\DeviceResource\Pages;
 use App\Models\Device;
+use App\Models\WorkflowPhase;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -31,17 +32,18 @@ class DeviceResource extends Resource
         return $form->components([
             Section::make('Ticket Info')->schema([
                 TextInput::make('ticket_number')->disabled(),
-                Select::make('status')
-                    ->options([
-                        'received'   => 'Received',
-                        'diagnosing' => 'Diagnosing',
-                        'repairing'  => 'Repairing',
-                        'waiting'    => 'Waiting for Parts',
-                        'ready'      => 'Ready for Pickup',
-                        'completed'  => 'Completed',
-                        'cancelled'  => 'Cancelled',
-                    ])
-                    ->required(),
+                Select::make('workflow_step_id')
+                    ->label('Aktueller Schritt')
+                    ->options(function () {
+                        return WorkflowPhase::with(['steps' => fn ($q) => $q->orderBy('sort_order')])
+                            ->orderBy('sort_order')
+                            ->get()
+                            ->mapWithKeys(fn ($phase) => [
+                                $phase->label => $phase->steps->pluck('label', 'id'),
+                            ]);
+                    })
+                    ->searchable()
+                    ->nullable(),
                 Select::make('priority')
                     ->options([
                         'low'    => 'Low',
@@ -84,18 +86,11 @@ class DeviceResource extends Resource
                 TextColumn::make('customer_name')->searchable(),
                 TextColumn::make('brand'),
                 TextColumn::make('model'),
-                TextColumn::make('status')
+                TextColumn::make('workflowStep.label')
+                    ->label('Schritt')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'received'   => 'gray',
-                        'diagnosing' => 'info',
-                        'repairing'  => 'warning',
-                        'waiting'    => 'danger',
-                        'ready'      => 'success',
-                        'completed'  => 'success',
-                        'cancelled'  => 'danger',
-                        default      => 'gray',
-                    }),
+                    ->color('info')
+                    ->placeholder('—'),
                 TextColumn::make('priority')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -109,16 +104,9 @@ class DeviceResource extends Resource
                 TextColumn::make('received_at')->dateTime()->sortable(),
             ])
             ->filters([
-                SelectFilter::make('status')
-                    ->options([
-                        'received'   => 'Received',
-                        'diagnosing' => 'Diagnosing',
-                        'repairing'  => 'Repairing',
-                        'waiting'    => 'Waiting for Parts',
-                        'ready'      => 'Ready for Pickup',
-                        'completed'  => 'Completed',
-                        'cancelled'  => 'Cancelled',
-                    ]),
+                SelectFilter::make('workflow_step_id')
+                    ->label('Schritt')
+                    ->relationship('workflowStep', 'label'),
                 SelectFilter::make('priority')
                     ->options([
                         'low'    => 'Low',
