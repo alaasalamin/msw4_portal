@@ -6,7 +6,7 @@ After=network.target redis.service
 User=www-data
 Group=www-data
 Restart=always
-ExecStart=/usr/bin/php8.4 /var/www/bizo.technology/artisan reverb:start --host=0.0.0.0 --port=8080
+ExecStart=/usr/bin/php8.4 /var/www/msw/artisan reverb:start --host=0.0.0.0 --port=8080
 StandardOutput=append:/var/log/laravel-reverb.log
 StandardError=append:/var/log/laravel-reverb.log
 

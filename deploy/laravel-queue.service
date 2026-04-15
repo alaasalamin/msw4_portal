@@ -1,12 +1,13 @@
 [Unit]
-Description=Laravel Queue Worker
+Description=Laravel Queue Worker %i
 After=network.target redis.service
 
 [Service]
 User=www-data
 Group=www-data
 Restart=always
-ExecStart=/usr/bin/php8.4 /var/www/bizo.technology/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600 --workers=6
+RestartSec=5
+ExecStart=/usr/bin/php8.4 /var/www/msw/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
 StandardOutput=append:/var/log/laravel-queue.log
 StandardError=append:/var/log/laravel-queue.log
 

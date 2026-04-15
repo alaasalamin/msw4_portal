@@ -150,25 +150,19 @@ jobs:
             set_env REDIS_HOST "127.0.0.1"
             set_env REDIS_PORT "6379"
 
-            # Setup queue worker as a systemd service if not exists
-            if [ ! -f /etc/systemd/system/laravel-queue.service ]; then
-              cp /var/www/msw/deploy/laravel-queue.service /etc/systemd/system/laravel-queue.service
-              systemctl daemon-reload
-              systemctl enable laravel-queue
-              systemctl start laravel-queue
-            fi
+            # Always sync service files so path/config changes take effect on every deploy
+            cp /var/www/msw/deploy/laravel-queue.service /etc/systemd/system/laravel-queue@.service
+            cp /var/www/msw/deploy/laravel-reverb.service /etc/systemd/system/laravel-reverb.service
+            systemctl daemon-reload
 
-            # Setup Reverb WebSocket server as a systemd service if not exists
-            if [ ! -f /etc/systemd/system/laravel-reverb.service ]; then
-              cp /var/www/msw/deploy/laravel-reverb.service /etc/systemd/system/laravel-reverb.service
-              systemctl daemon-reload
-              systemctl enable laravel-reverb
-              systemctl start laravel-reverb
-            fi
+            # Enable & start 2 queue worker instances (laravel-queue@1, laravel-queue@2)
+            systemctl enable laravel-queue@1 laravel-queue@2
+            systemctl enable laravel-reverb
 
-            # Restart workers so they pick up new code
+            # Signal workers to gracefully restart after code update, then restart services
             php8.4 artisan queue:restart
-            systemctl restart laravel-queue
+            systemctl restart laravel-queue@1
+            systemctl restart laravel-queue@2
             systemctl restart laravel-reverb
 
             # Ensure persistent upload directories exist (survive git reset --hard because storage/ is gitignored)
