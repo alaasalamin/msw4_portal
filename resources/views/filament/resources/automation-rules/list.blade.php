@@ -233,6 +233,23 @@
         .wfa-step-label { font-size:10px; line-height:1.35; color:#6b7280; text-align:center; max-width:72px; word-break:break-word; margin:0; }
         .dark .wfa-step-label { color:#9ca3af; }
 
+        /* ── Sub-note branch ──────────────────────── */
+        .wfa-branch { display:flex; flex-direction:column; align-items:center; gap:0; margin-top:4px; width:100%; }
+        .wfa-branch-line { width:1px; height:10px; background:rgba(99,102,241,.3); flex-shrink:0; }
+        .wfa-branch-dot { width:4px; height:4px; border-radius:50%; background:rgba(99,102,241,.45); flex-shrink:0; margin-bottom:4px; }
+        .wfa-subnotes { display:flex; flex-direction:column; gap:3px; width:calc(100% - 8px); max-width:90px; }
+        .wfa-subnote {
+            background:rgba(99,102,241,.07); border:1px solid rgba(99,102,241,.2);
+            border-radius:6px; padding:4px 6px;
+            display:flex; align-items:flex-start; gap:4px;
+            position:relative;
+        }
+        .dark .wfa-subnote { background:rgba(99,102,241,.13); border-color:rgba(99,102,241,.3); }
+        .wfa-subnote-bullet { font-size:8px; color:#6366f1; flex-shrink:0; margin-top:1px; }
+        .dark .wfa-subnote-bullet { color:#818cf8; }
+        .wfa-subnote-label { font-size:9px; font-weight:600; color:#4f46e5; line-height:1.3; flex:1; word-break:break-word; text-align:left; }
+        .dark .wfa-subnote-label { color:#818cf8; }
+
         .wfa-node {
             width:32px; height:32px; border-radius:50%; border-width:2px; border-style:solid;
             background:#fff; display:flex; align-items:center; justify-content:center;
@@ -382,21 +399,33 @@
                                     right:calc(16px + (100% - 32px) / {{ $count }} / 2);"></div>
                         <div style="display:grid; grid-template-columns:repeat({{ $count }}, 1fr); gap:4px; position:relative; z-index:1;">
                             @foreach ($items as $i => $step)
-                                @php $hasFields = !empty($step->custom_fields); @endphp
-                                <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
-                                    <div style="position:relative; display:inline-flex;">
-                                        <button type="button" wire:click="selectStep({{ $step->id }})"
-                                                class="wfa-node" style="border-color:{{ $color }}; color:{{ $color }};"
-                                                title="{{ $step->label }}">{{ $i + 1 }}</button>
-                                        @if ($hasFields)
-                                            <span style="position:absolute; top:-3px; right:-3px;
-                                                         width:10px; height:10px; border-radius:50%;
-                                                         background:#6366f1; border:2px solid #fff;
-                                                         font-size:0;"
-                                                  title="{{ count($step->custom_fields) }} Feld(er) definiert"></span>
-                                        @endif
-                                    </div>
+                                @php $fields = $step->custom_fields ?? []; $hasFields = count($fields) > 0; @endphp
+                                <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+
+                                    {{-- Node --}}
+                                    <button type="button" wire:click="selectStep({{ $step->id }})"
+                                            class="wfa-node" style="border-color:{{ $color }}; color:{{ $color }};"
+                                            title="Klicken um Felder zu bearbeiten">{{ $i + 1 }}</button>
+
+                                    {{-- Step label --}}
                                     <p class="wfa-step-label">{{ $step->label }}</p>
+
+                                    {{-- Branch sub-notes --}}
+                                    @if ($hasFields)
+                                        <div class="wfa-branch">
+                                            <div class="wfa-branch-line"></div>
+                                            <div class="wfa-branch-dot"></div>
+                                            <div class="wfa-subnotes">
+                                                @foreach ($fields as $field)
+                                                    <div class="wfa-subnote">
+                                                        <span class="wfa-subnote-bullet">▸</span>
+                                                        <span class="wfa-subnote-label">{{ $field['label'] }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
                                 </div>
                             @endforeach
                         </div>
