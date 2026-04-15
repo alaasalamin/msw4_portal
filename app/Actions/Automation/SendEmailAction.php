@@ -2,6 +2,7 @@
 
 namespace App\Actions\Automation;
 
+use App\Mail\AutomationMail;
 use App\Models\Device;
 use Illuminate\Support\Facades\Mail;
 
@@ -10,8 +11,8 @@ class SendEmailAction
     public function execute(Device $device, array $config, array $context = []): array
     {
         $recipient = match ($config['recipient'] ?? 'customer') {
-            'customer' => $device->customer_email,
-            default    => $config['custom_email'] ?? null,
+            'custom' => $config['custom_email'] ?? null,
+            default  => $device->customer_email,
         };
 
         if (! $recipient) {
@@ -21,7 +22,12 @@ class SendEmailAction
         $subject = $this->interpolate($config['subject'] ?? 'Benachrichtigung', $device);
         $body    = $this->interpolate($config['body']    ?? '',                  $device);
 
-        // TODO: Mail::to($recipient)->send(new \App\Mail\AutomationMail($subject, $body));
+        Mail::to($recipient)->send(new AutomationMail(
+            subject:      $subject,
+            body:         $body,
+            ticketNumber: $device->ticket_number,
+            deviceLabel:  trim("{$device->brand} {$device->model}"),
+        ));
 
         return ['to' => $recipient, 'subject' => $subject];
     }

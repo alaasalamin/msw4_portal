@@ -6,6 +6,7 @@ use App\Actions\Automation\ChangeStepAction;
 use App\Actions\Automation\GenerateInvoiceAction;
 use App\Actions\Automation\NotifyEmployeeAction;
 use App\Actions\Automation\SendAllowanceAction;
+use App\Actions\Automation\SendDelayedEmailAction;
 use App\Actions\Automation\SendEmailAction;
 use App\Models\AutomationAction;
 use App\Models\AutomationLog;
@@ -33,7 +34,11 @@ class RunAutomationAction implements ShouldQueue
     {
         try {
             $handler = $this->resolveHandler();
-            $payload = $handler->execute($this->device, $this->action->action_config ?? [], $this->context);
+            $ruleContext = array_merge($this->context, [
+                'rule_id'   => $this->rule->id,
+                'rule_name' => $this->rule->name,
+            ]);
+            $payload = $handler->execute($this->device, $this->action->action_config ?? [], $ruleContext);
 
             AutomationLog::create([
                 'rule_id'      => $this->rule->id,
@@ -62,12 +67,13 @@ class RunAutomationAction implements ShouldQueue
     private function resolveHandler()
     {
         return match ($this->action->action_type) {
-            'send_allowance'   => new SendAllowanceAction(),
-            'notify_employee'  => new NotifyEmployeeAction(),
-            'send_email'       => new SendEmailAction(),
-            'change_step'      => new ChangeStepAction(),
-            'generate_invoice' => new GenerateInvoiceAction(),
-            default            => throw new \RuntimeException("Unknown action type: {$this->action->action_type}"),
+            'send_allowance'    => new SendAllowanceAction(),
+            'notify_employee'   => new NotifyEmployeeAction(),
+            'send_email'        => new SendEmailAction(),
+            'send_delayed_email'=> new SendDelayedEmailAction(),
+            'change_step'       => new ChangeStepAction(),
+            'generate_invoice'  => new GenerateInvoiceAction(),
+            default             => throw new \RuntimeException("Unknown action type: {$this->action->action_type}"),
         };
     }
 }

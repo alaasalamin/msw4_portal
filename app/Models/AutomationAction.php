@@ -22,11 +22,12 @@ class AutomationAction extends Model
     public static function actionLabels(): array
     {
         return [
-            'send_allowance'   => 'Kundenfreigabe anfordern',
-            'notify_employee'  => 'Mitarbeiter benachrichtigen',
-            'send_email'       => 'E-Mail senden',
-            'change_step'      => 'Schritt wechseln',
-            'generate_invoice' => 'Rechnung generieren (RSW)',
+            'send_allowance'    => 'Kundenfreigabe anfordern',
+            'notify_employee'   => 'Mitarbeiter benachrichtigen',
+            'send_email'        => 'E-Mail senden',
+            'send_delayed_email'=> '⏱ Verzögerte E-Mail senden',
+            'change_step'       => 'Schritt wechseln',
+            'generate_invoice'  => 'Rechnung generieren (RSW)',
         ];
     }
 }

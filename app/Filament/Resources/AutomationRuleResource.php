@@ -150,6 +150,47 @@ class AutomationRuleResource extends Resource
                             ->placeholder("Verfügbare Variablen: {{ticket}}, {{brand}}, {{model}}, {{customer}}")
                             ->visible(fn (Get $get) => $get('action_type') === 'send_email'),
 
+                        // ── send_delayed_email ──────────────────────────────
+                        TextInput::make('action_config.delay_value')
+                            ->label('Verzögerung')
+                            ->numeric()
+                            ->default(1)
+                            ->minValue(1)
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'),
+
+                        Select::make('action_config.delay_unit')
+                            ->label('Einheit')
+                            ->options(['minutes' => 'Minuten', 'hours' => 'Stunden', 'days' => 'Tage'])
+                            ->default('hours')
+                            ->live()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'),
+
+                        Select::make('action_config.recipient')
+                            ->label('Empfänger')
+                            ->options(['customer' => 'Kunde', 'custom' => 'Benutzerdefiniert'])
+                            ->default('customer')
+                            ->live()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'),
+
+                        TextInput::make('action_config.custom_email')
+                            ->label('E-Mail-Adresse')
+                            ->email()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'
+                                && $get('action_config.recipient') === 'custom'),
+
+                        TextInput::make('action_config.subject')
+                            ->label('Betreff')
+                            ->placeholder('Dein Gerät {{ticket}} ist abholbereit')
+                            ->columnSpanFull()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'),
+
+                        Textarea::make('action_config.body')
+                            ->label('E-Mail-Text')
+                            ->rows(5)
+                            ->placeholder("Hallo {{customer}},\n\ndein {{brand}} {{model}} (Ticket {{ticket}}) ist fertig und kann abgeholt werden.\n\nBis bald,\nDas MSW-Team")
+                            ->columnSpanFull()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'),
+
                         // ── change_step ─────────────────────────────────────
                         Select::make('action_config.step_id')
                             ->label('Zielschritt')
