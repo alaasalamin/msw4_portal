@@ -95,9 +95,11 @@ jobs:
             set_env REVERB_APP_ID "$REVERB_APP_ID"
             set_env REVERB_APP_KEY "$REVERB_APP_KEY"
             set_env REVERB_APP_SECRET "$REVERB_APP_SECRET"
-            set_env REVERB_HOST "msw.bizo.technology"
-            set_env REVERB_PORT "443"
-            set_env REVERB_SCHEME "https"
+            # Server-side (queue workers) connect to Reverb internally — no SSL, no Nginx
+            set_env REVERB_HOST "127.0.0.1"
+            set_env REVERB_PORT "8080"
+            set_env REVERB_SCHEME "http"
+            # Browser connects via Nginx SSL proxy on port 443
             set_env VITE_REVERB_APP_KEY "$REVERB_APP_KEY"
             set_env VITE_REVERB_HOST "msw.bizo.technology"
             set_env VITE_REVERB_PORT "443"
