@@ -1,6 +1,9 @@
 <x-filament-panels::page>
     @php
-        $rules = $this->getAutomationRules();
+        $rules  = $this->getAutomationRules();
+        $phases = $this->getPhases();
+        $totalSteps = $phases->sum(fn ($p) => $p->steps->count());
+        $diagramColors = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#ec4899'];
 
         $triggerMeta = [
             'step_changed'      => ['icon' => '⚡', 'color' => '#8b5cf6', 'label' => 'Schritt geändert'],
@@ -203,6 +206,168 @@
             display: flex; align-items: center; gap: 4px;
         }
     </style>
+
+    {{-- ── Workflow diagram ──────────────────────────────────────────────── --}}
+    <style>
+        .wfa-card { border-radius:12px; padding:20px 24px; margin-bottom:24px; }
+        .wfa-card { background:#fff; border:1px solid rgba(0,0,0,.07); }
+        .dark .wfa-card { background:#111827; border-color:rgba(255,255,255,.08); }
+
+        .wfa-emp-avatar { width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; flex-shrink:0; border:2px solid #fff; margin-left:-6px; }
+        .dark .wfa-emp-avatar { border-color:#111827; }
+        .wfa-emp-name { font-size:10px; color:#6b7280; }
+        .dark .wfa-emp-name { color:#9ca3af; }
+        .wfa-emp-none { font-size:10px; color:#d1d5db; font-style:italic; margin-left:10px; }
+        .dark .wfa-emp-none { color:#4b5563; }
+
+        .wfa-divider { height:1px; background:#f3f4f6; margin:20px 0; }
+        .dark .wfa-divider { background:rgba(255,255,255,.06); }
+
+        .wfa-step-label { font-size:10px; line-height:1.35; color:#6b7280; text-align:center; max-width:72px; word-break:break-word; margin:0; }
+        .dark .wfa-step-label { color:#9ca3af; }
+
+        .wfa-node {
+            width:32px; height:32px; border-radius:50%; border-width:2px; border-style:solid;
+            background:#fff; display:flex; align-items:center; justify-content:center;
+            font-size:11px; font-weight:700; flex-shrink:0;
+            box-shadow:0 1px 4px rgba(0,0,0,.08);
+            cursor:pointer; transition:transform .15s, box-shadow .15s;
+        }
+        .wfa-node:hover { transform:scale(1.18); box-shadow:0 4px 12px rgba(0,0,0,.15); }
+        .dark .wfa-node { background:#111827; }
+        .dark .wfa-node:hover { box-shadow:0 4px 12px rgba(0,0,0,.5); }
+
+        .wfa-overlay {
+            position:fixed; inset:0; z-index:9999;
+            background:rgba(0,0,0,.45); backdrop-filter:blur(3px);
+            display:flex; align-items:center; justify-content:center; padding:16px;
+        }
+        .wfa-modal { background:#fff; border-radius:14px; width:100%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden; }
+        .dark .wfa-modal { background:#1f2937; }
+        .wfa-modal-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #f3f4f6; }
+        .dark .wfa-modal-header { border-bottom-color:rgba(255,255,255,.07); }
+        .wfa-modal-title { font-size:14px; font-weight:600; color:#111827; }
+        .dark .wfa-modal-title { color:#f9fafb; }
+        .wfa-modal-close { width:28px; height:28px; border-radius:6px; border:none; cursor:pointer; background:#f3f4f6; color:#6b7280; display:flex; align-items:center; justify-content:center; font-size:16px; transition:background .15s; }
+        .wfa-modal-close:hover { background:#e5e7eb; }
+        .dark .wfa-modal-close { background:rgba(255,255,255,.08); color:#9ca3af; }
+        .wfa-modal-body { padding:20px; }
+        .wfa-modal-step-name { font-size:16px; font-weight:600; color:#111827; margin:0 0 4px; }
+        .dark .wfa-modal-step-name { color:#f9fafb; }
+        .wfa-modal-phase { font-size:12px; color:#9ca3af; margin:0; }
+    </style>
+
+    <div class="wfa-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <span style="font-size:13px; font-weight:600; color:#374151;" class="dark:text-gray-100">
+                Workflow-Schritte — klicke auf einen Schritt für Details
+            </span>
+            <span style="font-size:11px; color:#9ca3af;">{{ $totalSteps }} Schritte</span>
+        </div>
+
+        @php $avatarColors = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#ec4899','#f97316']; @endphp
+
+        @forelse ($phases as $phaseIndex => $phase)
+            @php
+                $color = $diagramColors[$phaseIndex % count($diagramColors)];
+                $items = $phase->steps;
+                $count = $items->count();
+                [$r, $g, $b] = sscanf($color, '#%02x%02x%02x');
+                $phaseEmployees = $phase->steps->flatMap(fn ($s) => $s->employees)->unique('id')->values();
+            @endphp
+
+            @if ($count > 0)
+                <div>
+                    <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+                        <div style="display:inline-flex; align-items:center; gap:6px;
+                                    background:rgba({{ $r }},{{ $g }},{{ $b }},.12);
+                                    border:1px solid rgba({{ $r }},{{ $g }},{{ $b }},.35);
+                                    border-radius:20px; padding:3px 10px 3px 5px;">
+                            <span style="display:inline-flex; align-items:center; justify-content:center;
+                                         width:18px; height:18px; border-radius:50%;
+                                         background:{{ $color }}; color:#fff; font-size:10px; font-weight:700;">
+                                {{ $phaseIndex + 1 }}
+                            </span>
+                            <span style="font-size:11px; font-weight:600; color:{{ $color }};">{{ $phase->label }}</span>
+                        </div>
+                        <span style="width:3px; height:3px; border-radius:50%; background:#d1d5db; flex-shrink:0;"></span>
+                        <span style="font-size:10px; color:#9ca3af; white-space:nowrap;">Zuständig:</span>
+                        @if ($phaseEmployees->isEmpty())
+                            <span class="wfa-emp-none">Niemand zugewiesen</span>
+                        @else
+                            <div style="display:inline-flex; align-items:center;">
+                                @foreach ($phaseEmployees->take(5) as $ei => $emp)
+                                    @php $initials = collect(explode(' ', $emp->name))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->implode(''); @endphp
+                                    <span class="wfa-emp-avatar" style="background:{{ $avatarColors[$ei % count($avatarColors)] }}; z-index:{{ 10 - $ei }};" title="{{ $emp->name }}">{{ $initials }}</span>
+                                @endforeach
+                                @if ($phaseEmployees->count() > 5)
+                                    <span class="wfa-emp-avatar" style="background:#9ca3af; z-index:5;">+{{ $phaseEmployees->count() - 5 }}</span>
+                                @endif
+                            </div>
+                            <span class="wfa-emp-name">{{ $phaseEmployees->pluck('name')->join(', ') }}</span>
+                        @endif
+                    </div>
+
+                    <div style="position:relative; padding:0 16px;">
+                        <div style="position:absolute; top:15px; height:2px;
+                                    background:rgba({{ $r }},{{ $g }},{{ $b }},.25); border-radius:2px;
+                                    left:calc(16px + (100% - 32px) / {{ $count }} / 2);
+                                    right:calc(16px + (100% - 32px) / {{ $count }} / 2);"></div>
+                        <div style="display:grid; grid-template-columns:repeat({{ $count }}, 1fr); gap:4px; position:relative; z-index:1;">
+                            @foreach ($items as $i => $step)
+                                <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                                    <button type="button" wire:click="selectStep({{ $step->id }})"
+                                            class="wfa-node" style="border-color:{{ $color }}; color:{{ $color }};"
+                                            title="{{ $step->label }}">{{ $i + 1 }}</button>
+                                    <p class="wfa-step-label">{{ $step->label }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @if (!$loop->last)<div class="wfa-divider"></div>@endif
+            @endif
+        @empty
+            <p style="text-align:center; font-size:13px; color:#9ca3af; padding:20px 0;">Keine Phasen vorhanden.</p>
+        @endforelse
+    </div>
+
+    {{-- Step detail modal --}}
+    @if ($selectedStep)
+        <div class="wfa-overlay" wire:click.self="closeModal">
+            <div class="wfa-modal">
+                <div class="wfa-modal-header">
+                    <span class="wfa-modal-title">Schritt: {{ $selectedStep['label'] }}</span>
+                    <button type="button" class="wfa-modal-close" wire:click="closeModal">✕</button>
+                </div>
+                <div class="wfa-modal-body">
+                    <p class="wfa-modal-phase">Phase: {{ $selectedStep['phase'] }}</p>
+                    @php
+                        $stepRules = $rules->filter(fn($r) =>
+                            $r->trigger_type === 'step_changed' &&
+                            (empty($r->trigger_config['step_id']) || (int)$r->trigger_config['step_id'] === $selectedStep['id'])
+                        );
+                    @endphp
+                    @if ($stepRules->isEmpty())
+                        <div style="margin-top:16px; padding:14px; border-radius:8px; background:#f9fafb; border:1px dashed #d1d5db; text-align:center; font-size:12px; color:#9ca3af;">
+                            Keine Automationen für diesen Schritt.
+                        </div>
+                    @else
+                        <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+                            @foreach ($stepRules as $sr)
+                                <div style="padding:10px 14px; border-radius:8px; background:#f9fafb; border:1px solid #e5e7eb; display:flex; align-items:center; gap:8px;">
+                                    <span style="width:7px; height:7px; border-radius:50%; background:{{ $sr->is_active ? '#22c55e' : '#9ca3af' }}; flex-shrink:0;"></span>
+                                    <span style="font-size:13px; font-weight:500; color:#111827; flex:1;">{{ $sr->name }}</span>
+                                    <span style="font-size:11px; color:#9ca3af;">{{ $sr->actions->count() }} Aktion(en)</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+    {{-- ── End workflow diagram ───────────────────────────────────────────── --}}
 
     <div style="max-width:100%;">
 

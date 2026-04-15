@@ -10,6 +10,8 @@ class WorkflowAutomation extends Page
 {
     protected string $view = 'filament.pages.workflow-automation';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-bolt'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Workflow'; }
     public static function getNavigationSort(): ?int                    { return 3; }
