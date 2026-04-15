@@ -178,6 +178,11 @@ jobs:
             chown -R www-data:www-data storage bootstrap/cache
             chmod -R 775 storage bootstrap/cache
 
+            # PHP-FPM upload limits (must match Nginx client_max_body_size)
+            sed -i 's/^upload_max_filesize.*/upload_max_filesize = 20M/' /etc/php/8.4/fpm/php.ini
+            sed -i 's/^post_max_size.*/post_max_size = 25M/' /etc/php/8.4/fpm/php.ini
+            systemctl restart php8.4-fpm
+
             # Update Nginx config and reload
             cp /var/www/msw/deploy/nginx.conf /etc/nginx/sites-available/msw.bizo.technology
             ln -sf /etc/nginx/sites-available/msw.bizo.technology /etc/nginx/sites-enabled/msw.bizo.technology
