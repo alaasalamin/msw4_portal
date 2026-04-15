@@ -171,6 +171,13 @@ jobs:
             systemctl restart laravel-queue
             systemctl restart laravel-reverb
 
+            # Ensure persistent upload directories exist (survive git reset --hard because storage/ is gitignored)
+            mkdir -p storage/app/public/device-photos
+            mkdir -p storage/app/public/posts
+
+            # Re-link public/storage → storage/app/public (safe to run on every deploy)
+            php8.4 artisan storage:link --force
+
             # Fix permissions
             chown -R www-data:www-data storage bootstrap/cache
             chmod -R 775 storage bootstrap/cache

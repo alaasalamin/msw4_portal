@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
@@ -76,6 +77,11 @@ class Device extends Model
     public function workflowStep(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'workflow_step_id');
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(DeviceNote::class)->latest();
     }
 
     public function getDaysInShopAttribute(): int

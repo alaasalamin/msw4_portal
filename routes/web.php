@@ -5,6 +5,8 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Auth\EmployeeLoginController;
 use App\Http\Controllers\Auth\PartnerLoginController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\DeviceNoteController;
+use App\Http\Controllers\DevicePhotoUploadController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShipmentController;
@@ -52,6 +54,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/devices/{device}/status', [DeviceController::class, 'updateStatus'])->middleware('type.can:update_repair_status')->name('devices.status');
     Route::patch('/devices/{device}/notes', [DeviceController::class, 'updateNotes'])->middleware('type.can:add_repair_notes')->name('devices.notes');
 });
+
+// One-time photo upload (public, no auth — token is the key)
+Route::get('/upload/{token}',  [DevicePhotoUploadController::class, 'show'])->name('device-photo.show');
+Route::post('/upload/{token}', [DevicePhotoUploadController::class, 'store'])->name('device-photo.store');
+
+// Device notes — accessible from admin panel (auth:admin) or user portals (auth:web)
+Route::post('/devices/{device}/notes',             [DeviceNoteController::class, 'store'])->name('device-notes.store');
+Route::patch('/device-notes/{note}',               [DeviceNoteController::class, 'update'])->name('device-notes.update');
+Route::delete('/device-notes/{note}',              [DeviceNoteController::class, 'destroy'])->name('device-notes.destroy');
 
 // Employee auth routes
 Route::prefix('employee')->name('employee.')->group(function () {
