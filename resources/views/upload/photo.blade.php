@@ -151,12 +151,11 @@
 
                 <div class="dropzone" id="dropzone">
                     <input type="file" name="photo" id="photo-input"
-                           accept="image/*" capture="environment">
+                           accept="image/*">
                     <div class="dropzone-icon">📷</div>
                     <div class="dropzone-title">Foto aufnehmen oder wählen</div>
                     <div class="dropzone-sub">
-                        Tippe hier um die Kamera zu öffnen<br>
-                        oder ein Bild aus der Galerie zu wählen
+                        Foto aufnehmen oder aus der Galerie wählen
                     </div>
                 </div>
 
