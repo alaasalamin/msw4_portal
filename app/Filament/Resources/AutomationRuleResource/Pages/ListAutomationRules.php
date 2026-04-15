@@ -14,8 +14,10 @@ class ListAutomationRules extends ListRecords
     protected static string $resource = AutomationRuleResource::class;
 
     // Step-click modal state
-    public ?int   $selectedStepId = null;
-    public ?array $selectedStep   = null;
+    public ?int    $selectedStepId  = null;
+    public ?array  $selectedStep    = null;
+    public array   $stepFields      = [];   // custom_fields being edited
+    public string  $newFieldLabel   = '';  // input for adding a new field
 
     public function getView(): string
     {
@@ -44,12 +46,36 @@ class ListAutomationRules extends ListRecords
             'label' => $step->label,
             'phase' => $step->phase?->label,
         ];
+        $this->stepFields    = $step->custom_fields ?? [];
+        $this->newFieldLabel = '';
+    }
+
+    public function addField(): void
+    {
+        $label = trim($this->newFieldLabel);
+        if ($label === '') return;
+        $this->stepFields[]  = ['label' => $label, 'type' => 'text'];
+        $this->newFieldLabel = '';
+    }
+
+    public function removeField(int $index): void
+    {
+        array_splice($this->stepFields, $index, 1);
+    }
+
+    public function saveStepFields(): void
+    {
+        WorkflowStep::findOrFail($this->selectedStepId)
+            ->update(['custom_fields' => $this->stepFields ?: null]);
+        $this->closeModal();
     }
 
     public function closeModal(): void
     {
-        $this->selectedStepId = null;
-        $this->selectedStep   = null;
+        $this->selectedStepId  = null;
+        $this->selectedStep    = null;
+        $this->stepFields      = [];
+        $this->newFieldLabel   = '';
     }
 
     // ── Automation rules ─────────────────────────────────────────────────────

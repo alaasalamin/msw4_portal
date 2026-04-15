@@ -255,6 +255,66 @@
         .wfa-modal-step-name { font-size:16px; font-weight:600; color:#111827; margin:0 0 4px; }
         .dark .wfa-modal-step-name { color:#f9fafb; }
         .wfa-modal-phase { font-size:12px; color:#9ca3af; margin:0; }
+
+        .wfa-section-label {
+            font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+            color:#9ca3af; margin:20px 0 10px;
+        }
+        .wfa-field-row {
+            display:flex; align-items:center; gap:8px;
+            padding:8px 12px; border-radius:8px;
+            border:1px solid #e5e7eb; background:#f9fafb;
+            margin-bottom:6px;
+        }
+        .dark .wfa-field-row { border-color:rgba(255,255,255,.08); background:rgba(255,255,255,.04); }
+        .wfa-field-icon {
+            width:28px; height:28px; border-radius:6px; flex-shrink:0;
+            background:rgba(99,102,241,.12); border:1px solid rgba(99,102,241,.2);
+            display:flex; align-items:center; justify-content:center; font-size:13px;
+        }
+        .wfa-field-name { flex:1; font-size:13px; font-weight:500; color:#374151; }
+        .dark .wfa-field-name { color:#e5e7eb; }
+        .wfa-field-type { font-size:10px; color:#9ca3af; padding:2px 6px; border-radius:4px; background:#f3f4f6; }
+        .dark .wfa-field-type { background:rgba(255,255,255,.07); }
+        .wfa-field-remove {
+            width:22px; height:22px; border-radius:5px; border:none; cursor:pointer;
+            background:rgba(239,68,68,.1); color:#ef4444;
+            display:flex; align-items:center; justify-content:center; font-size:12px;
+            transition:background .15s;
+        }
+        .wfa-field-remove:hover { background:rgba(239,68,68,.2); }
+
+        .wfa-add-row { display:flex; gap:8px; margin-top:8px; }
+        .wfa-add-input {
+            flex:1; padding:8px 12px; border-radius:8px; font-size:13px;
+            border:1px solid #d1d5db; background:#fff; color:#111827;
+            outline:none; transition:border-color .15s;
+        }
+        .wfa-add-input:focus { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.1); }
+        .dark .wfa-add-input { background:#374151; border-color:rgba(255,255,255,.12); color:#f9fafb; }
+        .dark .wfa-add-input:focus { border-color:#818cf8; }
+        .wfa-add-btn {
+            padding:8px 14px; border-radius:8px; border:none; cursor:pointer; font-size:12px; font-weight:600;
+            background:#6366f1; color:#fff; transition:opacity .15s;
+            white-space:nowrap;
+        }
+        .wfa-add-btn:hover { opacity:.88; }
+
+        .wfa-save-btn {
+            display:block; width:100%; margin-top:16px;
+            padding:10px; border-radius:10px; border:none; cursor:pointer;
+            font-size:14px; font-weight:600; color:#fff;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            transition:opacity .15s;
+        }
+        .wfa-save-btn:hover { opacity:.9; }
+        .wfa-modal-footer { padding:0 20px 20px; }
+
+        .wfa-empty-fields {
+            padding:12px; border-radius:8px; border:1px dashed #d1d5db;
+            text-align:center; font-size:12px; color:#9ca3af; font-style:italic;
+        }
+        .dark .wfa-empty-fields { border-color:rgba(255,255,255,.1); }
     </style>
 
     <div class="wfa-card">
@@ -315,10 +375,20 @@
                                     right:calc(16px + (100% - 32px) / {{ $count }} / 2);"></div>
                         <div style="display:grid; grid-template-columns:repeat({{ $count }}, 1fr); gap:4px; position:relative; z-index:1;">
                             @foreach ($items as $i => $step)
+                                @php $hasFields = !empty($step->custom_fields); @endphp
                                 <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
-                                    <button type="button" wire:click="selectStep({{ $step->id }})"
-                                            class="wfa-node" style="border-color:{{ $color }}; color:{{ $color }};"
-                                            title="{{ $step->label }}">{{ $i + 1 }}</button>
+                                    <div style="position:relative; display:inline-flex;">
+                                        <button type="button" wire:click="selectStep({{ $step->id }})"
+                                                class="wfa-node" style="border-color:{{ $color }}; color:{{ $color }};"
+                                                title="{{ $step->label }}">{{ $i + 1 }}</button>
+                                        @if ($hasFields)
+                                            <span style="position:absolute; top:-3px; right:-3px;
+                                                         width:10px; height:10px; border-radius:50%;
+                                                         background:#6366f1; border:2px solid #fff;
+                                                         font-size:0;"
+                                                  title="{{ count($step->custom_fields) }} Feld(er) definiert"></span>
+                                        @endif
+                                    </div>
                                     <p class="wfa-step-label">{{ $step->label }}</p>
                                 </div>
                             @endforeach
@@ -335,34 +405,73 @@
     {{-- Step detail modal --}}
     @if ($selectedStep)
         <div class="wfa-overlay" wire:click.self="closeModal">
-            <div class="wfa-modal">
+            <div class="wfa-modal" style="max-height:90vh; overflow-y:auto;">
                 <div class="wfa-modal-header">
-                    <span class="wfa-modal-title">Schritt: {{ $selectedStep['label'] }}</span>
+                    <div>
+                        <div class="wfa-modal-title">{{ $selectedStep['label'] }}</div>
+                        <div class="wfa-modal-phase">Phase: {{ $selectedStep['phase'] }}</div>
+                    </div>
                     <button type="button" class="wfa-modal-close" wire:click="closeModal">✕</button>
                 </div>
+
                 <div class="wfa-modal-body">
-                    <p class="wfa-modal-phase">Phase: {{ $selectedStep['phase'] }}</p>
+
+                    {{-- ── Custom input fields ─────────────────────────────── --}}
+                    <div class="wfa-section-label">Pflichtfelder für diesen Schritt</div>
+
+                    @if (empty($stepFields))
+                        <div class="wfa-empty-fields">Noch keine Felder definiert.</div>
+                    @else
+                        @foreach ($stepFields as $fi => $field)
+                            <div class="wfa-field-row">
+                                <div class="wfa-field-icon">✏️</div>
+                                <span class="wfa-field-name">{{ $field['label'] }}</span>
+                                <span class="wfa-field-type">Text</span>
+                                <button type="button" class="wfa-field-remove"
+                                        wire:click="removeField({{ $fi }})"
+                                        title="Feld entfernen">✕</button>
+                            </div>
+                        @endforeach
+                    @endif
+
+                    {{-- Add new field --}}
+                    <div class="wfa-add-row">
+                        <input type="text"
+                               wire:model="newFieldLabel"
+                               wire:keydown.enter.prevent="addField"
+                               class="wfa-add-input"
+                               placeholder="z.B. Teilename, Seriennummer …">
+                        <button type="button" class="wfa-add-btn" wire:click="addField">
+                            + Hinzufügen
+                        </button>
+                    </div>
+
+                    {{-- ── Automations linked to this step ────────────────── --}}
                     @php
                         $stepRules = $rules->filter(fn($r) =>
                             $r->trigger_type === 'step_changed' &&
                             (empty($r->trigger_config['step_id']) || (int)$r->trigger_config['step_id'] === $selectedStep['id'])
                         );
                     @endphp
-                    @if ($stepRules->isEmpty())
-                        <div style="margin-top:16px; padding:14px; border-radius:8px; background:#f9fafb; border:1px dashed #d1d5db; text-align:center; font-size:12px; color:#9ca3af;">
-                            Keine Automationen für diesen Schritt.
-                        </div>
-                    @else
-                        <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+                    @if ($stepRules->isNotEmpty())
+                        <div class="wfa-section-label">Verknüpfte Automationen</div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
                             @foreach ($stepRules as $sr)
                                 <div style="padding:10px 14px; border-radius:8px; background:#f9fafb; border:1px solid #e5e7eb; display:flex; align-items:center; gap:8px;">
                                     <span style="width:7px; height:7px; border-radius:50%; background:{{ $sr->is_active ? '#22c55e' : '#9ca3af' }}; flex-shrink:0;"></span>
-                                    <span style="font-size:13px; font-weight:500; color:#111827; flex:1;">{{ $sr->name }}</span>
+                                    <span style="font-size:13px; font-weight:500; color:#111827; flex:1;" class="dark:text-gray-200">{{ $sr->name }}</span>
                                     <span style="font-size:11px; color:#9ca3af;">{{ $sr->actions->count() }} Aktion(en)</span>
                                 </div>
                             @endforeach
                         </div>
                     @endif
+
+                </div>
+
+                <div class="wfa-modal-footer">
+                    <button type="button" class="wfa-save-btn" wire:click="saveStepFields">
+                        Speichern
+                    </button>
                 </div>
             </div>
         </div>
