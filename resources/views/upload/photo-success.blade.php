@@ -27,7 +27,7 @@
 <body>
     <div class="icon">✅</div>
     <h1>Foto gesendet!</h1>
-    <p>Das Bild wurde erfolgreich für<br>Ticket <strong>{{ $device->ticket_number }}</strong> hochgeladen.</p>
+    <p>{{ $count ?? 1 }} {{ ($count ?? 1) === 1 ? 'Foto wurde' : 'Fotos wurden' }} erfolgreich für<br>Ticket <strong>{{ $device->ticket_number }}</strong> hochgeladen.</p>
     <div class="ticket">{{ $device->brand }} {{ $device->model }}</div>
     <p style="margin-top:24px; font-size:12px;">Du kannst dieses Fenster jetzt schließen.</p>
 </body>

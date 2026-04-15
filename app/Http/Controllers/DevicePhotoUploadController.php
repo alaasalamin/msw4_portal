@@ -40,24 +40,27 @@ class DevicePhotoUploadController extends Controller
         }
 
         $request->validate([
-            'photo' => ['required', 'image', 'max:15360'], // 15 MB
+            'photos'   => ['required', 'array', 'min:1', 'max:20'],
+            'photos.*' => ['image', 'max:15360'], // 15 MB each
         ]);
 
-        $path = $request->file('photo')->store('device-photos', 'public');
+        foreach ($request->file('photos') as $file) {
+            $path = $file->store('device-photos', 'public');
 
-        // Save as a DeviceNote with type=image, is_public=false (internal)
-        DeviceNote::create([
-            'device_id'   => $record->device_id,
-            'author_name' => 'Foto-Upload (Telefon)',
-            'author_role' => 'employee',
-            'content'     => $path,
-            'type'        => 'image',
-            'is_public'   => false,
-        ]);
+            DeviceNote::create([
+                'device_id'   => $record->device_id,
+                'author_name' => 'Foto-Upload (Telefon)',
+                'author_role' => 'employee',
+                'content'     => $path,
+                'type'        => 'image',
+                'is_public'   => false,
+            ]);
+        }
 
         // Consume token → auto-creates the next one
         $record->consume();
 
-        return view('upload.photo-success', ['device' => $record->device]);
+        $count = count($request->file('photos'));
+        return view('upload.photo-success', ['device' => $record->device, 'count' => $count]);
     }
 }
