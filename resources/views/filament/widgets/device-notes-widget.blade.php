@@ -495,21 +495,23 @@
         </div>
     </div>
 
+    @script
     <script>
-        function dnOpenLightbox(src) {
+        window.dnOpenLightbox = function(src) {
             const lb  = document.getElementById('dn-lightbox');
             const img = document.getElementById('dn-lightbox-img');
             img.src = src;
             lb.style.display = 'flex';
-            document.addEventListener('keydown', dnLightboxKeyHandler);
-        }
-        function dnCloseLightbox() {
+            document.addEventListener('keydown', window.dnLightboxKeyHandler);
+        };
+        window.dnCloseLightbox = function() {
             document.getElementById('dn-lightbox').style.display = 'none';
             document.getElementById('dn-lightbox-img').src = '';
-            document.removeEventListener('keydown', dnLightboxKeyHandler);
-        }
-        function dnLightboxKeyHandler(e) {
-            if (e.key === 'Escape') dnCloseLightbox();
-        }
+            document.removeEventListener('keydown', window.dnLightboxKeyHandler);
+        };
+        window.dnLightboxKeyHandler = function(e) {
+            if (e.key === 'Escape') window.dnCloseLightbox();
+        };
     </script>
+    @endscript
 </x-filament-widgets::widget>
