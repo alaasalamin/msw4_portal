@@ -429,49 +429,12 @@
                 </span>`;
     }
 
-    // ── Bell sound via Web Audio API ───────────────────────────────────────────
-    let _bellCtx = null;
-
-    async function playBell() {
-        try {
-            if (!_bellCtx) {
-                _bellCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (_bellCtx.state === 'suspended') {
-                await _bellCtx.resume();
-            }
-            if (_bellCtx.state !== 'running') return; // still blocked — no user gesture yet
-
-            const ctx = _bellCtx;
-            const t   = ctx.currentTime;
-
-            // Bell partials: fundamental + inharmonic overtones → metallic ring
-            [
-                { freq: 660,  amp: 0.5,  decay: 2.8 },
-                { freq: 1100, amp: 0.35, decay: 2.0 },
-                { freq: 1760, amp: 0.25, decay: 1.4 },
-                { freq: 2420, amp: 0.15, decay: 1.0 },
-                { freq: 3300, amp: 0.08, decay: 0.7 },
-            ].forEach(({ freq, amp, decay }) => {
-                const osc  = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, t);
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(amp, t + 0.005);
-                gain.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-                osc.start(t);
-                osc.stop(t + decay);
-            });
-        } catch (e) {
-            console.warn('[bell]', e);
+    // Bell delegates to admin-echo.js which owns the unlocked AudioContext
+    function playBell() {
+        if (typeof window._playAdminBell === 'function') {
+            window._playAdminBell();
         }
     }
-
-    // Expose for console testing: window._boardBell()
-    window._boardBell = playBell;
 
     // ── Badge tracking ─────────────────────────────────────────────────────────
     const _prevCounts = {};

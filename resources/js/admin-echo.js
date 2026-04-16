@@ -58,8 +58,39 @@ async function playBeep() {
     }
 }
 
+function playBell() {
+    try {
+        const ctx = _ensureAudio();
+        if (ctx.state !== 'running') return;
+
+        const t = ctx.currentTime;
+
+        [
+            { freq: 660,  amp: 0.5,  decay: 2.8 },
+            { freq: 1100, amp: 0.35, decay: 2.0 },
+            { freq: 1760, amp: 0.25, decay: 1.4 },
+            { freq: 2420, amp: 0.15, decay: 1.0 },
+            { freq: 3300, amp: 0.08, decay: 0.7 },
+        ].forEach(({ freq, amp, decay }) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(amp, t);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+            osc.start(t);
+            osc.stop(t + decay);
+        });
+    } catch (e) {
+        console.warn('[AdminEcho] bell error:', e);
+    }
+}
+
 // Expose for manual console testing
 window._playAdminBeep = playBeep;
+window._playAdminBell = playBell;
 
 // ── Channel subscription ──────────────────────────────────────────────────────
 function subscribeUser(userId) {
