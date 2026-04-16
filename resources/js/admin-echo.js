@@ -69,11 +69,38 @@ function _makeBellUri() {
     return 'data:audio/wav;base64,' + btoa(bin);
 }
 
+// Singleton Audio element — must be unlocked once via user gesture
+let _bellAudio  = null;
+let _bellReady  = false;
+
+function _getBellAudio() {
+    if (!_bellAudio) {
+        if (!_bellUri) _bellUri = _makeBellUri();
+        _bellAudio = new Audio(_bellUri);
+        _bellAudio.volume = 0.8;
+    }
+    return _bellAudio;
+}
+
+// On first user interaction: silently play+pause to unlock the element
+function _unlockBell() {
+    if (_bellReady) return;
+    const a = _getBellAudio();
+    a.play().then(() => {
+        a.pause();
+        a.currentTime = 0;
+        _bellReady = true;
+    }).catch(() => {});
+}
+['click', 'keydown', 'touchend', 'pointerdown'].forEach(ev =>
+    document.addEventListener(ev, _unlockBell, { passive: true })
+);
+
 function playBell() {
-    if (!_bellUri) _bellUri = _makeBellUri();
-    const a = new Audio(_bellUri);
-    a.volume = 0.8;
-    a.play().catch(e => console.warn('[AdminEcho] bell blocked:', e));
+    if (!_bellReady) return; // not yet unlocked
+    const a = _getBellAudio();
+    a.currentTime = 0;
+    a.play().catch(e => console.warn('[AdminEcho] bell:', e));
 }
 
 function playBeep() {
