@@ -17,6 +17,8 @@ class WorkflowPhaseResource extends Resource
 {
     protected static ?string $model = WorkflowPhase::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-flag'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Workflow'; }
     public static function getNavigationSort(): ?int                    { return 1; }

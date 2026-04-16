@@ -19,6 +19,8 @@ class WorkflowStepResource extends Resource
 {
     protected static ?string $model = WorkflowStep::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-list-bullet'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Workflow'; }
     public static function getNavigationSort(): ?int                    { return 2; }
