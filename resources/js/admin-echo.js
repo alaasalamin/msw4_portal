@@ -19,78 +19,91 @@ window.AdminEcho = new Echo({
     },
 });
 
-// ── Audio beep ────────────────────────────────────────────────────────────────
-let _audioCtx = null;
+// ── Audio ─────────────────────────────────────────────────────────────────────
 
-function _ensureAudio() {
-    if (!_audioCtx) {
-        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// Generate a bell WAV as a base64 data URI (computed once, cached)
+let _bellUri = null;
+
+function _makeBellUri() {
+    const rate     = 22050;
+    const duration = 2.5;
+    const n        = Math.floor(rate * duration);
+
+    // Partials: [frequency Hz, amplitude, decay seconds]
+    const partials = [
+        [660,  0.50, 2.0],
+        [1100, 0.35, 1.4],
+        [1760, 0.22, 1.0],
+        [2420, 0.12, 0.7],
+    ];
+
+    const pcm = new Int16Array(n);
+    for (let i = 0; i < n; i++) {
+        const t = i / rate;
+        let v = 0;
+        for (const [f, a, d] of partials) {
+            v += a * Math.sin(2 * Math.PI * f * t) * Math.exp(-t / d);
+        }
+        pcm[i] = Math.max(-32767, Math.min(32767, v * 26000));
     }
-    if (_audioCtx.state === 'suspended') {
-        _audioCtx.resume();
+
+    // Pack WAV
+    const buf = new ArrayBuffer(44 + n * 2);
+    const dv  = new DataView(buf);
+    const str = (s, o) => [...s].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+    str('RIFF', 0); dv.setUint32(4, 36 + n * 2, true);
+    str('WAVE', 8); str('fmt ', 12);
+    dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+    dv.setUint16(22, 1, true);  dv.setUint32(24, rate, true);
+    dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true);
+    dv.setUint16(34, 16, true); str('data', 36);
+    dv.setUint32(40, n * 2, true);
+    new Int16Array(buf, 44).set(pcm);
+
+    // base64 encode in chunks to avoid call-stack limits
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 8192) {
+        bin += String.fromCharCode(...bytes.subarray(i, i + 8192));
     }
-    return _audioCtx;
+    return 'data:audio/wav;base64,' + btoa(bin);
 }
 
-// Unlock on any user interaction
-document.addEventListener('click',    () => _ensureAudio(), { passive: true });
-document.addEventListener('keydown',  () => _ensureAudio(), { passive: true });
-document.addEventListener('touchend', () => _ensureAudio(), { passive: true });
-
-async function playBeep() {
-    try {
-        const ctx = _ensureAudio();
-        if (ctx.state === 'suspended') await ctx.resume();
-
-        const osc  = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1046, ctx.currentTime);
-        osc.frequency.setValueAtTime(880,  ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.45);
-    } catch (e) {
-        console.warn('[AdminEcho] beep error:', e);
-    }
+function playBell() {
+    if (!_bellUri) _bellUri = _makeBellUri();
+    const a = new Audio(_bellUri);
+    a.volume = 0.8;
+    a.play().catch(e => console.warn('[AdminEcho] bell blocked:', e));
 }
 
-async function playBell() {
-    try {
-        const ctx = _ensureAudio();
-        if (ctx.state === 'suspended') await ctx.resume();
-
-        const t = ctx.currentTime;
-
-        [
-            { freq: 660,  amp: 0.5,  decay: 2.8 },
-            { freq: 1100, amp: 0.35, decay: 2.0 },
-            { freq: 1760, amp: 0.25, decay: 1.4 },
-            { freq: 2420, amp: 0.15, decay: 1.0 },
-            { freq: 3300, amp: 0.08, decay: 0.7 },
-        ].forEach(({ freq, amp, decay }) => {
-            const osc  = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, t);
-            gain.gain.setValueAtTime(amp, t);
-            gain.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-            osc.start(t);
-            osc.stop(t + decay);
-        });
-
-        console.log('[AdminEcho] bell played, ctx.state=', ctx.state);
-    } catch (e) {
-        console.error('[AdminEcho] bell error:', e);
+function playBeep() {
+    // Simple two-tone beep reusing the same Audio approach
+    const rate = 22050, dur = 0.45, n = Math.floor(rate * dur);
+    const pcm  = new Int16Array(n);
+    for (let i = 0; i < n; i++) {
+        const t   = i / rate;
+        const f   = t < 0.12 ? 1046 : 880;
+        const env = Math.exp(-t / 0.15);
+        pcm[i] = Math.max(-32767, Math.min(32767, Math.sin(2 * Math.PI * f * t) * env * 20000));
     }
+    const buf = new ArrayBuffer(44 + n * 2);
+    const dv  = new DataView(buf);
+    const str = (s, o) => [...s].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+    str('RIFF', 0); dv.setUint32(4, 36 + n * 2, true);
+    str('WAVE', 8); str('fmt ', 12);
+    dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+    dv.setUint16(22, 1, true);  dv.setUint32(24, rate, true);
+    dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true);
+    dv.setUint16(34, 16, true); str('data', 36);
+    dv.setUint32(40, n * 2, true);
+    new Int16Array(buf, 44).set(pcm);
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode(...bytes.subarray(i, i + 8192));
+    const a = new Audio('data:audio/wav;base64,' + btoa(bin));
+    a.play().catch(() => {});
 }
 
-// Expose for manual console testing
 window._playAdminBeep = playBeep;
 window._playAdminBell = playBell;
 
