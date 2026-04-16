@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use Filament\Pages\Page;
+use Illuminate\Support\Facades\DB;
+
+class ScheduledJobs extends Page
+{
+    protected string $view = 'filament.pages.scheduled-jobs';
+
+    public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-clock'; }
+    public static function getNavigationGroup(): string|\UnitEnum|null  { return null; }
+    public static function getNavigationSort(): ?int                    { return 99; }
+    public static function getNavigationLabel(): string                 { return 'Geplante Jobs'; }
+    public function getTitle(): string                                   { return 'Geplante Jobs'; }
+
+    public function getJobs(): array
+    {
+        $rows = DB::table('jobs')
+            ->orderBy('available_at')
+            ->get();
+
+        return $rows->map(function ($row) {
+            $payload    = json_decode($row->payload, true);
+            $class      = $payload['displayName'] ?? ($payload['job'] ?? 'Unbekannt');
+            $data       = $payload['data'] ?? [];
+            $command    = isset($data['command']) ? @unserialize($data['command']) : null;
+            $now        = now()->timestamp;
+            $available  = (int) $row->available_at;
+            $isDelayed  = $available > $now;
+
+            return [
+                'id'          => $row->id,
+                'queue'       => $row->queue,
+                'class'       => class_basename($class),
+                'full_class'  => $class,
+                'attempts'    => (int) $row->attempts,
+                'reserved'    => (bool) $row->reserved_at,
+                'available_at'=> $available,
+                'created_at'  => (int) $row->created_at,
+                'is_delayed'  => $isDelayed,
+                'delay_secs'  => max(0, $available - $now),
+                'meta'        => $this->extractMeta($command, $class),
+            ];
+        })->toArray();
+    }
+
+    public function getFailedJobs(): array
+    {
+        return DB::table('failed_jobs')
+            ->orderByDesc('failed_at')
+            ->limit(50)
+            ->get()
+            ->map(function ($row) {
+                $payload = json_decode($row->payload, true);
+                $class   = $payload['displayName'] ?? ($payload['job'] ?? 'Unbekannt');
+                $data    = $payload['data'] ?? [];
+                $command = isset($data['command']) ? @unserialize($data['command']) : null;
+
+                return [
+                    'id'        => $row->id,
+                    'uuid'      => $row->uuid,
+                    'queue'     => $row->queue,
+                    'class'     => class_basename($class),
+                    'failed_at' => $row->failed_at,
+                    'exception' => collect(explode("\n", $row->exception))->first(),
+                    'meta'      => $this->extractMeta($command, $class),
+                ];
+            })->toArray();
+    }
+
+    public function retryFailed(string $uuid): void
+    {
+        \Artisan::call('queue:retry', ['id' => [$uuid]]);
+    }
+
+    public function deleteFailed(string $uuid): void
+    {
+        DB::table('failed_jobs')->where('uuid', $uuid)->delete();
+    }
+
+    public function deleteJob(int $id): void
+    {
+        DB::table('jobs')->where('id', $id)->delete();
+    }
+
+    // ── Extract human-readable context from the serialized job ───────────────
+    private function extractMeta(mixed $command, string $class): array
+    {
+        if (! is_object($command)) return [];
+
+        $meta = [];
+
+        // SendAutomationEmailJob
+        if (property_exists($command, 'device') && $command->device) {
+            $meta['Ticket'] = $command->device->ticket_number ?? '—';
+            $meta['Gerät']  = trim(($command->device->brand ?? '') . ' ' . ($command->device->model ?? ''));
+        }
+        if (property_exists($command, 'config') && is_array($command->config)) {
+            if (isset($command->config['subject'])) $meta['Betreff'] = $command->config['subject'];
+            if (isset($command->config['delay_value'])) {
+                $unit = match($command->config['delay_unit'] ?? 'hours') {
+                    'minutes' => 'Min.', 'days' => 'Tage', default => 'Std.',
+                };
+                $meta['Verzögerung'] = $command->config['delay_value'] . ' ' . $unit;
+            }
+        }
+        if (property_exists($command, 'ruleName') && $command->ruleName) {
+            $meta['Regel'] = $command->ruleName;
+        }
+
+        return $meta;
+    }
+}
