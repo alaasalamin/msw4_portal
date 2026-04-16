@@ -88,16 +88,19 @@ const BELL_PREF_KEY = 'adminBellEnabled';
 async function _tryAutoUnlock() {
     if (!localStorage.getItem(BELL_PREF_KEY)) return;
     const a = _getBellAudio();
-    a.volume = 0;
+    // Use muted=true (browser-level silence) instead of volume=0 to guarantee
+    // no audible output during the unlock test, even on Chrome/localhost.
+    a.muted = true;
     try {
         await a.play();
         a.pause();
         a.currentTime = 0;
-        a.volume = 0.8;
         _bellReady = true;
         console.log('[AdminEcho] bell auto-unlocked ✓');
     } catch {
         // Browser still blocked — user will see the button and click again
+    } finally {
+        a.muted = false; // unmute for real playback
     }
 }
 
@@ -122,7 +125,6 @@ async function unlockAndPlayBell() {
 // Called automatically from poll timer
 function playBell() {
     if (!_bellReady) return;
-    console.trace('[AdminEcho] playBell called');
     const a = _getBellAudio();
     a.currentTime = 0;
     a.play().catch(() => {});
@@ -139,7 +141,6 @@ window._bellDebug = () => ({
 });
 
 function playBeep() {
-    console.trace('[AdminEcho] playBeep called');
     // Simple two-tone beep reusing the same Audio approach
     const rate = 22050, dur = 0.45, n = Math.floor(rate * dur);
     const pcm  = new Int16Array(n);
