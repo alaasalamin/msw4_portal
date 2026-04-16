@@ -419,6 +419,7 @@
     </div>{{-- end wire:poll wrapper --}}
 
 {{-- ── Real-time sidebar badge updater ──────────────────────────────────── --}}
+@script
 <script>
 (function () {
     // Minimal badge HTML that matches Filament's fi-badge structure
@@ -542,6 +543,7 @@
     setInterval(fetchAndUpdate, 5000);
 })();
 </script>
+@endscript
 
 {{-- ── Delete submission confirm modal ──────────────────────────────────── --}}
 @if($deleteSubmissionId)
