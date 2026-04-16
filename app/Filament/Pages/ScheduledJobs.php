@@ -59,15 +59,23 @@ class ScheduledJobs extends Page
                 $command = isset($data['command']) ? @unserialize($data['command']) : null;
 
                 return [
-                    'id'        => $row->id,
-                    'uuid'      => $row->uuid,
-                    'queue'     => $row->queue,
-                    'class'     => class_basename($class),
-                    'failed_at' => $row->failed_at,
-                    'exception' => collect(explode("\n", $row->exception))->first(),
-                    'meta'      => $this->extractMeta($command, $class),
+                    'id'            => $row->id,
+                    'uuid'          => $row->uuid,
+                    'queue'         => $row->queue,
+                    'class'         => class_basename($class),
+                    'failed_at'     => $row->failed_at,
+                    'exception'     => collect(explode("\n", $row->exception))->first(),
+                    'exception_full' => $row->exception,
+                    'meta'          => $this->extractMeta($command, $class),
                 ];
             })->toArray();
+    }
+
+    public ?string $expandedJob = null;
+
+    public function toggleJobLog(string $uuid): void
+    {
+        $this->expandedJob = $this->expandedJob === $uuid ? null : $uuid;
     }
 
     public function retryFailed(string $uuid): void

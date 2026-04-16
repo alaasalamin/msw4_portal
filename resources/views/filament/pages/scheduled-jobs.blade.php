@@ -229,7 +229,10 @@
         </div>
 
         @forelse ($failed as $job)
-            @php $meta = $jobIcons[$job['class']] ?? ['icon' => '⚙️', 'color' => '#6b7280']; @endphp
+            @php
+                $meta      = $jobIcons[$job['class']] ?? ['icon' => '⚙️', 'color' => '#6b7280'];
+                $expanded  = $expandedJob === $job['uuid'];
+            @endphp
             <div class="sj-card">
                 <div class="sj-card-row">
                     <div class="sj-icon" style="background:rgba(239,68,68,.1);">
@@ -250,9 +253,46 @@
                             wire:click="deleteFailed('{{ $job['uuid'] }}')"
                             wire:confirm="Fehlgeschlagenen Job löschen?">✕</button>
                 </div>
+
+                {{-- First line of exception + "Mehr anzeigen" toggle --}}
                 @if ($job['exception'])
-                    <div class="sj-exc">{{ Str::limit($job['exception'], 120) }}</div>
+                    <div style="padding:0 16px 10px 64px;">
+                        <div class="sj-exc" style="padding:0; margin-bottom:4px;">
+                            {{ $job['exception'] }}
+                        </div>
+                        <button type="button"
+                                wire:click="toggleJobLog('{{ $job['uuid'] }}')"
+                                style="font-size:11px; font-weight:600; color:#6366f1; background:none; border:none;
+                                       cursor:pointer; padding:0; display:inline-flex; align-items:center; gap:4px;">
+                            {{ $expanded ? '▲ Weniger anzeigen' : '▼ Mehr anzeigen' }}
+                        </button>
+                    </div>
+
+                    {{-- Full stack trace --}}
+                    @if ($expanded)
+                        <div style="margin:0 16px 14px; border-radius:8px; overflow:hidden;
+                                    border:1px solid rgba(239,68,68,.2); background:rgba(239,68,68,.04);">
+                            <div style="display:flex; align-items:center; justify-content:space-between;
+                                        padding:6px 12px; border-bottom:1px solid rgba(239,68,68,.15);
+                                        background:rgba(239,68,68,.08);">
+                                <span style="font-size:10px; font-weight:700; color:#ef4444; letter-spacing:.05em; text-transform:uppercase;">
+                                    Stack Trace
+                                </span>
+                                <button type="button"
+                                        onclick="navigator.clipboard.writeText(this.closest('[data-trace]').querySelector('pre').innerText).then(()=>{ this.textContent='Kopiert ✓'; setTimeout(()=>this.textContent='Kopieren',1500); })"
+                                        style="font-size:10px; font-weight:600; color:#9ca3af; background:none; border:none; cursor:pointer;">
+                                    Kopieren
+                                </button>
+                            </div>
+                            <div data-trace style="overflow-x:auto; max-height:360px; overflow-y:auto;">
+                                <pre style="margin:0; padding:12px; font-size:11px; line-height:1.6;
+                                            color:#fca5a5; font-family:'JetBrains Mono',Menlo,Monaco,monospace;
+                                            white-space:pre; tab-size:4;">{{ $job['exception_full'] }}</pre>
+                            </div>
+                        </div>
+                    @endif
                 @endif
+
                 @if (!empty($job['meta']))
                     <div class="sj-meta">
                         @foreach ($job['meta'] as $key => $val)
