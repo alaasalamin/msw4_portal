@@ -163,6 +163,27 @@
         }
         .cb-modal-danger:hover { background:#dc2626; }
 
+        /* live indicator */
+        .cb-live {
+            display:inline-flex; align-items:center; gap:5px;
+            padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700;
+            background:rgba(16,185,129,0.1); color:#10b981;
+            letter-spacing:.04em;
+        }
+        .dark .cb-live { background:rgba(16,185,129,0.12); }
+        .cb-live-dot {
+            width:6px; height:6px; border-radius:50%; background:#10b981;
+            animation: cb-pulse 1.8s ease-in-out infinite;
+        }
+        @keyframes cb-pulse {
+            0%, 100% { opacity:1; transform:scale(1); }
+            50%       { opacity:.4; transform:scale(.7); }
+        }
+        .cb-last-updated {
+            font-size:10px; color:#9ca3af; margin-left:4px;
+        }
+        .dark .cb-last-updated { color:#4b5563; }
+
         /* section counter pill */
         .cb-count {
             display:inline-flex; align-items:center; gap:4px;
@@ -192,11 +213,17 @@
                 <div class="cb-desc">{{ $board->description }}</div>
             @endif
         </div>
-        @if($entries->isNotEmpty())
-            <div style="margin-left:auto; font-size:12px; color:#9ca3af;">
-                {{ $entries->count() }} open {{ Str::plural('entry', $entries->count()) }}
-            </div>
-        @endif
+        <div style="margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0;">
+            @if($entries->isNotEmpty())
+                <span style="font-size:12px; color:#9ca3af;">
+                    {{ $entries->count() }} open {{ Str::plural('entry', $entries->count()) }}
+                </span>
+            @endif
+            <span class="cb-live">
+                <span class="cb-live-dot"></span> LIVE
+            </span>
+            <span class="cb-last-updated">{{ $lastUpdated }}</span>
+        </div>
     </div>
 
     {{-- ── Device entries (only shown when there are entries) ─────────────── --}}
@@ -242,6 +269,9 @@
             @endforeach
         </div>
     @endif
+
+    {{-- ── Live-refreshing sections (devices + submissions) ──────────────── --}}
+    <div wire:poll.5000ms="refresh">
 
     {{-- ── Step-filtered devices ───────────────────────────────────────── --}}
     @if(!empty($board?->workflow_step_ids))
@@ -385,6 +415,8 @@
             @endif
         </div>
     @endif
+
+    </div>{{-- end wire:poll wrapper --}}
 
 {{-- ── Delete submission confirm modal ──────────────────────────────────── --}}
 @if($deleteSubmissionId)

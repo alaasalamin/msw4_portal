@@ -22,12 +22,19 @@ class CustomBoardPage extends Page
     public ?CustomPage $board = null;
     public string $search     = '';
     public ?int $deleteSubmissionId = null;
+    public string $lastUpdated = '';
 
     public function mount(): void
     {
-        $slug            = request()->query('p', '');
-        $this->boardSlug = $slug;
-        $this->board     = CustomPage::with('form.fields')->where('slug', $slug)->firstOrFail();
+        $slug              = request()->query('p', '');
+        $this->boardSlug   = $slug;
+        $this->board       = CustomPage::with('form.fields')->where('slug', $slug)->firstOrFail();
+        $this->lastUpdated = now()->format('H:i:s');
+    }
+
+    public function refresh(): void
+    {
+        $this->lastUpdated = now()->format('H:i:s');
     }
 
     public function getTitle(): string
