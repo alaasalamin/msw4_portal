@@ -119,6 +119,14 @@
         /* card customer color in dark */
         .dark .cb-card-customer { color:#9ca3af; }
 
+        /* empty state card */
+        .cb-empty-card {
+            text-align:center; padding:32px; border-radius:12px;
+            border:1px dashed #e5e7eb; color:#9ca3af; font-size:13px;
+            background:#f9fafb;
+        }
+        .dark .cb-empty-card { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); color:#6b7280; }
+
         /* section counter pill */
         .cb-count {
             display:inline-flex; align-items:center; gap:4px;
@@ -296,7 +304,7 @@
             </div>
 
             @if($submissions->isEmpty())
-                <div style="text-align:center; padding:32px; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb; color:#9ca3af; font-size:13px;">
+                <div class="cb-empty-card">
                     No submissions yet.
                 </div>
             @else
