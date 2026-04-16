@@ -99,7 +99,7 @@ Route::get('/admin/api/board-counts', function () {
         return [$page->slug => $total ?: null];
     });
     return response()->json($counts);
-})->middleware(['auth'])->name('admin.board-counts');
+})->middleware(['auth:admin'])->name('admin.board-counts');
 
 // Partner auth routes
 Route::prefix('partner')->name('partner.')->group(function () {
