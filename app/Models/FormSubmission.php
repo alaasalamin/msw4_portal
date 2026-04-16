@@ -11,7 +11,10 @@ class FormSubmission extends Model
     use SoftDeletes;
     protected $fillable = ['form_id', 'page_slug', 'data', 'ip_address', 'user_agent'];
 
-    protected $casts = ['data' => 'array'];
+    protected $casts = [
+        'data'       => 'array',
+        'replied_at' => 'datetime',
+    ];
 
     public function form(): BelongsTo
     {

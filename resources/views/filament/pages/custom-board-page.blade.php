@@ -184,6 +184,15 @@
         }
         .dark .cb-last-updated { color:#4b5563; }
 
+        /* replied badge */
+        .cb-replied-badge {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700;
+            background:rgba(16,185,129,0.1); color:#10b981;
+            white-space:nowrap;
+        }
+        .dark .cb-replied-badge { background:rgba(16,185,129,0.12); color:#34d399; }
+
         /* reply modal */
         .cb-reply-icon { background:#ede9fe; }
         .dark .cb-reply-icon { background:rgba(99,102,241,0.15); }
@@ -429,6 +438,7 @@
                                 @endforeach
                                 <th>Page</th>
                                 <th>Submitted</th>
+                                <th>Status</th>
                                 <th style="width:40px;"></th>
                             </tr>
                         </thead>
@@ -441,12 +451,35 @@
                                     @endforeach
                                     <td class="muted">{{ $sub->page_slug ?: '—' }}</td>
                                     <td class="muted" style="white-space:nowrap;">{{ $sub->created_at->format('d M Y H:i') }}</td>
+                                    <td>
+                                        @if($sub->replied_at)
+                                            <span class="cb-replied-badge" title="Replied {{ $sub->replied_at->diffForHumans() }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:9px;height:9px;">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                                </svg>
+                                                Replied
+                                            </span>
+                                        @elseif($subEmail)
+                                            <span class="muted" style="font-size:10px;">Pending</span>
+                                        @else
+                                            <span class="muted" style="font-size:10px;">—</span>
+                                        @endif
+                                    </td>
                                     <td style="text-align:right; white-space:nowrap;">
-                                        @if($subEmail)
+                                        @if($subEmail && !$sub->replied_at)
                                             <button type="button"
                                                 wire:click="openReply({{ $sub->id }})"
                                                 style="background:none; border:none; cursor:pointer; color:#6366f1; padding:2px; margin-right:4px;"
                                                 title="Reply to {{ $subEmail }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+                                                </svg>
+                                            </button>
+                                        @elseif($subEmail && $sub->replied_at)
+                                            <button type="button"
+                                                wire:click="openReply({{ $sub->id }})"
+                                                style="background:none; border:none; cursor:pointer; color:#10b981; padding:2px; margin-right:4px; opacity:0.6;"
+                                                title="Send another reply to {{ $subEmail }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
                                                 </svg>
