@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\CustomPage;
 use App\Models\CustomPageEntry;
+use App\Models\FormSubmission;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
 
@@ -23,7 +24,7 @@ class CustomBoardPage extends Page
     {
         $slug            = request()->query('p', '');
         $this->boardSlug = $slug;
-        $this->board     = CustomPage::where('slug', $slug)->firstOrFail();
+        $this->board     = CustomPage::with('form.fields')->where('slug', $slug)->firstOrFail();
     }
 
     public function getTitle(): string
@@ -40,6 +41,22 @@ class CustomBoardPage extends Page
             ->whereNull('resolved_at')
             ->latest()
             ->get();
+    }
+
+    public function getSubmissions()
+    {
+        if (! $this->board?->form_id) return collect();
+
+        return FormSubmission::where('form_id', $this->board->form_id)
+            ->latest()
+            ->get();
+    }
+
+    public function deleteSubmission(int $id): void
+    {
+        FormSubmission::where('id', $id)
+            ->where('form_id', $this->board?->form_id)
+            ->delete();
     }
 
     /** Mark an entry as resolved (done / handled) */

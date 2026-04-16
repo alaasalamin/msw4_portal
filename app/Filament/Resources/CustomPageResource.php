@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CustomPageResource\Pages;
+use App\Models\CustomForm;
 use App\Models\CustomPage;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
@@ -60,6 +61,14 @@ class CustomPageResource extends Resource
                 ColorPicker::make('color')->default('#6366f1'),
                 TextInput::make('sort_order')->numeric()->default(0),
                 Textarea::make('description')->rows(2)->columnSpanFull(),
+                Select::make('form_id')
+                    ->label('Show form submissions on this page')
+                    ->placeholder('None — device entries only')
+                    ->options(fn () => CustomForm::orderBy('name')->pluck('name', 'id'))
+                    ->nullable()
+                    ->searchable()
+                    ->helperText('If selected, a submissions table for this form will appear on the board view.')
+                    ->columnSpanFull(),
             ])->columns(2),
         ]);
     }

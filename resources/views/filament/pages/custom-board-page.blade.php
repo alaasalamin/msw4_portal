@@ -113,6 +113,7 @@
         </div>
     </div>
 
+    {{-- ── Device entries ─────────────────────────────────────────────────── --}}
     @if($entries->isEmpty())
         <div class="cb-empty">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" display="block" style="margin:0 auto 12px;">
@@ -131,7 +132,6 @@
                         <div class="cb-card-device">{{ $device?->brand }} {{ $device?->model }}</div>
                         <div class="cb-card-customer">{{ $device?->customer_name ?: '—' }}</div>
                     </a>
-
                     <div class="cb-card-meta">
                         @if($device?->workflowStep)
                             <span class="cb-chip cb-chip-step">
@@ -142,16 +142,12 @@
                             </span>
                         @endif
                         @if($device?->storage_box)
-                            <span class="cb-chip cb-chip-box">
-                                📦 {{ $device->storage_box }}
-                            </span>
+                            <span class="cb-chip cb-chip-box">📦 {{ $device->storage_box }}</span>
                         @endif
                     </div>
-
                     @if($entry->notes)
                         <div class="cb-card-notes">{{ $entry->notes }}</div>
                     @endif
-
                     <div class="cb-card-footer">
                         <div>
                             <div class="cb-card-time">{{ $entry->created_at->diffForHumans() }}</div>
@@ -160,20 +156,92 @@
                             @endif
                         </div>
                         <div class="cb-actions">
-                            <button type="button" class="cb-btn cb-btn-resolve"
-                                wire:click="resolve({{ $entry->id }})"
-                                title="Mark as resolved">
-                                ✓ Done
-                            </button>
-                            <button type="button" class="cb-btn cb-btn-remove"
-                                wire:click="remove({{ $entry->id }})"
-                                title="Remove from board">
-                                ✕
-                            </button>
+                            <button type="button" class="cb-btn cb-btn-resolve" wire:click="resolve({{ $entry->id }})" title="Mark as resolved">✓ Done</button>
+                            <button type="button" class="cb-btn cb-btn-remove"  wire:click="remove({{ $entry->id }})"  title="Remove from board">✕</button>
                         </div>
                     </div>
                 </div>
             @endforeach
+        </div>
+    @endif
+
+    {{-- ── Form submissions table (shown when a form is linked) ──────────── --}}
+    @if($board?->form_id)
+        @php $submissions = $this->getSubmissions(); $form = $board->form; @endphp
+
+        <div style="margin-top:36px;">
+            {{-- Section header --}}
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="display:inline-flex; align-items:center; justify-content:center;
+                                 width:28px; height:28px; border-radius:8px;
+                                 background:rgba(99,102,241,.1); color:#6366f1;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"/>
+                        </svg>
+                    </span>
+                    <span style="font-size:14px; font-weight:700; color:#111827;" class="dark:text-white">
+                        Form Submissions — {{ $form?->name }}
+                    </span>
+                    <span style="font-size:11px; padding:2px 8px; border-radius:12px; background:rgba(99,102,241,.1); color:#6366f1; font-weight:600;">
+                        {{ $submissions->count() }}
+                    </span>
+                </div>
+            </div>
+
+            @if($submissions->isEmpty())
+                <div style="text-align:center; padding:32px; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb; color:#9ca3af; font-size:13px;">
+                    No submissions yet.
+                </div>
+            @else
+                {{-- Build column list from form fields --}}
+                @php $fieldLabels = $form?->fields->pluck('label')->all() ?? []; @endphp
+
+                <div style="overflow-x:auto; border-radius:12px; border:1px solid #e5e7eb;" class="dark:border-white/10">
+                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                        <thead>
+                            <tr style="background:#f9fafb; border-bottom:1px solid #e5e7eb;" class="dark:bg-white/5 dark:border-white/10">
+                                @foreach($fieldLabels as $label)
+                                    <th style="padding:10px 14px; text-align:left; font-weight:600; color:#374151; white-space:nowrap;" class="dark:text-gray-200">
+                                        {{ $label }}
+                                    </th>
+                                @endforeach
+                                <th style="padding:10px 14px; text-align:left; font-weight:600; color:#374151; white-space:nowrap;" class="dark:text-gray-200">Page</th>
+                                <th style="padding:10px 14px; text-align:left; font-weight:600; color:#374151; white-space:nowrap;" class="dark:text-gray-200">Submitted</th>
+                                <th style="padding:10px 14px; width:40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($submissions as $sub)
+                                <tr style="border-bottom:1px solid #f3f4f6;" class="dark:border-white/05">
+                                    @foreach($fieldLabels as $label)
+                                        <td style="padding:10px 14px; color:#374151; vertical-align:top;" class="dark:text-gray-300">
+                                            {{ $sub->data[$label] ?? '—' }}
+                                        </td>
+                                    @endforeach
+                                    <td style="padding:10px 14px; color:#9ca3af; font-size:11px; vertical-align:top;">
+                                        {{ $sub->page_slug ?: '—' }}
+                                    </td>
+                                    <td style="padding:10px 14px; color:#9ca3af; font-size:11px; white-space:nowrap; vertical-align:top;">
+                                        {{ $sub->created_at->format('d M Y H:i') }}
+                                    </td>
+                                    <td style="padding:10px 14px; vertical-align:top; text-align:right;">
+                                        <button type="button"
+                                            wire:click="deleteSubmission({{ $sub->id }})"
+                                            wire:confirm="Delete this submission?"
+                                            style="background:none; border:none; cursor:pointer; color:#d1d5db; padding:2px;"
+                                            title="Delete">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     @endif
 
