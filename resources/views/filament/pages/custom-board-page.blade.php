@@ -127,6 +127,42 @@
         }
         .dark .cb-empty-card { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); color:#6b7280; }
 
+        /* delete confirm modal */
+        .cb-modal-backdrop {
+            position:fixed; inset:0; z-index:1000;
+            background:rgba(0,0,0,0.5); backdrop-filter:blur(2px);
+            display:flex; align-items:center; justify-content:center;
+        }
+        .cb-modal {
+            background:#fff; border-radius:16px; padding:28px 28px 24px;
+            width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,0.2);
+        }
+        .dark .cb-modal { background:#1e293b; border:1px solid rgba(255,255,255,0.08); }
+        .cb-modal-icon {
+            width:44px; height:44px; border-radius:50%; background:#fee2e2;
+            display:flex; align-items:center; justify-content:center; margin-bottom:16px;
+        }
+        .dark .cb-modal-icon { background:rgba(239,68,68,0.15); }
+        .cb-modal-title {
+            font-size:16px; font-weight:700; color:#111827; margin-bottom:6px;
+        }
+        .dark .cb-modal-title { color:#f1f5f9; }
+        .cb-modal-desc {
+            font-size:13px; color:#6b7280; margin-bottom:24px; line-height:1.5;
+        }
+        .dark .cb-modal-desc { color:#94a3b8; }
+        .cb-modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+        .cb-modal-cancel {
+            padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600;
+            cursor:pointer; border:1px solid #e5e7eb; background:#f9fafb; color:#374151;
+        }
+        .dark .cb-modal-cancel { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); color:#cbd5e1; }
+        .cb-modal-danger {
+            padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600;
+            cursor:pointer; border:none; background:#ef4444; color:#fff;
+        }
+        .cb-modal-danger:hover { background:#dc2626; }
+
         /* section counter pill */
         .cb-count {
             display:inline-flex; align-items:center; gap:4px;
@@ -333,8 +369,7 @@
                                     <td class="muted" style="white-space:nowrap;">{{ $sub->created_at->format('d M Y H:i') }}</td>
                                     <td style="text-align:right;">
                                         <button type="button"
-                                            wire:click="deleteSubmission({{ $sub->id }})"
-                                            wire:confirm="Delete this submission?"
+                                            wire:click="confirmDeleteSubmission({{ $sub->id }})"
                                             style="background:none; border:none; cursor:pointer; color:#d1d5db; padding:2px;"
                                             title="Delete">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
@@ -350,5 +385,24 @@
             @endif
         </div>
     @endif
+
+{{-- ── Delete submission confirm modal ──────────────────────────────────── --}}
+@if($deleteSubmissionId)
+    <div class="cb-modal-backdrop" wire:click.self="cancelDeleteSubmission">
+        <div class="cb-modal">
+            <div class="cb-modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#ef4444" style="width:22px;height:22px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                </svg>
+            </div>
+            <div class="cb-modal-title">Delete this submission?</div>
+            <div class="cb-modal-desc">This action cannot be undone. The submission and all its data will be permanently removed.</div>
+            <div class="cb-modal-actions">
+                <button type="button" class="cb-modal-cancel" wire:click="cancelDeleteSubmission">Cancel</button>
+                <button type="button" class="cb-modal-danger" wire:click="deleteSubmission">Delete</button>
+            </div>
+        </div>
+    </div>
+@endif
 
 </x-filament-panels::page>

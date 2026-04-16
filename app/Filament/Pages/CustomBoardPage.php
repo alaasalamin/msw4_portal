@@ -21,6 +21,7 @@ class CustomBoardPage extends Page
     public string $boardSlug  = '';
     public ?CustomPage $board = null;
     public string $search     = '';
+    public ?int $deleteSubmissionId = null;
 
     public function mount(): void
     {
@@ -76,11 +77,25 @@ class CustomBoardPage extends Page
             ->get();
     }
 
-    public function deleteSubmission(int $id): void
+    public function confirmDeleteSubmission(int $id): void
     {
-        FormSubmission::where('id', $id)
+        $this->deleteSubmissionId = $id;
+    }
+
+    public function deleteSubmission(): void
+    {
+        if (! $this->deleteSubmissionId) return;
+
+        FormSubmission::where('id', $this->deleteSubmissionId)
             ->where('form_id', $this->board?->form_id)
             ->delete();
+
+        $this->deleteSubmissionId = null;
+    }
+
+    public function cancelDeleteSubmission(): void
+    {
+        $this->deleteSubmissionId = null;
     }
 
     /** Mark an entry as resolved (done / handled) */
