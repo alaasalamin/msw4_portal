@@ -20,10 +20,11 @@ class CustomBoardPage extends Page
     public string $boardSlug = '';
     public ?CustomPage $board = null;
 
-    public function mount(string $board): void
+    public function mount(): void
     {
-        $this->boardSlug = $board;
-        $this->board     = CustomPage::where('slug', $board)->firstOrFail();
+        $slug            = request()->route('board', '');
+        $this->boardSlug = $slug;
+        $this->board     = CustomPage::where('slug', $slug)->firstOrFail();
     }
 
     public function getTitle(): string
