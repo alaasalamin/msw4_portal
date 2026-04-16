@@ -83,17 +83,24 @@ class AutomationRuleResource extends Resource
                     ->visible(fn (Get $get) => $get('trigger_type') === 'step_changed'),
             ])->columns(2),
 
-            Section::make('Aktionen (DANN)')->schema([
+            Section::make('Aktionen (DANN)')
+                ->description('Alle Aktionen werden der Reihe nach ausgeführt — ziehe sie per Handle um, um die Reihenfolge zu ändern.')
+                ->schema([
                 Repeater::make('actions')
-                    ->label('Aktionen (werden der Reihe nach ausgeführt)')
+                    ->label('')
                     ->relationship()
                     ->orderColumn('sort_order')
                     ->reorderable()
                     ->collapsible()
-                    ->addActionLabel('Aktion hinzufügen')
+                    ->collapsed()
+                    ->cloneable()
+                    ->addActionLabel('+ Aktion hinzufügen')
+                    ->itemLabel(fn (array $state): string =>
+                        AutomationAction::actionLabels()[$state['action_type'] ?? ''] ?? 'Neue Aktion'
+                    )
                     ->schema([
                         Select::make('action_type')
-                            ->label('Aktion')
+                            ->label('Was soll passieren?')
                             ->options(AutomationAction::actionLabels())
                             ->required()
                             ->live()
@@ -190,6 +197,40 @@ class AutomationRuleResource extends Resource
                             ->default("Hallo {{customer}},\n\ndein {{brand}} {{model}} (Ticket {{ticket}}) ist fertig und kann abgeholt werden.\n\nBis bald,\nDas MSW-Team")
                             ->columnSpanFull()
                             ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'),
+
+                        // ── update_device_field ─────────────────────────────
+                        Select::make('action_config.field')
+                            ->label('Welches Feld?')
+                            ->options([
+                                'estimated_cost' => 'Geschätzter Preis (€)',
+                                'final_cost'     => 'Endpreis (€)',
+                                'priority'       => 'Priorität',
+                                'completed_at'   => 'Als abgeschlossen markieren',
+                                'internal_notes' => 'Interne Notiz setzen',
+                            ])
+                            ->required(fn (Get $get) => $get('action_type') === 'update_device_field')
+                            ->live()
+                            ->visible(fn (Get $get) => $get('action_type') === 'update_device_field'),
+
+                        TextInput::make('action_config.value')
+                            ->label('Wert')
+                            ->numeric()
+                            ->prefix('€')
+                            ->visible(fn (Get $get) => $get('action_type') === 'update_device_field'
+                                && in_array($get('action_config.field'), ['estimated_cost', 'final_cost'])),
+
+                        Select::make('action_config.value')
+                            ->label('Priorität')
+                            ->options(['low' => 'Niedrig', 'normal' => 'Normal', 'high' => 'Hoch', 'urgent' => 'Dringend'])
+                            ->visible(fn (Get $get) => $get('action_type') === 'update_device_field'
+                                && $get('action_config.field') === 'priority'),
+
+                        Textarea::make('action_config.value')
+                            ->label('Notiztext')
+                            ->rows(3)
+                            ->placeholder('{{ticket}} — automatisch erstellt')
+                            ->visible(fn (Get $get) => $get('action_type') === 'update_device_field'
+                                && $get('action_config.field') === 'internal_notes'),
 
                         // ── change_step ─────────────────────────────────────
                         Select::make('action_config.step_id')

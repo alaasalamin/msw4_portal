@@ -8,6 +8,7 @@ use App\Actions\Automation\NotifyEmployeeAction;
 use App\Actions\Automation\SendAllowanceAction;
 use App\Actions\Automation\SendDelayedEmailAction;
 use App\Actions\Automation\SendEmailAction;
+use App\Actions\Automation\UpdateDeviceFieldAction;
 use App\Models\AutomationAction;
 use App\Models\AutomationLog;
 use App\Models\AutomationRule;
@@ -67,13 +68,14 @@ class RunAutomationAction implements ShouldQueue
     private function resolveHandler()
     {
         return match ($this->action->action_type) {
-            'send_allowance'    => new SendAllowanceAction(),
-            'notify_employee'   => new NotifyEmployeeAction(),
-            'send_email'        => new SendEmailAction(),
-            'send_delayed_email'=> new SendDelayedEmailAction(),
-            'change_step'       => new ChangeStepAction(),
-            'generate_invoice'  => new GenerateInvoiceAction(),
-            default             => throw new \RuntimeException("Unknown action type: {$this->action->action_type}"),
+            'send_allowance'      => new SendAllowanceAction(),
+            'notify_employee'     => new NotifyEmployeeAction(),
+            'send_email'          => new SendEmailAction(),
+            'send_delayed_email'  => new SendDelayedEmailAction(),
+            'change_step'         => new ChangeStepAction(),
+            'update_device_field' => new UpdateDeviceFieldAction(),
+            'generate_invoice'    => new GenerateInvoiceAction(),
+            default               => throw new \RuntimeException("Unknown action type: {$this->action->action_type}"),
         };
     }
 }

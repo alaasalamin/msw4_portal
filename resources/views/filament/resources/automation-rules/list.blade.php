@@ -13,12 +13,13 @@
         ];
 
         $actionMeta = [
-            'send_allowance'    => ['icon' => '📋', 'color' => '#3b82f6', 'label' => 'Kundenfreigabe'],
-            'notify_employee'   => ['icon' => '🔔', 'color' => '#f59e0b', 'label' => 'Mitarbeiter'],
-            'send_email'        => ['icon' => '✉️',  'color' => '#10b981', 'label' => 'E-Mail'],
-            'send_delayed_email'=> ['icon' => '⏱',  'color' => '#6366f1', 'label' => 'Verzögerte E-Mail'],
-            'change_step'       => ['icon' => '➡️',  'color' => '#ec4899', 'label' => 'Schritt wechseln'],
-            'generate_invoice'  => ['icon' => '🧾', 'color' => '#eab308', 'label' => 'RSW Rechnung'],
+            'send_allowance'      => ['icon' => '📋', 'color' => '#3b82f6', 'label' => 'Kundenfreigabe'],
+            'notify_employee'     => ['icon' => '🔔', 'color' => '#f59e0b', 'label' => 'Mitarbeiter'],
+            'send_email'          => ['icon' => '✉️',  'color' => '#10b981', 'label' => 'E-Mail'],
+            'send_delayed_email'  => ['icon' => '⏱',  'color' => '#6366f1', 'label' => 'Verzögerte E-Mail'],
+            'change_step'         => ['icon' => '➡️',  'color' => '#ec4899', 'label' => 'Schritt wechseln'],
+            'update_device_field' => ['icon' => '✏️',  'color' => '#14b8a6', 'label' => 'Feld aktualisieren'],
+            'generate_invoice'    => ['icon' => '🧾', 'color' => '#eab308', 'label' => 'RSW Rechnung'],
         ];
 
         function nodeDetail(\App\Models\AutomationAction $action, array $meta): string {
@@ -32,8 +33,16 @@
                 'send_allowance'    => 'Gültig ' . ($cfg['expires_days'] ?? 7) . ' Tage',
                 'notify_employee'   => empty($cfg['employee_ids']) ? 'Alle Mitarbeiter' : count($cfg['employee_ids']) . ' Mitarbeiter',
                 'send_email'        => $cfg['subject'] ?? 'Kein Betreff',
-                'send_delayed_email'=> 'Nach ' . $delayLabel($cfg) . ' → ' . ($cfg['subject'] ?? 'Kein Betreff'),
-                'change_step'       => isset($cfg['step_id'])
+                'send_delayed_email'  => 'Nach ' . $delayLabel($cfg) . ' → ' . ($cfg['subject'] ?? 'Kein Betreff'),
+                'update_device_field' => match($cfg['field'] ?? '') {
+                    'estimated_cost' => '€ Geschätzt → ' . ($cfg['value'] ?? '?'),
+                    'final_cost'     => '€ Endpreis → ' . ($cfg['value'] ?? '?'),
+                    'priority'       => 'Priorität → ' . ($cfg['value'] ?? '?'),
+                    'completed_at'   => 'Als abgeschlossen markieren',
+                    'internal_notes' => 'Notiz setzen',
+                    default          => $cfg['field'] ?? '?',
+                },
+                'change_step'         => isset($cfg['step_id'])
                     ? (\App\Models\WorkflowStep::find($cfg['step_id'])?->label ?? 'Unbekannt')
                     : 'Kein Schritt',
                 'generate_invoice'  => 'Vorlage: ' . ($cfg['template'] ?? 'Standard'),
