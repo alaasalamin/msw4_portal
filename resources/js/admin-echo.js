@@ -82,7 +82,29 @@ function _getBellAudio() {
     return _bellAudio;
 }
 
-// Called from a button click — unlocks AND plays the bell in one gesture
+const BELL_PREF_KEY = 'adminBellEnabled';
+
+// Try to silently unlock on page load (works if browser trusts this site)
+async function _tryAutoUnlock() {
+    if (!localStorage.getItem(BELL_PREF_KEY)) return;
+    const a = _getBellAudio();
+    a.volume = 0;
+    try {
+        await a.play();
+        a.pause();
+        a.currentTime = 0;
+        a.volume = 0.8;
+        _bellReady = true;
+        console.log('[AdminEcho] bell auto-unlocked ✓');
+    } catch {
+        // Browser still blocked — user will see the button and click again
+    }
+}
+
+// Expose promise so the blade can wait before hiding the button
+window._bellUnlockReady = _tryAutoUnlock();
+
+// Called from the "Enable sound" button — unlocks AND plays in one user gesture
 async function unlockAndPlayBell() {
     const a = _getBellAudio();
     a.currentTime = 0;
@@ -90,13 +112,14 @@ async function unlockAndPlayBell() {
     try {
         await a.play();
         _bellReady = true;
+        localStorage.setItem(BELL_PREF_KEY, '1');
         console.log('[AdminEcho] bell unlocked ✓');
     } catch (e) {
         console.warn('[AdminEcho] bell unlock failed:', e.message);
     }
 }
 
-// Called automatically from the poll timer — only works after unlockAndPlayBell()
+// Called automatically from poll timer
 function playBell() {
     if (!_bellReady) return;
     const a = _getBellAudio();

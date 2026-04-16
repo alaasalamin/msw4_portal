@@ -453,14 +453,16 @@
     // "Enable sound" button
     const soundBtn = document.getElementById('cb-sound-btn');
     if (soundBtn) {
-        // Already unlocked (e.g. navigated back) — hide immediately
-        if (window._bellDebug && window._bellDebug().ready) {
-            soundBtn.style.display = 'none';
-        }
+        // Wait for the auto-unlock attempt, then hide if it succeeded
+        (window._bellUnlockReady || Promise.resolve()).then(() => {
+            if (window._bellDebug && window._bellDebug().ready) {
+                soundBtn.style.display = 'none';
+            }
+        });
 
         soundBtn.addEventListener('click', async () => {
             if (typeof window._unlockAndPlayBell === 'function') {
-                await window._unlockAndPlayBell();   // unlocks + plays in one gesture
+                await window._unlockAndPlayBell();
             }
             soundBtn.style.transition = 'opacity .3s';
             soundBtn.style.opacity = '0';
