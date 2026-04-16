@@ -33,6 +33,7 @@ class Device extends Model
         'serial_number',
         'color',
         'storage_box',
+        'step_data',
         'issue_description',
         'internal_notes',
         'priority',
@@ -49,6 +50,7 @@ class Device extends Model
         'completed_at'         => 'datetime',
         'estimated_cost'       => 'decimal:2',
         'final_cost'           => 'decimal:2',
+        'step_data'            => 'array',
     ];
 
     protected static function booted(): void

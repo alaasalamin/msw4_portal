@@ -14,10 +14,17 @@ class DeviceWorkflowProgressWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
-    public ?Model  $record          = null;
-    public ?int    $pendingStepId   = null;
+    public ?Model  $record           = null;
+    public ?int    $pendingStepId    = null;
     public ?string $pendingStepLabel = null;
-    public ?string $flashMessage    = null;
+    public ?string $flashMessage     = null;
+
+    // Modal state
+    public bool    $showFieldModal   = false;
+    public ?int    $modalStepId      = null;
+    public ?string $modalStepLabel   = null;
+    public array   $modalFields      = [];   // [{label, type}, ...]
+    public array   $modalValues      = [];   // indexed array matching modalFields
 
     public function getDevice(): ?Device
     {
@@ -58,14 +65,17 @@ class DeviceWorkflowProgressWidget extends Widget
         ];
     }
 
-    /** User clicks a node — stage it for confirmation */
+    /** User clicks a node */
     public function selectStep(int $stepId): void
     {
         $device = $this->getDevice();
         if (! $device) return;
 
-        // Clicking the already-pending or current step cancels
-        if ($this->pendingStepId === $stepId || $device->workflow_step_id === $stepId) {
+        // Clicking the current step does nothing
+        if ($device->workflow_step_id === $stepId) return;
+
+        // Clicking the already-pending step cancels staging
+        if ($this->pendingStepId === $stepId) {
             $this->pendingStepId    = null;
             $this->pendingStepLabel = null;
             return;
@@ -74,11 +84,24 @@ class DeviceWorkflowProgressWidget extends Widget
         $step = WorkflowStep::find($stepId);
         if (! $step) return;
 
+        // If step has custom fields → open the modal
+        if (! empty($step->custom_fields)) {
+            $this->pendingStepId    = null;
+            $this->pendingStepLabel = null;
+            $this->modalStepId      = $stepId;
+            $this->modalStepLabel   = $step->label;
+            $this->modalFields      = $step->custom_fields;
+            $this->modalValues      = array_fill(0, count($step->custom_fields), '');
+            $this->showFieldModal   = true;
+            return;
+        }
+
+        // Otherwise stage for plain confirmation
         $this->pendingStepId    = $stepId;
         $this->pendingStepLabel = $step->label;
     }
 
-    /** User confirmed — save the new step */
+    /** Plain confirmation (no custom fields) */
     public function confirmStep(): void
     {
         $device = $this->getDevice();
@@ -96,5 +119,49 @@ class DeviceWorkflowProgressWidget extends Widget
     {
         $this->pendingStepId    = null;
         $this->pendingStepLabel = null;
+    }
+
+    /** Modal submit — save step + filled custom field values */
+    public function submitModal(): void
+    {
+        $device = $this->getDevice();
+        if (! $device || ! $this->modalStepId) return;
+
+        $stepData = $device->step_data ?? [];
+        $values   = [];
+        foreach ($this->modalFields as $i => $field) {
+            $values[$field['label']] = $this->modalValues[$i] ?? '';
+        }
+        $stepData[(string) $this->modalStepId] = $values;
+
+        $device->update([
+            'workflow_step_id' => $this->modalStepId,
+            'step_data'        => $stepData,
+        ]);
+        $this->record = $device->fresh('workflowStep');
+
+        $this->flashMessage   = 'Schritt geändert zu „' . $this->modalStepLabel . '" — Felder gespeichert';
+        $this->closeModal();
+    }
+
+    public function cancelModal(): void
+    {
+        $this->closeModal();
+    }
+
+    private function closeModal(): void
+    {
+        $this->showFieldModal = false;
+        $this->modalStepId    = null;
+        $this->modalStepLabel = null;
+        $this->modalFields    = [];
+        $this->modalValues    = [];
+    }
+
+    /** Returns saved values for a given step id (used in blade) */
+    public function getStepValues(int $stepId): array
+    {
+        $device = $this->getDevice();
+        return $device?->step_data[(string) $stepId] ?? [];
     }
 }
