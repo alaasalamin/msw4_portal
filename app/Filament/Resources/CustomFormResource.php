@@ -32,75 +32,9 @@ class CustomFormResource extends Resource
 
     public static function form(Schema $form): Schema
     {
-        return $form->components([
+        return $form->columns(2)->components([
 
-            Section::make('Form Details')->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(120)
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn ($state, callable $set) =>
-                        $set('slug', \Illuminate\Support\Str::slug($state))
-                    ),
-
-                TextInput::make('slug')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->helperText('Auto-generated. Used internally.'),
-
-                Textarea::make('description')
-                    ->rows(2)
-                    ->columnSpanFull(),
-
-                Textarea::make('success_message')
-                    ->label('Success message (shown after submit)')
-                    ->rows(2)
-                    ->placeholder('Thank you! We will get back to you shortly.')
-                    ->columnSpanFull(),
-
-                TextInput::make('redirect_url')
-                    ->label('Redirect URL after submit (optional)')
-                    ->placeholder('/thank-you')
-                    ->columnSpanFull(),
-            ])->columns(2),
-
-            Section::make('Preset Replies')
-                ->description('Save reply templates for this form. Use {{Field Label}} to insert submission values — e.g. {{Name}}, {{Email}}.')
-                ->schema([
-                    Repeater::make('preset_replies')
-                        ->label('')
-                        ->addActionLabel('+ Add preset reply')
-                        ->itemLabel(fn (array $state): string => $state['name'] ?? 'Unnamed preset')
-                        ->collapsible()
-                        ->collapsed()
-                        ->defaultItems(0)
-                        ->schema([
-                            TextInput::make('name')
-                                ->label('Preset name')
-                                ->placeholder('e.g. Thank you, Price info, Follow-up…')
-                                ->required()
-                                ->maxLength(80)
-                                ->live(onBlur: true),
-
-                            TextInput::make('subject')
-                                ->label('Email subject')
-                                ->placeholder('e.g. Re: Your enquiry — {{Name}}')
-                                ->required()
-                                ->maxLength(255)
-                                ->columnSpanFull(),
-
-                            Textarea::make('body')
-                                ->label('Message body')
-                                ->placeholder("Dear {{Name}},\n\nThank you for reaching out…")
-                                ->required()
-                                ->rows(6)
-                                ->columnSpanFull(),
-                        ])
-                        ->columns(2)
-                        ->columnSpanFull(),
-                ])
-                ->collapsible(),
-
+            // ── Left: Form Fields ────────────────────────────────────────────
             Section::make('Form Fields')
                 ->description('Define the fields that will appear in this form.')
                 ->schema([
@@ -144,7 +78,6 @@ class CustomFormResource extends Resource
                                 ->label('Required')
                                 ->inline(false),
 
-                            // Options repeater for select fields
                             Repeater::make('options')
                                 ->label('Dropdown options')
                                 ->schema([
@@ -159,7 +92,83 @@ class CustomFormResource extends Resource
                         ])
                         ->columns(2)
                         ->columnSpanFull(),
-                ]),
+                ])
+                ->columnSpan(1),
+
+            // ── Right: Form Details ──────────────────────────────────────────
+            Section::make('Form Details')
+                ->schema([
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(120)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(fn ($state, callable $set) =>
+                            $set('slug', \Illuminate\Support\Str::slug($state))
+                        )
+                        ->columnSpanFull(),
+
+                    TextInput::make('slug')
+                        ->required()
+                        ->unique(ignoreRecord: true)
+                        ->helperText('Auto-generated. Used internally.')
+                        ->columnSpanFull(),
+
+                    Textarea::make('description')
+                        ->rows(2)
+                        ->columnSpanFull(),
+
+                    Textarea::make('success_message')
+                        ->label('Success message (shown after submit)')
+                        ->rows(2)
+                        ->placeholder('Thank you! We will get back to you shortly.')
+                        ->columnSpanFull(),
+
+                    TextInput::make('redirect_url')
+                        ->label('Redirect URL after submit (optional)')
+                        ->placeholder('/thank-you')
+                        ->columnSpanFull(),
+                ])
+                ->columnSpan(1),
+
+            // ── Bottom: Preset Replies ───────────────────────────────────────
+            Section::make('Preset Replies')
+                ->description('Save reply templates for this form. Use {{Field Label}} to insert submission values — e.g. {{Name}}, {{Email}}.')
+                ->schema([
+                    Repeater::make('preset_replies')
+                        ->label('')
+                        ->addActionLabel('+ Add preset reply')
+                        ->itemLabel(fn (array $state): string => $state['name'] ?? 'Unnamed preset')
+                        ->collapsible()
+                        ->collapsed()
+                        ->defaultItems(0)
+                        ->schema([
+                            TextInput::make('name')
+                                ->label('Preset name')
+                                ->placeholder('e.g. Thank you, Price info, Follow-up…')
+                                ->required()
+                                ->maxLength(80)
+                                ->live(onBlur: true),
+
+                            TextInput::make('subject')
+                                ->label('Email subject')
+                                ->placeholder('e.g. Re: Your enquiry — {{Name}}')
+                                ->required()
+                                ->maxLength(255)
+                                ->columnSpanFull(),
+
+                            Textarea::make('body')
+                                ->label('Message body')
+                                ->placeholder("Dear {{Name}},\n\nThank you for reaching out…")
+                                ->required()
+                                ->rows(6)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2)
+                        ->columnSpanFull(),
+                ])
+                ->collapsible()
+                ->columnSpanFull(),
+
         ]);
     }
 
