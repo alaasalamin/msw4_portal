@@ -14,7 +14,8 @@ class CustomBoardPage extends Page
     // Unique slug per board is handled via getNavigationItems + URL param
     protected static ?string $slug = 'board/{board}';
 
-    protected static bool $shouldRegisterNavigation = false; // we register manually below
+    // Must be true so Filament calls our getNavigationItems() override
+    protected static bool $shouldRegisterNavigation = true;
 
     public string $boardSlug = '';
     public ?CustomPage $board = null;
