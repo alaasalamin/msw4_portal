@@ -105,18 +105,31 @@ class CustomBoardPage extends Page
         try {
             return CustomPage::orderBy('sort_order')
                 ->get()
-                ->map(fn (CustomPage $page) =>
-                    NavigationItem::make($page->name)
+                ->map(function (CustomPage $page) {
+                    $total = 0;
+
+                    // Automation entries
+                    $total += CustomPageEntry::where('custom_page_id', $page->id)
+                        ->whereNull('resolved_at')
+                        ->count();
+
+                    // Form submissions
+                    if ($page->form_id) {
+                        $total += FormSubmission::where('form_id', $page->form_id)->count();
+                    }
+
+                    // Step-filtered devices
+                    if (! empty($page->workflow_step_ids)) {
+                        $total += Device::whereIn('workflow_step_id', $page->workflow_step_ids)->count();
+                    }
+
+                    return NavigationItem::make($page->name)
                         ->url('/admin/board?p=' . $page->slug)
                         ->icon($page->icon ?: 'heroicon-o-clipboard-document-list')
                         ->sort(10 + $page->sort_order)
-                        ->badge(
-                            CustomPageEntry::where('custom_page_id', $page->id)
-                                ->whereNull('resolved_at')
-                                ->count() ?: null
-                        )
-                        ->isActiveWhen(fn () => request()->query('p') === $page->slug)
-                )
+                        ->badge($total ?: null)
+                        ->isActiveWhen(fn () => request()->query('p') === $page->slug);
+                })
                 ->all();
         } catch (\Throwable) {
             return [];

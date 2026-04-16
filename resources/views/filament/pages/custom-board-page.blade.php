@@ -118,6 +118,14 @@
 
         /* card customer color in dark */
         .dark .cb-card-customer { color:#9ca3af; }
+
+        /* section counter pill */
+        .cb-count {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700;
+            background:#f3f4f6; color:#374151;
+        }
+        .dark .cb-count { background:rgba(255,255,255,0.08); color:#d1d5db; }
     </style>
 
     @php
@@ -204,9 +212,7 @@
                     </svg>
                 </span>
                 <span class="cb-section-title">Devices at selected steps</span>
-                <span style="font-size:11px; padding:2px 8px; border-radius:12px; background:rgba({{ implode(',', array_map('hexdec', str_split(ltrim($color,'#'),2))) }},.1); color:{{ $color }}; font-weight:600;">
-                    {{ $stepDevices->count() }}
-                </span>
+                <span class="cb-count">{{ $stepDevices->count() }} device{{ $stepDevices->count() !== 1 ? 's' : '' }}</span>
             </div>
 
             {{-- Search bar --}}
@@ -285,9 +291,7 @@
                         </svg>
                     </span>
                     <span class="cb-section-title">Form Submissions — {{ $form?->name }}</span>
-                    <span style="font-size:11px; padding:2px 8px; border-radius:12px; background:rgba(99,102,241,.1); color:#6366f1; font-weight:600;">
-                        {{ $submissions->count() }}
-                    </span>
+                    <span class="cb-count">{{ $submissions->count() }} submission{{ $submissions->count() !== 1 ? 's' : '' }}</span>
                 </div>
             </div>
 
