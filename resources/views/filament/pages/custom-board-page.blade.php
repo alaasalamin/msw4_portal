@@ -86,6 +86,26 @@
             color:inherit; text-decoration:none;
         }
         .cb-link:hover .cb-card-device { color:#6366f1; }
+
+        /* section headings */
+        .cb-section-title { font-size:14px; font-weight:700; color:#111827; }
+        .dark .cb-section-title { color:#f9fafb; }
+
+        /* submissions table */
+        .cb-table { width:100%; border-collapse:collapse; font-size:12px; }
+        .cb-table thead { background:#f9fafb; border-bottom:1px solid #e5e7eb; }
+        .dark .cb-table thead { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
+        .cb-table th { padding:10px 14px; text-align:left; font-weight:600; color:#374151; white-space:nowrap; }
+        .dark .cb-table th { color:#d1d5db; }
+        .cb-table td { padding:10px 14px; color:#374151; vertical-align:top; border-bottom:1px solid #f3f4f6; }
+        .dark .cb-table td { color:#d1d5db; border-color:rgba(255,255,255,0.05); }
+        .cb-table td.muted { color:#9ca3af; font-size:11px; }
+        .dark .cb-table td.muted { color:#6b7280; }
+        .cb-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid #e5e7eb; }
+        .dark .cb-table-wrap { border-color:rgba(255,255,255,0.08); }
+
+        /* card customer color in dark */
+        .dark .cb-card-customer { color:#9ca3af; }
     </style>
 
     @php
@@ -103,7 +123,7 @@
             />
         </div>
         <div>
-            <div class="cb-title">{{ $board?->name }}</div>
+            <div class="cb-title cb-section-title" style="font-size:18px;">{{ $board?->name }}</div>
             @if($board?->description)
                 <div class="cb-desc">{{ $board->description }}</div>
             @endif
@@ -177,9 +197,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3m-3 3.75h3M8.25 8.25h.008v.008H8.25V8.25Zm0 3.75h.008v.008H8.25V12Zm0 3.75h.008v.008H8.25v-.008Z"/>
                     </svg>
                 </span>
-                <span style="font-size:14px; font-weight:700; color:#111827;" class="dark:text-white">
-                    Devices at selected steps
-                </span>
+                <span class="cb-section-title">Devices at selected steps</span>
                 <span style="font-size:11px; padding:2px 8px; border-radius:12px; background:rgba({{ implode(',', array_map('hexdec', str_split(ltrim($color,'#'),2))) }},.1); color:{{ $color }}; font-weight:600;">
                     {{ $stepDevices->count() }}
                 </span>
@@ -239,9 +257,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"/>
                         </svg>
                     </span>
-                    <span style="font-size:14px; font-weight:700; color:#111827;" class="dark:text-white">
-                        Form Submissions — {{ $form?->name }}
-                    </span>
+                    <span class="cb-section-title">Form Submissions — {{ $form?->name }}</span>
                     <span style="font-size:11px; padding:2px 8px; border-radius:12px; background:rgba(99,102,241,.1); color:#6366f1; font-weight:600;">
                         {{ $submissions->count() }}
                     </span>
@@ -256,35 +272,27 @@
                 {{-- Build column list from form fields --}}
                 @php $fieldLabels = $form?->fields->pluck('label')->all() ?? []; @endphp
 
-                <div style="overflow-x:auto; border-radius:12px; border:1px solid #e5e7eb;" class="dark:border-white/10">
-                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <div class="cb-table-wrap">
+                    <table class="cb-table">
                         <thead>
-                            <tr style="background:#f9fafb; border-bottom:1px solid #e5e7eb;" class="dark:bg-white/5 dark:border-white/10">
+                            <tr>
                                 @foreach($fieldLabels as $label)
-                                    <th style="padding:10px 14px; text-align:left; font-weight:600; color:#374151; white-space:nowrap;" class="dark:text-gray-200">
-                                        {{ $label }}
-                                    </th>
+                                    <th>{{ $label }}</th>
                                 @endforeach
-                                <th style="padding:10px 14px; text-align:left; font-weight:600; color:#374151; white-space:nowrap;" class="dark:text-gray-200">Page</th>
-                                <th style="padding:10px 14px; text-align:left; font-weight:600; color:#374151; white-space:nowrap;" class="dark:text-gray-200">Submitted</th>
-                                <th style="padding:10px 14px; width:40px;"></th>
+                                <th>Page</th>
+                                <th>Submitted</th>
+                                <th style="width:40px;"></th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($submissions as $sub)
-                                <tr style="border-bottom:1px solid #f3f4f6;" class="dark:border-white/05">
+                                <tr>
                                     @foreach($fieldLabels as $label)
-                                        <td style="padding:10px 14px; color:#374151; vertical-align:top;" class="dark:text-gray-300">
-                                            {{ $sub->data[$label] ?? '—' }}
-                                        </td>
+                                        <td>{{ $sub->data[$label] ?? '—' }}</td>
                                     @endforeach
-                                    <td style="padding:10px 14px; color:#9ca3af; font-size:11px; vertical-align:top;">
-                                        {{ $sub->page_slug ?: '—' }}
-                                    </td>
-                                    <td style="padding:10px 14px; color:#9ca3af; font-size:11px; white-space:nowrap; vertical-align:top;">
-                                        {{ $sub->created_at->format('d M Y H:i') }}
-                                    </td>
-                                    <td style="padding:10px 14px; vertical-align:top; text-align:right;">
+                                    <td class="muted">{{ $sub->page_slug ?: '—' }}</td>
+                                    <td class="muted" style="white-space:nowrap;">{{ $sub->created_at->format('d M Y H:i') }}</td>
+                                    <td style="text-align:right;">
                                         <button type="button"
                                             wire:click="deleteSubmission({{ $sub->id }})"
                                             wire:confirm="Delete this submission?"
