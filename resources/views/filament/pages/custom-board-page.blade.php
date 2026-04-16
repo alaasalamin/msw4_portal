@@ -184,6 +184,49 @@
         }
         .dark .cb-last-updated { color:#4b5563; }
 
+        /* reply modal */
+        .cb-reply-icon { background:#ede9fe; }
+        .dark .cb-reply-icon { background:rgba(99,102,241,0.15); }
+
+        .cb-reply-success-icon {
+            width:48px; height:48px; border-radius:50%; background:#d1fae5;
+            display:flex; align-items:center; justify-content:center; margin:0 auto 16px;
+        }
+        .dark .cb-reply-success-icon { background:rgba(16,185,129,0.15); }
+
+        .cb-field-label {
+            font-size:11px; font-weight:600; color:#6b7280;
+            display:block; margin-bottom:4px; letter-spacing:.04em;
+        }
+        .dark .cb-field-label { color:#4b5563; }
+
+        .cb-reply-input {
+            width:100%; padding:8px 10px; border-radius:8px;
+            border:1.5px solid #e5e7eb; font-size:13px;
+            color:#111827; background:#f9fafb;
+            outline:none; box-sizing:border-box; transition:border-color .15s;
+        }
+        .cb-reply-input:focus { border-color:#6366f1; }
+        .dark .cb-reply-input {
+            background:rgba(255,255,255,0.05);
+            border-color:rgba(255,255,255,0.1);
+            color:#f3f4f6;
+        }
+        .dark .cb-reply-input:focus { border-color:#6366f1; }
+        .cb-reply-input::placeholder { color:#9ca3af; }
+        .dark .cb-reply-input::placeholder { color:#4b5563; }
+
+        textarea.cb-reply-input { resize:vertical; font-family:inherit; }
+
+        .cb-reply-send {
+            display:inline-flex; align-items:center; gap:6px;
+            padding:8px 18px; border-radius:8px; border:none;
+            cursor:pointer; font-size:13px; font-weight:600;
+            background:#6366f1; color:#fff; transition:opacity .15s;
+        }
+        .cb-reply-send:hover { background:#4f46e5; }
+        .cb-reply-send:disabled { opacity:.55; cursor:not-allowed; }
+
         /* section counter pill */
         .cb-count {
             display:inline-flex; align-items:center; gap:4px;
@@ -526,18 +569,18 @@
             @if($replySent)
                 {{-- Success state --}}
                 <div style="text-align:center; padding:12px 0;">
-                    <div style="width:48px;height:48px;border-radius:50%;background:#d1fae5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                    <div class="cb-reply-success-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#10b981" style="width:24px;height:24px;">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
                         </svg>
                     </div>
                     <div class="cb-modal-title">Email sent!</div>
                     <div class="cb-modal-desc" style="margin-bottom:20px;">Your reply was delivered to {{ $replyEmail }}</div>
-                    <button type="button" class="cb-modal-cancel" wire:click="cancelReply" style="width:100%;">Close</button>
+                    <button type="button" class="cb-modal-cancel" style="width:100%;" wire:click="cancelReply">Close</button>
                 </div>
             @else
                 {{-- Compose state --}}
-                <div class="cb-modal-icon" style="background:#ede9fe;">
+                <div class="cb-modal-icon cb-reply-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#6366f1" style="width:22px;height:22px;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
                     </svg>
@@ -545,36 +588,30 @@
                 <div class="cb-modal-title">Reply to submission</div>
 
                 <div style="margin-bottom:14px;">
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">TO</label>
+                    <label class="cb-field-label">TO</label>
                     <div style="font-size:13px;color:#6366f1;font-weight:500;">{{ $replyEmail }}</div>
                 </div>
 
                 <div style="margin-bottom:12px;">
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">SUBJECT</label>
-                    <input type="text" wire:model="replySubject" placeholder="Subject…"
-                        style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:13px;color:#111827;background:#f9fafb;outline:none;box-sizing:border-box;"
-                        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e7eb'">
+                    <label class="cb-field-label">SUBJECT</label>
+                    <input type="text" wire:model="replySubject" placeholder="Subject…" class="cb-reply-input">
                     @error('replySubject') <div style="color:#ef4444;font-size:11px;margin-top:3px;">{{ $message }}</div> @enderror
                 </div>
 
                 <div style="margin-bottom:18px;">
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">MESSAGE</label>
-                    <textarea wire:model="replyBody" rows="6" placeholder="Write your reply…"
-                        style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:13px;color:#111827;background:#f9fafb;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"
-                        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+                    <label class="cb-field-label">MESSAGE</label>
+                    <textarea wire:model="replyBody" rows="6" placeholder="Write your reply…" class="cb-reply-input"></textarea>
                     @error('replyBody') <div style="color:#ef4444;font-size:11px;margin-top:3px;">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="cb-modal-actions">
                     <button type="button" class="cb-modal-cancel" wire:click="cancelReply">Cancel</button>
-                    <button type="button"
+                    <button type="button" class="cb-reply-send"
                         wire:click="sendReply"
                         wire:loading.attr="disabled"
-                        wire:target="sendReply"
-                        style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:#6366f1;color:#fff;transition:opacity .15s;"
-                        wire:loading.class="opacity-50">
+                        wire:target="sendReply">
                         <span wire:loading.remove wire:target="sendReply">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;display:inline;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;display:inline;vertical-align:middle;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/>
                             </svg>
                             Send
