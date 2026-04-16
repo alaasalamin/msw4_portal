@@ -69,39 +69,46 @@ function _makeBellUri() {
     return 'data:audio/wav;base64,' + btoa(bin);
 }
 
-// Singleton Audio element — must be unlocked once via user gesture
-let _bellAudio  = null;
-let _bellReady  = false;
+// Singleton Audio element
+let _bellAudio = null;
+let _bellReady = false;
 
 function _getBellAudio() {
     if (!_bellAudio) {
         if (!_bellUri) _bellUri = _makeBellUri();
         _bellAudio = new Audio(_bellUri);
         _bellAudio.volume = 0.8;
+        _bellAudio.addEventListener('error', e => console.error('[AdminEcho] bell load error:', e));
     }
     return _bellAudio;
 }
 
-// On first user interaction: silently play+pause to unlock the element
+// Unlock: silently play+pause during a real user gesture
 function _unlockBell() {
     if (_bellReady) return;
     const a = _getBellAudio();
-    a.play().then(() => {
-        a.pause();
-        a.currentTime = 0;
-        _bellReady = true;
-    }).catch(() => {});
+    a.volume = 0;
+    a.play()
+        .then(() => { a.pause(); a.currentTime = 0; a.volume = 0.8; _bellReady = true; console.log('[AdminEcho] bell unlocked ✓'); })
+        .catch(e  => console.warn('[AdminEcho] bell unlock failed:', e.message));
 }
 ['click', 'keydown', 'touchend', 'pointerdown'].forEach(ev =>
     document.addEventListener(ev, _unlockBell, { passive: true })
 );
 
 function playBell() {
-    if (!_bellReady) return; // not yet unlocked
+    if (!_bellReady) { console.warn('[AdminEcho] bell not ready — click the page first'); return; }
     const a = _getBellAudio();
     a.currentTime = 0;
-    a.play().catch(e => console.warn('[AdminEcho] bell:', e));
+    a.play().catch(e => console.warn('[AdminEcho] bell play failed:', e.message));
 }
+
+// Debug helper
+window._bellDebug = () => ({
+    ready:      _bellReady,
+    uriLength:  _bellUri ? _bellUri.length : 0,
+    audioState: _bellAudio ? _bellAudio.readyState : 'not created',
+});
 
 function playBeep() {
     // Simple two-tone beep reusing the same Audio approach
