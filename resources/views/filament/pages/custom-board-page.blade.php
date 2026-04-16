@@ -104,6 +104,18 @@
         .cb-table-wrap { overflow-x:auto; border-radius:12px; border:1px solid #e5e7eb; }
         .dark .cb-table-wrap { border-color:rgba(255,255,255,0.08); }
 
+        /* step-devices search input */
+        .cb-search {
+            width:100%; padding:8px 12px 8px 32px; border-radius:8px; font-size:12px;
+            border:1.5px solid #e5e7eb; background:#f9fafb; color:#111827;
+            outline:none; transition:border-color .15s, background .15s;
+        }
+        .cb-search::placeholder { color:#9ca3af; }
+        .cb-search:focus { border-color:#6366f1; background:#fff; }
+        .dark .cb-search { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:#f3f4f6; }
+        .dark .cb-search::placeholder { color:#4b5563; }
+        .dark .cb-search:focus { border-color:#6366f1; background:rgba(255,255,255,0.08); }
+
         /* card customer color in dark */
         .dark .cb-card-customer { color:#9ca3af; }
     </style>
@@ -207,11 +219,7 @@
                     type="text"
                     wire:model.live.debounce.200ms="search"
                     placeholder="Search ticket, customer, device, box…"
-                    style="width:100%; padding:8px 12px 8px 32px; border-radius:8px; font-size:12px;
-                           border:1px solid #e5e7eb; background:#f9fafb; color:#111827;
-                           outline:none; transition:border-color .15s;"
-                    class="dark:bg-white/5 dark:border-white/10 dark:text-gray-200 dark:placeholder-gray-500"
-                    onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor=''"
+                    class="cb-search"
                 >
                 @if($search)
                     <button type="button" wire:click="$set('search','')"
