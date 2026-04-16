@@ -28,6 +28,9 @@ class CustomBoardPage extends Page
     // Delete modal
     public ?int $deleteSubmissionId = null;
 
+    // View modal
+    public ?int $viewSubmissionId = null;
+
     // Reply modal
     public ?int $replySubmissionId = null;
     public string $replyEmail      = '';
@@ -97,6 +100,7 @@ class CustomBoardPage extends Page
 
     public function confirmDeleteSubmission(int $id): void
     {
+        $this->viewSubmissionId   = null;
         $this->deleteSubmissionId = $id;
     }
 
@@ -114,6 +118,18 @@ class CustomBoardPage extends Page
     public function cancelDeleteSubmission(): void
     {
         $this->deleteSubmissionId = null;
+    }
+
+    // ── View ──────────────────────────────────────────────────────────────────
+
+    public function openView(int $id): void
+    {
+        $this->viewSubmissionId = $id;
+    }
+
+    public function closeView(): void
+    {
+        $this->viewSubmissionId = null;
     }
 
     // ── Reply ─────────────────────────────────────────────────────────────────
@@ -144,6 +160,7 @@ class CustomBoardPage extends Page
         $email = $this->findEmailInData($sub->data ?? []);
         if (! $email) return;
 
+        $this->viewSubmissionId  = null; // close view modal if open
         $this->replySubmissionId = $id;
         $this->replyEmail        = $email;
         $this->replySubject      = '';

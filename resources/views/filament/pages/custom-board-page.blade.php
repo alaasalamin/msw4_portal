@@ -184,6 +184,30 @@
         }
         .dark .cb-last-updated { color:#4b5563; }
 
+        /* row hover via CSS variable */
+        :root { --cb-row-hover: rgba(99,102,241,0.04); }
+        .dark { --cb-row-hover: rgba(99,102,241,0.08); }
+
+        /* view modal */
+        .cb-view-field { margin-bottom:14px; }
+        .cb-view-label {
+            font-size:10px; font-weight:700; letter-spacing:.06em;
+            color:#9ca3af; text-transform:uppercase; margin-bottom:3px;
+        }
+        .dark .cb-view-label { color:#4b5563; }
+        .cb-view-value {
+            font-size:13px; color:#111827; line-height:1.55; word-break:break-word;
+        }
+        .dark .cb-view-value { color:#e2e8f0; }
+        .cb-view-divider {
+            height:1px; background:#f1f5f9; margin:18px 0;
+        }
+        .dark .cb-view-divider { background:rgba(255,255,255,0.06); }
+        .cb-view-meta {
+            font-size:11px; color:#9ca3af; display:flex; flex-wrap:wrap; gap:12px;
+        }
+        .dark .cb-view-meta { color:#4b5563; }
+
         /* replied badge */
         .cb-replied-badge {
             display:inline-flex; align-items:center; gap:4px;
@@ -445,7 +469,11 @@
                         <tbody>
                             @foreach($submissions as $sub)
                                 @php $subEmail = $this->findEmailInData($sub->data ?? []); @endphp
-                                <tr>
+                                <tr wire:click="openView({{ $sub->id }})" style="cursor:pointer;"
+                                    class="cb-table-row"
+                                    onmouseenter="this.style.background='var(--cb-row-hover)'"
+                                    onmouseleave="this.style.background=''"
+                                    >
                                     @foreach($fieldLabels as $label)
                                         <td>{{ $sub->data[$label] ?? '—' }}</td>
                                     @endforeach
@@ -465,7 +493,7 @@
                                             <span class="muted" style="font-size:10px;">—</span>
                                         @endif
                                     </td>
-                                    <td style="text-align:right; white-space:nowrap;">
+                                    <td style="text-align:right; white-space:nowrap;" wire:click.stop>
                                         @if($subEmail && !$sub->replied_at)
                                             <button type="button"
                                                 wire:click="openReply({{ $sub->id }})"
@@ -593,6 +621,99 @@
             </div>
         </div>
     </div>
+@endif
+
+{{-- ── View submission modal ────────────────────────────────────────────── --}}
+@if($viewSubmissionId)
+    @php
+        $viewSub   = $this->getSubmissions()->firstWhere('id', $viewSubmissionId);
+        $viewEmail = $viewSub ? $this->findEmailInData($viewSub->data ?? []) : null;
+        $viewForm  = $board?->form;
+        $viewLabels = $viewForm?->fields->pluck('label')->all() ?? [];
+    @endphp
+    @if($viewSub)
+        <div class="cb-modal-backdrop" wire:click.self="closeView">
+            <div class="cb-modal" style="max-width:520px; max-height:85vh; overflow-y:auto;">
+
+                {{-- Header --}}
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px;">
+                    <div>
+                        <div class="cb-modal-title" style="margin-bottom:4px;">Submission details</div>
+                        <div class="cb-view-meta">
+                            <span>{{ $viewSub->created_at->format('d M Y, H:i') }}</span>
+                            @if($viewSub->page_slug)
+                                <span>Page: {{ $viewSub->page_slug }}</span>
+                            @endif
+                            @if($viewSub->replied_at)
+                                <span class="cb-replied-badge">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:9px;height:9px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                    </svg>
+                                    Replied {{ $viewSub->replied_at->diffForHumans() }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                    <button type="button" wire:click="closeView"
+                        style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:2px;margin-left:12px;flex-shrink:0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="cb-view-divider"></div>
+
+                {{-- Fields --}}
+                @foreach($viewLabels as $label)
+                    @if(isset($viewSub->data[$label]))
+                        <div class="cb-view-field">
+                            <div class="cb-view-label">{{ $label }}</div>
+                            <div class="cb-view-value">{{ $viewSub->data[$label] ?: '—' }}</div>
+                        </div>
+                    @endif
+                @endforeach
+
+                {{-- Any extra data keys not in form labels --}}
+                @foreach($viewSub->data ?? [] as $key => $value)
+                    @if(!in_array($key, $viewLabels) && !str_starts_with($key, '_'))
+                        <div class="cb-view-field">
+                            <div class="cb-view-label">{{ $key }}</div>
+                            <div class="cb-view-value">{{ $value ?: '—' }}</div>
+                        </div>
+                    @endif
+                @endforeach
+
+                <div class="cb-view-divider"></div>
+
+                {{-- Actions --}}
+                <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+                    <button type="button" class="cb-modal-cancel" wire:click="closeView">Close</button>
+
+                    @if($viewEmail)
+                        <button type="button"
+                            wire:click="openReply({{ $viewSub->id }})"
+                            style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:#6366f1;color:#fff;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+                            </svg>
+                            {{ $viewSub->replied_at ? 'Reply again' : 'Reply' }}
+                        </button>
+                    @endif
+
+                    <button type="button"
+                        wire:click="confirmDeleteSubmission({{ $viewSub->id }})"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:#fee2e2;color:#ef4444;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    @endif
 @endif
 
 {{-- ── Reply modal ───────────────────────────────────────────────────────── --}}
