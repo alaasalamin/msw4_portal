@@ -119,17 +119,6 @@
         /* card customer color in dark */
         .dark .cb-card-customer { color:#9ca3af; }
 
-        /* sound enable button */
-        .cb-sound-btn {
-            display:inline-flex; align-items:center; gap:5px;
-            padding:4px 10px; border-radius:20px; font-size:10px; font-weight:600;
-            cursor:pointer; border:1px dashed #d1d5db; background:transparent;
-            color:#9ca3af; transition:all .15s;
-        }
-        .cb-sound-btn:hover { border-color:#6366f1; color:#6366f1; }
-        .dark .cb-sound-btn { border-color:rgba(255,255,255,0.15); color:#4b5563; }
-        .dark .cb-sound-btn:hover { border-color:#6366f1; color:#6366f1; }
-
         /* empty state card */
         .cb-empty-card {
             text-align:center; padding:32px; border-radius:12px;
@@ -230,9 +219,6 @@
                     {{ $entries->count() }} open {{ Str::plural('entry', $entries->count()) }}
                 </span>
             @endif
-            <button id="cb-sound-btn" class="cb-sound-btn" title="Click to enable bell sound">
-                🔔 Enable sound
-            </button>
             <span class="cb-live">
                 <span class="cb-live-dot"></span> LIVE
             </span>
@@ -443,47 +429,9 @@
                 </span>`;
     }
 
-    // Bell delegates to admin-echo.js which owns the unlocked AudioContext
-    function playBell() {
-        if (typeof window._playAdminBell === 'function') {
-            window._playAdminBell();
-        }
-    }
-
-    // "Enable sound" button
-    const soundBtn = document.getElementById('cb-sound-btn');
-    if (soundBtn) {
-        // Wait for the auto-unlock attempt, then hide if it succeeded
-        (window._bellUnlockReady || Promise.resolve()).then(() => {
-            if (window._bellDebug && window._bellDebug().ready) {
-                soundBtn.style.display = 'none';
-            }
-        });
-
-        soundBtn.addEventListener('click', async () => {
-            if (typeof window._unlockAndPlayBell === 'function') {
-                await window._unlockAndPlayBell();
-            }
-            soundBtn.style.transition = 'opacity .3s';
-            soundBtn.style.opacity = '0';
-            setTimeout(() => { soundBtn.style.display = 'none'; }, 350);
-        });
-    }
-
     // ── Badge tracking ─────────────────────────────────────────────────────────
-    const _prevCounts = {};
-    let   _initialized = false; // skip bell on very first poll (baseline load)
-
     function updateBadges(counts) {
-        let anyIncrease = false;
-
         Object.entries(counts).forEach(([slug, count]) => {
-            const prev = _prevCounts[slug] ?? null;
-            // Only count as increase after baseline is set
-            if (_initialized && count !== null && (prev === null || count > prev)) {
-                anyIncrease = true;
-            }
-            _prevCounts[slug] = count;
 
             const btn = document.querySelector(
                 `.fi-sidebar-item-btn[href*="board?p=${slug}"]`
@@ -519,8 +467,6 @@
             }
         });
 
-        _initialized = true;
-        if (anyIncrease) playBell();
     }
 
     function fetchAndUpdate() {
