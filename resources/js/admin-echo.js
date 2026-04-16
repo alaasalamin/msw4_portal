@@ -122,6 +122,7 @@ async function unlockAndPlayBell() {
 // Called automatically from poll timer
 function playBell() {
     if (!_bellReady) return;
+    console.trace('[AdminEcho] playBell called');
     const a = _getBellAudio();
     a.currentTime = 0;
     a.play().catch(() => {});
@@ -138,6 +139,7 @@ window._bellDebug = () => ({
 });
 
 function playBeep() {
+    console.trace('[AdminEcho] playBeep called');
     // Simple two-tone beep reusing the same Audio approach
     const rate = 22050, dur = 0.45, n = Math.floor(rate * dur);
     const pcm  = new Int16Array(n);

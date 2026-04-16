@@ -520,7 +520,10 @@
         });
 
         _initialized = true;
-        if (anyIncrease) playBell();
+        if (anyIncrease) {
+            console.log('[Board] counter increase detected, ringing bell', JSON.stringify(_prevCounts));
+            playBell();
+        }
     }
 
     function fetchAndUpdate() {
