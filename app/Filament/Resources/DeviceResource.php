@@ -9,6 +9,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Resources\GlobalSearch\GlobalSearchResult;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -18,6 +19,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DeviceResource extends Resource
 {
@@ -26,6 +28,45 @@ class DeviceResource extends Resource
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-device-phone-mobile'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Operations'; }
     public static function getNavigationSort(): ?int                    { return 2; }
+
+    // ── Global search ─────────────────────────────────────────────────────────
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['ticket_number', 'customer_name', 'customer_email', 'customer_phone', 'storage_box', 'brand', 'model'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record->ticket_number . ' — ' . $record->brand . ' ' . $record->model;
+    }
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        $details = ['Kunde' => $record->customer_name ?: '—'];
+
+        if ($record->storage_box) {
+            $details['Box'] = $record->storage_box;
+        }
+
+        if ($record->workflowStep) {
+            $details['Schritt'] = $record->workflowStep->label;
+        }
+
+        return $details;
+    }
+
+    public static function getGlobalSearchResultUrl(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return static::getUrl('view', ['record' => $record]);
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with('workflowStep');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     public static function form(Schema $form): Schema
     {
