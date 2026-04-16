@@ -197,9 +197,34 @@
                 </span>
             </div>
 
+            {{-- Search bar --}}
+            <div style="margin-bottom:14px; position:relative;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                     style="position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:#9ca3af; pointer-events:none;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                </svg>
+                <input
+                    type="text"
+                    wire:model.live.debounce.200ms="search"
+                    placeholder="Search ticket, customer, device, box…"
+                    style="width:100%; padding:8px 12px 8px 32px; border-radius:8px; font-size:12px;
+                           border:1px solid #e5e7eb; background:#f9fafb; color:#111827;
+                           outline:none; transition:border-color .15s;"
+                    class="dark:bg-white/5 dark:border-white/10 dark:text-gray-200 dark:placeholder-gray-500"
+                    onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor=''"
+                >
+                @if($search)
+                    <button type="button" wire:click="$set('search','')"
+                            style="position:absolute; right:10px; top:50%; transform:translateY(-50%);
+                                   background:none; border:none; cursor:pointer; color:#9ca3af; line-height:1;">
+                        ✕
+                    </button>
+                @endif
+            </div>
+
             @if($stepDevices->isEmpty())
                 <div style="text-align:center; padding:28px; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb; color:#9ca3af; font-size:13px;" class="dark:bg-white/5 dark:border-white/10">
-                    No devices at these steps right now.
+                    {{ $search ? 'No devices match "' . $search . '".' : 'No devices at these steps right now.' }}
                 </div>
             @else
                 <div class="cb-grid">

@@ -18,8 +18,9 @@ class CustomBoardPage extends Page
     // Must be true so Filament calls our getNavigationItems() override
     protected static bool $shouldRegisterNavigation = true;
 
-    public string $boardSlug = '';
+    public string $boardSlug  = '';
     public ?CustomPage $board = null;
+    public string $search     = '';
 
     public function mount(): void
     {
@@ -49,10 +50,21 @@ class CustomBoardPage extends Page
         $stepIds = $this->board?->workflow_step_ids ?? [];
         if (empty($stepIds)) return collect();
 
-        return Device::with('workflowStep')
-            ->whereIn('workflow_step_id', $stepIds)
-            ->orderBy('received_at', 'desc')
-            ->get();
+        $q = Device::with('workflowStep')
+            ->whereIn('workflow_step_id', $stepIds);
+
+        if ($term = trim($this->search)) {
+            $q->where(fn ($w) => $w
+                ->where('ticket_number', 'like', "%$term%")
+                ->orWhere('customer_name', 'like', "%$term%")
+                ->orWhere('brand',         'like', "%$term%")
+                ->orWhere('model',         'like', "%$term%")
+                ->orWhere('storage_box',   'like', "%$term%")
+                ->orWhere('customer_phone','like', "%$term%")
+            );
+        }
+
+        return $q->orderBy('received_at', 'desc')->get();
     }
 
     public function getSubmissions()
