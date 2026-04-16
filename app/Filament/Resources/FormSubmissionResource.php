@@ -5,10 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\FormSubmissionResource\Pages;
 use App\Models\CustomForm;
 use App\Models\FormSubmission;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -74,7 +74,7 @@ class FormSubmissionResource extends Resource
                     ->modalContent(fn (FormSubmission $record) => view('filament.modals.submission-detail', ['record' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
-                \Filament\Tables\Actions\DeleteAction::make()->requiresConfirmation(),
+                DeleteAction::make()->requiresConfirmation(),
             ]);
     }
 
