@@ -12,6 +12,7 @@ import ProcessSteps  from './Sections/ProcessSteps';
 import Testimonials  from './Sections/Testimonials';
 import CtaBanner     from './Sections/CtaBanner';
 import TextBlock     from './Sections/TextBlock';
+import FormSection   from './Sections/FormSection';
 
 // Map Filament Builder block type → React component
 const SECTION_MAP: Record<string, React.ComponentType<any>> = {
@@ -22,6 +23,7 @@ const SECTION_MAP: Record<string, React.ComponentType<any>> = {
     testimonials:   Testimonials,
     cta_banner:     CtaBanner,
     text_block:     TextBlock,
+    form_block:     FormSection,
 };
 
 interface SitePageData {

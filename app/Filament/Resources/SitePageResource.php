@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SitePageResource\Pages;
+use App\Models\CustomForm;
 use App\Models\SitePage;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -184,6 +185,28 @@ class SitePageResource extends Resource
                                 Select::make('theme')
                                     ->options(['dark' => 'Dark (zinc-900)', 'light' => 'Light (white)', 'orange' => 'Orange'])
                                     ->default('dark'),
+                            ])->columns(2),
+
+                        // ── Contact Form ─────────────────────────────────────
+                        Block::make('form_block')
+                            ->label('Contact Form')
+                            ->icon('heroicon-o-envelope')
+                            ->schema([
+                                Select::make('form_id')
+                                    ->label('Select Form')
+                                    ->options(fn () => CustomForm::pluck('name', 'id'))
+                                    ->required()
+                                    ->searchable(),
+                                TextInput::make('title')
+                                    ->label('Block Title (optional)')
+                                    ->maxLength(120),
+                                Textarea::make('description')
+                                    ->label('Block Description (optional)')
+                                    ->rows(2)
+                                    ->maxLength(300),
+                                Select::make('theme')
+                                    ->options(['light' => 'Light (white)', 'dark' => 'Dark (zinc-900)', 'muted' => 'Muted (zinc-50)'])
+                                    ->default('light'),
                             ])->columns(2),
 
                         // ── Text Block ────────────────────────────────────────

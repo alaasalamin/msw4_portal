@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PartnerLoginController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceNoteController;
 use App\Http\Controllers\DevicePhotoUploadController;
+use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShipmentController;
@@ -95,6 +96,9 @@ Route::get('/blog',                     [BlogController::class, 'index'])->name(
 Route::get('/blog/category/{category}', [BlogController::class, 'category'])->name('blog.category');
 Route::get('/blog/{category}/{slug}',   [BlogController::class, 'show'])->name('blog.show');
 Route::get('/blog/{slug}',              [BlogController::class, 'showLegacy'])->name('blog.show.legacy');
+
+// Form submissions (public, no auth required)
+Route::post('/forms/{form}/submit', [FormSubmissionController::class, 'submit'])->name('forms.submit');
 
 // Dynamic CMS pages — must be last to avoid shadowing named routes
 Route::get('/{slug}', [PageController::class, 'show'])
