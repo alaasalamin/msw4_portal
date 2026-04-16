@@ -22,6 +22,10 @@ class NotificationBell extends Component
     private function loadNotifications(User $user): array
     {
         return $user->notifications()
+            ->where(fn ($q) => $q
+                ->whereNull('read_at')                          // unread: always show
+                ->orWhere('created_at', '>=', now()->subDay())  // read but recent (< 1 day): show
+            )
             ->latest()
             ->limit(20)
             ->get()
