@@ -208,6 +208,30 @@
         }
         .dark .cb-view-meta { color:#4b5563; }
 
+        /* reply thread inside view modal */
+        .cb-reply-thread-item {
+            border-left:2px solid #6366f1; padding:10px 14px;
+            margin-bottom:10px; border-radius:0 8px 8px 0;
+            background:rgba(99,102,241,0.04);
+        }
+        .dark .cb-reply-thread-item { background:rgba(99,102,241,0.08); }
+        .cb-reply-thread-header {
+            display:flex; justify-content:space-between; align-items:baseline;
+            gap:8px; margin-bottom:6px;
+        }
+        .cb-reply-thread-subject {
+            font-size:12px; font-weight:700; color:#111827;
+        }
+        .dark .cb-reply-thread-subject { color:#e2e8f0; }
+        .cb-reply-thread-time {
+            font-size:10px; color:#9ca3af; white-space:nowrap; flex-shrink:0;
+        }
+        .dark .cb-reply-thread-time { color:#4b5563; }
+        .cb-reply-thread-body {
+            font-size:12px; color:#374151; line-height:1.6; white-space:pre-wrap;
+        }
+        .dark .cb-reply-thread-body { color:#94a3b8; }
+
         /* replied badge */
         .cb-replied-badge {
             display:inline-flex; align-items:center; gap:4px;
@@ -683,6 +707,25 @@
                         </div>
                     @endif
                 @endforeach
+
+                {{-- Replies thread --}}
+                @if(!empty($viewSub->replies))
+                    <div class="cb-view-divider"></div>
+                    <div style="margin-bottom:4px;">
+                        <div class="cb-view-label" style="margin-bottom:12px;">
+                            Replies ({{ count($viewSub->replies) }})
+                        </div>
+                        @foreach(array_reverse($viewSub->replies) as $reply)
+                            <div class="cb-reply-thread-item">
+                                <div class="cb-reply-thread-header">
+                                    <span class="cb-reply-thread-subject">{{ $reply['subject'] }}</span>
+                                    <span class="cb-reply-thread-time">{{ \Carbon\Carbon::parse($reply['sent_at'])->diffForHumans() }}</span>
+                                </div>
+                                <div class="cb-reply-thread-body">{{ $reply['body'] }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
 
                 <div class="cb-view-divider"></div>
 

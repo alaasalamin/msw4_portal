@@ -13,6 +13,7 @@ class FormSubmission extends Model
 
     protected $casts = [
         'data'       => 'array',
+        'replies'    => 'array',
         'replied_at' => 'datetime',
     ];
 

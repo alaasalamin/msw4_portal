@@ -179,7 +179,16 @@ class CustomBoardPage extends Page
             new AutomationMail($this->replySubject, $this->replyBody)
         );
 
-        FormSubmission::where('id', $this->replySubmissionId)->update(['replied_at' => now()]);
+        $sub     = FormSubmission::find($this->replySubmissionId);
+        $replies = $sub->replies ?? [];
+        $replies[] = [
+            'subject'  => $this->replySubject,
+            'body'     => $this->replyBody,
+            'sent_at'  => now()->toIso8601String(),
+        ];
+        $sub->replies    = $replies;
+        $sub->replied_at = now();
+        $sub->save();
 
         $this->replySent = true;
     }
