@@ -530,9 +530,15 @@
             .catch(() => {});
     }
 
-    // Align with Livewire's 5 s poll
+    // Align with Livewire's 5 s poll — clear any previous interval first
+    if (window._boardPollInterval) clearInterval(window._boardPollInterval);
     fetchAndUpdate();
-    setInterval(fetchAndUpdate, 5000);
+    window._boardPollInterval = setInterval(fetchAndUpdate, 5000);
+
+    document.addEventListener('livewire:navigating', () => {
+        clearInterval(window._boardPollInterval);
+        window._boardPollInterval = null;
+    }, { once: true });
 })();
 </script>
 @endscript

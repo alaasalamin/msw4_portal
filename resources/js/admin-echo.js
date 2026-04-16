@@ -169,19 +169,19 @@ window._playAdminBeep = playBeep;
 window._playAdminBell = playBell;
 
 // ── Channel subscription ──────────────────────────────────────────────────────
+let _subscribedUserId = null; // guard against duplicate subscriptions
+
 function subscribeUser(userId) {
+    if (_subscribedUserId === userId) return; // already subscribed
+    _subscribedUserId = userId;
+
     window.AdminEcho
         .private('App.Models.User.' + userId)
         .listen(
             '.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated',
             (data) => {
                 console.log('[AdminEcho] Notification received', data);
-
-                // Play beep
                 playBeep();
-
-                // Dispatch global Livewire event — received by #[On] in NotificationBell
-                // Wrap under 'notification' key so PHP receives it as array $notification
                 if (typeof Livewire !== 'undefined') {
                     Livewire.dispatch('notificationReceived', {
                         notification: {
@@ -195,7 +195,6 @@ function subscribeUser(userId) {
         );
 }
 
-// Wait for the auth-user-id meta tag (injected by admin-echo-setup blade)
 function trySubscribe(attempts = 0) {
     const meta = document.querySelector('meta[name="auth-user-id"]');
     if (meta) {
