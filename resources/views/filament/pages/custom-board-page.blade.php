@@ -119,6 +119,17 @@
         /* card customer color in dark */
         .dark .cb-card-customer { color:#9ca3af; }
 
+        /* sound enable button */
+        .cb-sound-btn {
+            display:inline-flex; align-items:center; gap:5px;
+            padding:4px 10px; border-radius:20px; font-size:10px; font-weight:600;
+            cursor:pointer; border:1px dashed #d1d5db; background:transparent;
+            color:#9ca3af; transition:all .15s;
+        }
+        .cb-sound-btn:hover { border-color:#6366f1; color:#6366f1; }
+        .dark .cb-sound-btn { border-color:rgba(255,255,255,0.15); color:#4b5563; }
+        .dark .cb-sound-btn:hover { border-color:#6366f1; color:#6366f1; }
+
         /* empty state card */
         .cb-empty-card {
             text-align:center; padding:32px; border-radius:12px;
@@ -219,6 +230,9 @@
                     {{ $entries->count() }} open {{ Str::plural('entry', $entries->count()) }}
                 </span>
             @endif
+            <button id="cb-sound-btn" class="cb-sound-btn" title="Click to enable bell sound">
+                🔔 Enable sound
+            </button>
             <span class="cb-live">
                 <span class="cb-live-dot"></span> LIVE
             </span>
@@ -434,6 +448,26 @@
         if (typeof window._playAdminBell === 'function') {
             window._playAdminBell();
         }
+    }
+
+    // "Enable sound" button: clicking it unlocks audio AND plays confirmation bell
+    const soundBtn = document.getElementById('cb-sound-btn');
+    if (soundBtn) {
+        // Hide once audio is already unlocked (e.g. navigated back to page)
+        if (window._bellDebug && window._bellDebug().ready) {
+            soundBtn.style.display = 'none';
+        }
+
+        soundBtn.addEventListener('click', () => {
+            // _unlockBell runs via the global click listener automatically,
+            // but we also explicitly play so the user hears confirmation
+            setTimeout(() => {
+                playBell();
+                soundBtn.textContent = '🔔 Sound on';
+                soundBtn.style.opacity = '0';
+                setTimeout(() => soundBtn.style.display = 'none', 400);
+            }, 80); // small delay so _unlockBell fires first
+        });
     }
 
     // ── Badge tracking ─────────────────────────────────────────────────────────
