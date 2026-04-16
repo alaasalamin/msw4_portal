@@ -421,32 +421,51 @@
 {{-- ── Real-time sidebar badge updater ──────────────────────────────────── --}}
 <script>
 (function () {
+    // Minimal badge HTML that matches Filament's fi-badge structure
+    function badgeHtml(count) {
+        return `<span class="fi-badge fi-size-sm" style="background-color:rgba(99,102,241,.1);color:rgb(99,102,241);border-color:rgba(99,102,241,.2);border-radius:9999px;padding:1px 8px;font-size:11px;font-weight:700;white-space:nowrap;">
+                    <span class="fi-badge-label-ctn"><span class="fi-badge-label">${count}</span></span>
+                </span>`;
+    }
+
     function updateBadges(counts) {
         Object.entries(counts).forEach(([slug, count]) => {
-            // Find the nav item whose href contains this board slug
-            const link = document.querySelector(
-                `.fi-sidebar-item a[href*="board?p=${slug}"], .fi-sidebar-item button[data-url*="board?p=${slug}"]`
+            // Try both anchor and button with href/data-url containing the slug
+            const btn = document.querySelector(
+                `.fi-sidebar-item-btn[href*="board?p=${slug}"]`
             );
-            if (! link) return;
+            if (!btn) return;
 
-            const item     = link.closest('.fi-sidebar-item');
-            const badgeCtn = item?.querySelector('.fi-sidebar-item-badge-ctn');
-            const label    = item?.querySelector('.fi-badge-label');
+            const item     = btn.closest('.fi-sidebar-item');
+            let badgeCtn   = item.querySelector('.fi-sidebar-item-badge-ctn');
+            let label      = item.querySelector('.fi-badge-label');
 
             if (count) {
                 if (label) {
+                    // Badge already in DOM — just update the number
                     label.textContent = count;
+                    if (badgeCtn) badgeCtn.style.removeProperty('display');
                 } else if (badgeCtn) {
-                    // Badge container exists but no label — rebuild
-                    badgeCtn.innerHTML =
-                        `<span class="fi-badge fi-color-custom fi-size-sm" style="--c-400:rgb(99,102,241);--c-600:rgb(99,102,241);">
-                            <span class="fi-badge-label-ctn"><span class="fi-badge-label">${count}</span></span>
-                         </span>`;
+                    // Container exists but was emptied — rebuild content
+                    badgeCtn.innerHTML = badgeHtml(count);
+                    badgeCtn.style.removeProperty('display');
+                } else {
+                    // No badge at all (initial count was 0) — create and inject
+                    badgeCtn = document.createElement('span');
+                    badgeCtn.className = 'fi-sidebar-item-badge-ctn';
+                    badgeCtn.setAttribute('data-board-badge', slug);
+                    badgeCtn.innerHTML = badgeHtml(count);
+                    btn.appendChild(badgeCtn);
                 }
-                if (badgeCtn) badgeCtn.style.display = '';
             } else {
-                // Zero — hide the badge
-                if (badgeCtn) badgeCtn.style.display = 'none';
+                // Count is 0 or null — remove our injected badge, or hide Filament's
+                if (badgeCtn) {
+                    if (badgeCtn.dataset.boardBadge) {
+                        badgeCtn.remove(); // we created it — remove entirely
+                    } else {
+                        badgeCtn.style.display = 'none'; // Filament's — just hide
+                    }
+                }
             }
         });
     }
@@ -455,10 +474,10 @@
         fetch('/admin/api/board-counts', { credentials: 'same-origin' })
             .then(r => r.ok ? r.json() : null)
             .then(counts => { if (counts) updateBadges(counts); })
-            .catch(() => {}); // silently ignore network errors
+            .catch(() => {});
     }
 
-    // Start polling every 5 s (aligned with Livewire poll)
+    // Align with Livewire's 5 s poll
     fetchAndUpdate();
     setInterval(fetchAndUpdate, 5000);
 })();
