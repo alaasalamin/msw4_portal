@@ -11,8 +11,7 @@ class CustomBoardPage extends Page
 {
     protected string $view = 'filament.pages.custom-board-page';
 
-    // Unique slug per board is handled via getNavigationItems + URL param
-    protected static ?string $slug = 'board/{board}';
+    protected static ?string $slug = 'board';
 
     // Must be true so Filament calls our getNavigationItems() override
     protected static bool $shouldRegisterNavigation = true;
@@ -22,7 +21,7 @@ class CustomBoardPage extends Page
 
     public function mount(): void
     {
-        $slug            = request()->route('board', '');
+        $slug            = request()->query('p', '');
         $this->boardSlug = $slug;
         $this->board     = CustomPage::where('slug', $slug)->firstOrFail();
     }
@@ -67,15 +66,15 @@ class CustomBoardPage extends Page
                 ->get()
                 ->map(fn (CustomPage $page) =>
                     NavigationItem::make($page->name)
-                        ->url('/admin/board/' . $page->slug)
+                        ->url('/admin/board?p=' . $page->slug)
                         ->icon($page->icon ?: 'heroicon-o-clipboard-document-list')
-                        ->sort(10 + $page->sort_order) // after Dashboard (sort -2/null)
+                        ->sort(10 + $page->sort_order)
                         ->badge(
                             CustomPageEntry::where('custom_page_id', $page->id)
                                 ->whereNull('resolved_at')
                                 ->count() ?: null
                         )
-                        ->isActiveWhen(fn () => str_contains(request()->url(), '/board/' . $page->slug))
+                        ->isActiveWhen(fn () => request()->query('p') === $page->slug)
                 )
                 ->all();
         } catch (\Throwable) {
