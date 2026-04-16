@@ -67,6 +67,11 @@ class DeviceResource extends Resource
                 TextInput::make('model'),
                 TextInput::make('serial_number'),
                 TextInput::make('color'),
+                TextInput::make('storage_box')
+                    ->label('Box / Lagerplatz')
+                    ->placeholder('z.B. Box 123, Regal A2')
+                    ->maxLength(60)
+                    ->prefix('📦'),
             ])->columns(2),
 
             Section::make('Repair')->schema([
@@ -86,6 +91,13 @@ class DeviceResource extends Resource
                 TextColumn::make('customer_name')->searchable(),
                 TextColumn::make('brand'),
                 TextColumn::make('model'),
+                TextColumn::make('storage_box')
+                    ->label('Box')
+                    ->badge()
+                    ->color('gray')
+                    ->icon('heroicon-m-archive-box')
+                    ->placeholder('—')
+                    ->searchable(),
                 TextColumn::make('workflowStep.label')
                     ->label('Schritt')
                     ->badge()

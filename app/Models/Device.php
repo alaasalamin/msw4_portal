@@ -32,6 +32,7 @@ class Device extends Model
         'model',
         'serial_number',
         'color',
+        'storage_box',
         'issue_description',
         'internal_notes',
         'priority',
