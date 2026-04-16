@@ -418,6 +418,52 @@
 
     </div>{{-- end wire:poll wrapper --}}
 
+{{-- ── Real-time sidebar badge updater ──────────────────────────────────── --}}
+<script>
+(function () {
+    function updateBadges(counts) {
+        Object.entries(counts).forEach(([slug, count]) => {
+            // Find the nav item whose href contains this board slug
+            const link = document.querySelector(
+                `.fi-sidebar-item a[href*="board?p=${slug}"], .fi-sidebar-item button[data-url*="board?p=${slug}"]`
+            );
+            if (! link) return;
+
+            const item     = link.closest('.fi-sidebar-item');
+            const badgeCtn = item?.querySelector('.fi-sidebar-item-badge-ctn');
+            const label    = item?.querySelector('.fi-badge-label');
+
+            if (count) {
+                if (label) {
+                    label.textContent = count;
+                } else if (badgeCtn) {
+                    // Badge container exists but no label — rebuild
+                    badgeCtn.innerHTML =
+                        `<span class="fi-badge fi-color-custom fi-size-sm" style="--c-400:rgb(99,102,241);--c-600:rgb(99,102,241);">
+                            <span class="fi-badge-label-ctn"><span class="fi-badge-label">${count}</span></span>
+                         </span>`;
+                }
+                if (badgeCtn) badgeCtn.style.display = '';
+            } else {
+                // Zero — hide the badge
+                if (badgeCtn) badgeCtn.style.display = 'none';
+            }
+        });
+    }
+
+    function fetchAndUpdate() {
+        fetch('/admin/api/board-counts', { credentials: 'same-origin' })
+            .then(r => r.ok ? r.json() : null)
+            .then(counts => { if (counts) updateBadges(counts); })
+            .catch(() => {}); // silently ignore network errors
+    }
+
+    // Start polling every 5 s (aligned with Livewire poll)
+    fetchAndUpdate();
+    setInterval(fetchAndUpdate, 5000);
+})();
+</script>
+
 {{-- ── Delete submission confirm modal ──────────────────────────────────── --}}
 @if($deleteSubmissionId)
     <div class="cb-modal-backdrop" wire:click.self="cancelDeleteSubmission">

@@ -11,6 +11,10 @@ use App\Http\Controllers\FormSubmissionController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShipmentController;
+use App\Models\CustomPage;
+use App\Models\CustomPageEntry;
+use App\Models\Device;
+use App\Models\FormSubmission;
 use App\Models\Setting;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +85,21 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::post('register',  [CustomerLoginController::class, 'register']);
     Route::post('logout',    [CustomerLoginController::class, 'logout'])->name('logout');
 });
+
+// Admin API — board badge counts (used by real-time JS in the sidebar)
+Route::get('/admin/api/board-counts', function () {
+    $counts = CustomPage::orderBy('sort_order')->get()->mapWithKeys(function (CustomPage $page) {
+        $total = CustomPageEntry::where('custom_page_id', $page->id)->whereNull('resolved_at')->count();
+        if ($page->form_id) {
+            $total += FormSubmission::where('form_id', $page->form_id)->count();
+        }
+        if (! empty($page->workflow_step_ids)) {
+            $total += Device::whereIn('workflow_step_id', $page->workflow_step_ids)->count();
+        }
+        return [$page->slug => $total ?: null];
+    });
+    return response()->json($counts);
+})->middleware(['auth'])->name('admin.board-counts');
 
 // Partner auth routes
 Route::prefix('partner')->name('partner.')->group(function () {
