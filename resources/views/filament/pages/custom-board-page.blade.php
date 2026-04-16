@@ -428,9 +428,19 @@
                 </span>`;
     }
 
+    // Track previous counts to detect increases
+    const _prevCounts = {};
+
     function updateBadges(counts) {
+        let anyIncrease = false;
+
         Object.entries(counts).forEach(([slug, count]) => {
-            // Try both anchor and button with href/data-url containing the slug
+            const prev = _prevCounts[slug] ?? null;
+            if (count !== null && (prev === null || count > prev)) {
+                anyIncrease = true;
+            }
+            _prevCounts[slug] = count;
+
             const btn = document.querySelector(
                 `.fi-sidebar-item-btn[href*="board?p=${slug}"]`
             );
@@ -442,15 +452,12 @@
 
             if (count) {
                 if (label) {
-                    // Badge already in DOM — just update the number
                     label.textContent = count;
                     if (badgeCtn) badgeCtn.style.removeProperty('display');
                 } else if (badgeCtn) {
-                    // Container exists but was emptied — rebuild content
                     badgeCtn.innerHTML = badgeHtml(count);
                     badgeCtn.style.removeProperty('display');
                 } else {
-                    // No badge at all (initial count was 0) — create and inject
                     badgeCtn = document.createElement('span');
                     badgeCtn.className = 'fi-sidebar-item-badge-ctn';
                     badgeCtn.setAttribute('data-board-badge', slug);
@@ -458,16 +465,20 @@
                     btn.appendChild(badgeCtn);
                 }
             } else {
-                // Count is 0 or null — remove our injected badge, or hide Filament's
                 if (badgeCtn) {
                     if (badgeCtn.dataset.boardBadge) {
-                        badgeCtn.remove(); // we created it — remove entirely
+                        badgeCtn.remove();
                     } else {
-                        badgeCtn.style.display = 'none'; // Filament's — just hide
+                        badgeCtn.style.display = 'none';
                     }
                 }
             }
         });
+
+        // Beep when any board's count goes up
+        if (anyIncrease && typeof window._playAdminBeep === 'function') {
+            window._playAdminBeep();
+        }
     }
 
     function fetchAndUpdate() {
