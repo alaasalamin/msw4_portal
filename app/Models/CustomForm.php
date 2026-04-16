@@ -8,7 +8,9 @@ use Illuminate\Support\Str;
 
 class CustomForm extends Model
 {
-    protected $fillable = ['name', 'slug', 'description', 'success_message', 'redirect_url'];
+    protected $fillable = ['name', 'slug', 'description', 'success_message', 'redirect_url', 'preset_replies'];
+
+    protected $casts = ['preset_replies' => 'array'];
 
     protected static function booted(): void
     {

@@ -6,6 +6,7 @@ use App\Filament\Resources\CustomFormResource\Pages;
 use App\Models\CustomForm;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -62,6 +63,43 @@ class CustomFormResource extends Resource
                     ->placeholder('/thank-you')
                     ->columnSpanFull(),
             ])->columns(2),
+
+            Section::make('Preset Replies')
+                ->description('Save reply templates for this form. Use {{Field Label}} to insert submission values — e.g. {{Name}}, {{Email}}.')
+                ->schema([
+                    Repeater::make('preset_replies')
+                        ->label('')
+                        ->addActionLabel('+ Add preset reply')
+                        ->itemLabel(fn (array $state): string => $state['name'] ?? 'Unnamed preset')
+                        ->collapsible()
+                        ->collapsed()
+                        ->defaultItems(0)
+                        ->schema([
+                            TextInput::make('name')
+                                ->label('Preset name')
+                                ->placeholder('e.g. Thank you, Price info, Follow-up…')
+                                ->required()
+                                ->maxLength(80)
+                                ->live(onBlur: true),
+
+                            TextInput::make('subject')
+                                ->label('Email subject')
+                                ->placeholder('e.g. Re: Your enquiry — {{Name}}')
+                                ->required()
+                                ->maxLength(255)
+                                ->columnSpanFull(),
+
+                            Textarea::make('body')
+                                ->label('Message body')
+                                ->placeholder("Dear {{Name}},\n\nThank you for reaching out…")
+                                ->required()
+                                ->rows(6)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2)
+                        ->columnSpanFull(),
+                ])
+                ->collapsible(),
 
             Section::make('Form Fields')
                 ->description('Define the fields that will appear in this form.')

@@ -168,6 +168,28 @@ class CustomBoardPage extends Page
         $this->replySent         = false;
     }
 
+    public function loadPreset(int $index): void
+    {
+        $presets = $this->board?->form?->preset_replies ?? [];
+        $preset  = $presets[$index] ?? null;
+        if (! $preset) return;
+
+        $sub  = FormSubmission::find($this->replySubmissionId);
+        $data = $sub?->data ?? [];
+
+        $subject = $preset['subject'] ?? '';
+        $body    = $preset['body']    ?? '';
+
+        foreach ($data as $label => $value) {
+            $placeholder = '{{' . $label . '}}';
+            $subject     = str_replace($placeholder, (string) ($value ?? ''), $subject);
+            $body        = str_replace($placeholder, (string) ($value ?? ''), $body);
+        }
+
+        $this->replySubject = $subject;
+        $this->replyBody    = $body;
+    }
+
     public function sendReply(): void
     {
         $this->validate([

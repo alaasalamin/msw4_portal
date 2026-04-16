@@ -241,6 +241,20 @@
         }
         .dark .cb-replied-badge { background:rgba(16,185,129,0.12); color:#34d399; }
 
+        /* preset reply buttons */
+        .cb-preset-btn {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600;
+            cursor:pointer; border:1.5px solid #e0e7ff;
+            background:#eef2ff; color:#4f46e5; transition:all .15s;
+        }
+        .cb-preset-btn:hover { background:#e0e7ff; border-color:#6366f1; }
+        .dark .cb-preset-btn {
+            background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.3);
+            color:#a5b4fc;
+        }
+        .dark .cb-preset-btn:hover { background:rgba(99,102,241,0.2); border-color:#6366f1; }
+
         /* reply modal */
         .cb-reply-icon { background:#ede9fe; }
         .dark .cb-reply-icon { background:rgba(99,102,241,0.15); }
@@ -783,6 +797,23 @@
                     </svg>
                 </div>
                 <div class="cb-modal-title">Reply to submission</div>
+
+                {{-- Preset picker --}}
+                @php $presets = $board?->form?->preset_replies ?? []; @endphp
+                @if(!empty($presets))
+                    <div style="margin-bottom:14px;">
+                        <label class="cb-field-label">USE PRESET</label>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                            @foreach($presets as $i => $preset)
+                                <button type="button"
+                                    wire:click="loadPreset({{ $i }})"
+                                    class="cb-preset-btn">
+                                    {{ $preset['name'] }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 <div style="margin-bottom:14px;">
                     <label class="cb-field-label">TO</label>
