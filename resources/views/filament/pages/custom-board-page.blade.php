@@ -428,15 +428,66 @@
                 </span>`;
     }
 
-    // Track previous counts to detect increases
+    // ── Bell sound via Web Audio API ───────────────────────────────────────────
+    let _bellCtx  = null;
+    let _bellReady = false; // true once unlocked by a user gesture
+
+    function _initBellCtx() {
+        if (!_bellCtx) _bellCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (_bellCtx.state === 'suspended') {
+            _bellCtx.resume().then(() => { _bellReady = true; });
+        } else {
+            _bellReady = true;
+        }
+    }
+
+    // Unlock on any user interaction
+    ['click', 'keydown', 'touchend', 'pointerdown'].forEach(ev =>
+        document.addEventListener(ev, _initBellCtx, { passive: true })
+    );
+
+    function playBell() {
+        if (!_bellCtx || !_bellReady) return; // silently skip if not unlocked yet
+
+        const ctx = _bellCtx;
+        const t   = ctx.currentTime;
+
+        // Bell partials: fundamental + inharmonic overtones → metallic ring
+        [
+            { freq: 660,  amp: 0.5,  decay: 2.8 },
+            { freq: 1100, amp: 0.35, decay: 2.0 },
+            { freq: 1760, amp: 0.25, decay: 1.4 },
+            { freq: 2420, amp: 0.15, decay: 1.0 },
+            { freq: 3300, amp: 0.08, decay: 0.7 },
+        ].forEach(({ freq, amp, decay }) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(amp, t + 0.005);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+            osc.start(t);
+            osc.stop(t + decay);
+        });
+    }
+
+    // Expose so the bell can be tested from the browser console: _boardBell()
+    window._boardBell = playBell;
+
+    // ── Badge tracking ─────────────────────────────────────────────────────────
     const _prevCounts = {};
+    let   _initialized = false; // skip bell on very first poll (baseline load)
 
     function updateBadges(counts) {
         let anyIncrease = false;
 
         Object.entries(counts).forEach(([slug, count]) => {
             const prev = _prevCounts[slug] ?? null;
-            if (count !== null && (prev === null || count > prev)) {
+            // Only count as increase after baseline is set
+            if (_initialized && count !== null && (prev === null || count > prev)) {
                 anyIncrease = true;
             }
             _prevCounts[slug] = count;
@@ -475,59 +526,8 @@
             }
         });
 
-        // Bell ring when any board's count goes up
+        _initialized = true;
         if (anyIncrease) playBell();
-    }
-
-    // ── Bell sound via Web Audio API ───────────────────────────────────────────
-    let _bellCtx = null;
-
-    // Unlock AudioContext on first user gesture (browser requirement)
-    function _unlockBell() {
-        if (!_bellCtx) _bellCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (_bellCtx.state === 'suspended') _bellCtx.resume();
-    }
-    document.addEventListener('click',    _unlockBell, { once: false, passive: true });
-    document.addEventListener('keydown',  _unlockBell, { once: false, passive: true });
-    document.addEventListener('touchend', _unlockBell, { once: false, passive: true });
-
-    async function playBell() {
-        try {
-            if (!_bellCtx) _bellCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (_bellCtx.state === 'suspended') await _bellCtx.resume();
-
-            const ctx = _bellCtx;
-            const t   = ctx.currentTime;
-
-            // Bell partials — fundamental + inharmonic overtones for metallic ring
-            const partials = [
-                { freq: 660,  amp: 0.5,  decay: 2.8 },
-                { freq: 1100, amp: 0.35, decay: 2.0 },
-                { freq: 1760, amp: 0.25, decay: 1.4 },
-                { freq: 2420, amp: 0.15, decay: 1.0 },
-                { freq: 3300, amp: 0.08, decay: 0.7 },
-            ];
-
-            partials.forEach(({ freq, amp, decay }) => {
-                const osc  = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, t);
-
-                // Sharp attack, long exponential decay — classic bell envelope
-                gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(amp, t + 0.005); // near-instant attack
-                gain.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-
-                osc.start(t);
-                osc.stop(t + decay);
-            });
-        } catch (e) {
-            console.warn('[board] bell error:', e);
-        }
     }
 
     function fetchAndUpdate() {
