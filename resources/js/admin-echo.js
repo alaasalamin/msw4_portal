@@ -58,10 +58,10 @@ async function playBeep() {
     }
 }
 
-function playBell() {
+async function playBell() {
     try {
         const ctx = _ensureAudio();
-        if (ctx.state !== 'running') return;
+        if (ctx.state === 'suspended') await ctx.resume();
 
         const t = ctx.currentTime;
 
@@ -83,8 +83,10 @@ function playBell() {
             osc.start(t);
             osc.stop(t + decay);
         });
+
+        console.log('[AdminEcho] bell played, ctx.state=', ctx.state);
     } catch (e) {
-        console.warn('[AdminEcho] bell error:', e);
+        console.error('[AdminEcho] bell error:', e);
     }
 }
 
