@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $subject }}</title>
+    <title>{{ $mailSubject }}</title>
 </head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 
@@ -30,7 +30,7 @@
                     {{-- Body --}}
                     <tr>
                         <td style="background:#ffffff;padding:36px 36px 28px;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
-                            <div style="font-size:15px;line-height:1.75;color:#1e293b;white-space:pre-line;">{{ $body }}</div>
+                            <div style="font-size:15px;line-height:1.75;color:#1e293b;white-space:pre-line;">{{ $mailBody }}</div>
                         </td>
                     </tr>
 

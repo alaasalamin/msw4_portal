@@ -12,16 +12,26 @@ class AutomationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public string $mailSubject;
+    public string $mailBody;
+    public string $ticketNumber;
+    public string $deviceLabel;
+
     public function __construct(
-        public readonly string $subject,
-        public readonly string $body,
-        public readonly string $ticketNumber = '',
-        public readonly string $deviceLabel  = '',
-    ) {}
+        string $subject,
+        string $body,
+        string $ticketNumber = '',
+        string $deviceLabel  = '',
+    ) {
+        $this->mailSubject  = $subject;
+        $this->mailBody     = $body;
+        $this->ticketNumber = $ticketNumber;
+        $this->deviceLabel  = $deviceLabel;
+    }
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: $this->subject);
+        return new Envelope(subject: $this->mailSubject);
     }
 
     public function content(): Content
