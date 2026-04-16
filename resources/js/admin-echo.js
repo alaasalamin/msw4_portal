@@ -84,28 +84,14 @@ function _getBellAudio() {
 
 const BELL_PREF_KEY = 'adminBellEnabled';
 
-// Try to silently unlock on page load (works if browser trusts this site)
-async function _tryAutoUnlock() {
+// Restore bell-ready state from saved preference — no audio played on load.
+function _tryAutoUnlock() {
     if (!localStorage.getItem(BELL_PREF_KEY)) return;
-    const a = _getBellAudio();
-    // Use muted=true (browser-level silence) instead of volume=0 to guarantee
-    // no audible output during the unlock test, even on Chrome/localhost.
-    a.muted = true;
-    try {
-        await a.play();
-        a.pause();
-        a.currentTime = 0;
-        _bellReady = true;
-        console.log('[AdminEcho] bell auto-unlocked ✓');
-    } catch {
-        // Browser still blocked — user will see the button and click again
-    } finally {
-        a.muted = false; // unmute for real playback
-    }
+    _bellReady = true;
+    console.log('[AdminEcho] bell ready (restored from preference)');
 }
 
-// Expose promise so the blade can wait before hiding the button
-window._bellUnlockReady = _tryAutoUnlock();
+_tryAutoUnlock();
 
 // Called from the "Enable sound" button — unlocks AND plays in one user gesture
 async function unlockAndPlayBell() {
