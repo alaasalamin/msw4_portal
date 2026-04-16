@@ -391,13 +391,24 @@
                         </thead>
                         <tbody>
                             @foreach($submissions as $sub)
+                                @php $subEmail = $this->findEmailInData($sub->data ?? []); @endphp
                                 <tr>
                                     @foreach($fieldLabels as $label)
                                         <td>{{ $sub->data[$label] ?? '—' }}</td>
                                     @endforeach
                                     <td class="muted">{{ $sub->page_slug ?: '—' }}</td>
                                     <td class="muted" style="white-space:nowrap;">{{ $sub->created_at->format('d M Y H:i') }}</td>
-                                    <td style="text-align:right;">
+                                    <td style="text-align:right; white-space:nowrap;">
+                                        @if($subEmail)
+                                            <button type="button"
+                                                wire:click="openReply({{ $sub->id }})"
+                                                style="background:none; border:none; cursor:pointer; color:#6366f1; padding:2px; margin-right:4px;"
+                                                title="Reply to {{ $subEmail }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+                                                </svg>
+                                            </button>
+                                        @endif
                                         <button type="button"
                                             wire:click="confirmDeleteSubmission({{ $sub->id }})"
                                             style="background:none; border:none; cursor:pointer; color:#d1d5db; padding:2px;"
@@ -504,6 +515,74 @@
                 <button type="button" class="cb-modal-cancel" wire:click="cancelDeleteSubmission">Cancel</button>
                 <button type="button" class="cb-modal-danger" wire:click="deleteSubmission">Delete</button>
             </div>
+        </div>
+    </div>
+@endif
+
+{{-- ── Reply modal ───────────────────────────────────────────────────────── --}}
+@if($replySubmissionId)
+    <div class="cb-modal-backdrop" wire:click.self="cancelReply">
+        <div class="cb-modal" style="max-width:480px;">
+            @if($replySent)
+                {{-- Success state --}}
+                <div style="text-align:center; padding:12px 0;">
+                    <div style="width:48px;height:48px;border-radius:50%;background:#d1fae5;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#10b981" style="width:24px;height:24px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                        </svg>
+                    </div>
+                    <div class="cb-modal-title">Email sent!</div>
+                    <div class="cb-modal-desc" style="margin-bottom:20px;">Your reply was delivered to {{ $replyEmail }}</div>
+                    <button type="button" class="cb-modal-cancel" wire:click="cancelReply" style="width:100%;">Close</button>
+                </div>
+            @else
+                {{-- Compose state --}}
+                <div class="cb-modal-icon" style="background:#ede9fe;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#6366f1" style="width:22px;height:22px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/>
+                    </svg>
+                </div>
+                <div class="cb-modal-title">Reply to submission</div>
+
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">TO</label>
+                    <div style="font-size:13px;color:#6366f1;font-weight:500;">{{ $replyEmail }}</div>
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">SUBJECT</label>
+                    <input type="text" wire:model="replySubject" placeholder="Subject…"
+                        style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:13px;color:#111827;background:#f9fafb;outline:none;box-sizing:border-box;"
+                        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e7eb'">
+                    @error('replySubject') <div style="color:#ef4444;font-size:11px;margin-top:3px;">{{ $message }}</div> @enderror
+                </div>
+
+                <div style="margin-bottom:18px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">MESSAGE</label>
+                    <textarea wire:model="replyBody" rows="6" placeholder="Write your reply…"
+                        style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:13px;color:#111827;background:#f9fafb;outline:none;resize:vertical;box-sizing:border-box;font-family:inherit;"
+                        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+                    @error('replyBody') <div style="color:#ef4444;font-size:11px;margin-top:3px;">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="cb-modal-actions">
+                    <button type="button" class="cb-modal-cancel" wire:click="cancelReply">Cancel</button>
+                    <button type="button"
+                        wire:click="sendReply"
+                        wire:loading.attr="disabled"
+                        wire:target="sendReply"
+                        style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:#6366f1;color:#fff;transition:opacity .15s;"
+                        wire:loading.class="opacity-50">
+                        <span wire:loading.remove wire:target="sendReply">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px;display:inline;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"/>
+                            </svg>
+                            Send
+                        </span>
+                        <span wire:loading wire:target="sendReply">Sending…</span>
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
 @endif

@@ -2,12 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Mail\AutomationMail;
 use App\Models\CustomPage;
 use App\Models\CustomPageEntry;
 use App\Models\Device;
 use App\Models\FormSubmission;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Mail;
 
 class CustomBoardPage extends Page
 {
@@ -21,8 +23,17 @@ class CustomBoardPage extends Page
     public string $boardSlug  = '';
     public ?CustomPage $board = null;
     public string $search     = '';
-    public ?int $deleteSubmissionId = null;
     public string $lastUpdated = '';
+
+    // Delete modal
+    public ?int $deleteSubmissionId = null;
+
+    // Reply modal
+    public ?int $replySubmissionId = null;
+    public string $replyEmail      = '';
+    public string $replySubject    = '';
+    public string $replyBody       = '';
+    public bool   $replySent       = false;
 
     public function mount(): void
     {
@@ -103,6 +114,61 @@ class CustomBoardPage extends Page
     public function cancelDeleteSubmission(): void
     {
         $this->deleteSubmissionId = null;
+    }
+
+    // ── Reply ─────────────────────────────────────────────────────────────────
+
+    /** Find the first email address in a submission's data (checks key names first) */
+    public function findEmailInData(array $data): ?string
+    {
+        // Prefer a field whose label contains "email"
+        foreach ($data as $key => $value) {
+            if (is_string($value) && stripos($key, 'email') !== false && filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                return $value;
+            }
+        }
+        // Fallback: any value that is a valid email
+        foreach ($data as $value) {
+            if (is_string($value) && filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                return $value;
+            }
+        }
+        return null;
+    }
+
+    public function openReply(int $id): void
+    {
+        $sub = FormSubmission::find($id);
+        if (! $sub) return;
+
+        $email = $this->findEmailInData($sub->data ?? []);
+        if (! $email) return;
+
+        $this->replySubmissionId = $id;
+        $this->replyEmail        = $email;
+        $this->replySubject      = '';
+        $this->replyBody         = '';
+        $this->replySent         = false;
+    }
+
+    public function sendReply(): void
+    {
+        $this->validate([
+            'replySubject' => 'required|string|max:255',
+            'replyBody'    => 'required|string|max:5000',
+        ]);
+
+        Mail::to($this->replyEmail)->send(
+            new AutomationMail($this->replySubject, $this->replyBody)
+        );
+
+        $this->replySent = true;
+    }
+
+    public function cancelReply(): void
+    {
+        $this->replySubmissionId = null;
+        $this->replySent         = false;
     }
 
     /** Mark an entry as resolved (done / handled) */
