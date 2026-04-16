@@ -12,8 +12,8 @@ class ScheduledJobs extends Page
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-clock'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return null; }
     public static function getNavigationSort(): ?int                    { return 99; }
-    public static function getNavigationLabel(): string                 { return 'Geplante Jobs'; }
-    public function getTitle(): string                                   { return 'Geplante Jobs'; }
+    public static function getNavigationLabel(): string                 { return 'Job-Übersicht'; }
+    public function getTitle(): string                                   { return 'Job-Übersicht'; }
 
     public function getJobs(): array
     {
@@ -72,6 +72,26 @@ class ScheduledJobs extends Page
     }
 
     public ?string $expandedJob = null;
+
+    public function getRecentLogs(): array
+    {
+        return DB::table('automation_logs')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get()
+            ->map(fn ($row) => [
+                'id'           => $row->id,
+                'rule_name'    => $row->rule_name,
+                'trigger_type' => $row->trigger_type,
+                'action_type'  => $row->action_type,
+                'status'       => $row->status,
+                'device_id'    => $row->device_id,
+                'payload'      => json_decode($row->payload ?? '{}', true),
+                'error'        => $row->error,
+                'created_at'   => $row->created_at,
+            ])
+            ->toArray();
+    }
 
     public function toggleJobLog(string $uuid): void
     {

@@ -2,6 +2,7 @@
     @php
         $jobs       = $this->getJobs();
         $failed     = $this->getFailedJobs();
+        $logs       = $this->getRecentLogs();
         $delayed    = array_filter($jobs, fn($j) => $j['is_delayed']);
         $pending    = array_filter($jobs, fn($j) => !$j['is_delayed'] && !$j['reserved']);
         $running    = array_filter($jobs, fn($j) => $j['reserved']);
@@ -9,6 +10,16 @@
         $jobIcons = [
             'SendAutomationEmailJob' => ['icon' => '✉️',  'color' => '#6366f1'],
             'RunAutomationAction'    => ['icon' => '⚡',  'color' => '#f59e0b'],
+        ];
+
+        $actionIcons = [
+            'send_email'          => ['icon' => '✉️',  'color' => '#10b981'],
+            'send_delayed_email'  => ['icon' => '⏱',  'color' => '#6366f1'],
+            'notify_employee'     => ['icon' => '🔔', 'color' => '#f59e0b'],
+            'change_step'         => ['icon' => '➡️', 'color' => '#ec4899'],
+            'update_device_field' => ['icon' => '✏️', 'color' => '#14b8a6'],
+            'send_allowance'      => ['icon' => '📋', 'color' => '#3b82f6'],
+            'generate_invoice'    => ['icon' => '🧾', 'color' => '#eab308'],
         ];
     @endphp
 
@@ -108,20 +119,20 @@
     {{-- ── Stats ── --}}
     <div class="sj-stats">
         <div class="sj-stat">
-            <span class="sj-stat-val" style="color:#6366f1;">{{ count($delayed) }}</span>
-            <span class="sj-stat-lbl">Geplant</span>
+            <span class="sj-stat-val" style="color:#10b981;">{{ count(array_filter($logs, fn($l) => $l['status'] === 'success')) }}</span>
+            <span class="sj-stat-lbl">Erfolgreich</span>
         </div>
         <div class="sj-stat">
-            <span class="sj-stat-val" style="color:#10b981;">{{ count($pending) }}</span>
-            <span class="sj-stat-lbl">Ausstehend</span>
-        </div>
-        <div class="sj-stat">
-            <span class="sj-stat-val" style="color:#f59e0b;">{{ count($running) }}</span>
-            <span class="sj-stat-lbl">Laufend</span>
+            <span class="sj-stat-val" style="color:#6366f1;">{{ count($delayed) + count($pending) + count($running) }}</span>
+            <span class="sj-stat-lbl">In Warteschlange</span>
         </div>
         <div class="sj-stat">
             <span class="sj-stat-val" style="color:#ef4444;">{{ count($failed) }}</span>
             <span class="sj-stat-lbl">Fehlgeschlagen</span>
+        </div>
+        <div class="sj-stat">
+            <span class="sj-stat-val" style="color:#9ca3af;">{{ count($logs) }}</span>
+            <span class="sj-stat-lbl">Gesamt (50)</span>
         </div>
     </div>
 
@@ -304,6 +315,89 @@
         @empty
             <div class="sj-empty">Keine fehlgeschlagenen Jobs.</div>
         @endforelse
+    </div>
+
+    {{-- ── Execution history ── --}}
+    <div class="sj-section">
+        <div class="sj-section-title">
+            📋 Ausführungsverlauf
+            <span style="background:#6b7280;">{{ count($logs) }}</span>
+        </div>
+
+        @if (empty($logs))
+            <div class="sj-empty">Noch keine Ausführungen protokolliert.</div>
+        @else
+            <div style="border-radius:12px; overflow:hidden; border:1px solid rgba(0,0,0,.06);">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="background:#f9fafb; border-bottom:1px solid rgba(0,0,0,.06);">
+                            <th style="padding:8px 14px; text-align:left; font-weight:700; color:#6b7280; font-size:10px; text-transform:uppercase; letter-spacing:.05em; width:36px;"></th>
+                            <th style="padding:8px 14px; text-align:left; font-weight:700; color:#6b7280; font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Aktion</th>
+                            <th style="padding:8px 14px; text-align:left; font-weight:700; color:#6b7280; font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Regel</th>
+                            <th style="padding:8px 14px; text-align:left; font-weight:700; color:#6b7280; font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Detail</th>
+                            <th style="padding:8px 14px; text-align:left; font-weight:700; color:#6b7280; font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Status</th>
+                            <th style="padding:8px 14px; text-align:right; font-weight:700; color:#6b7280; font-size:10px; text-transform:uppercase; letter-spacing:.05em;">Zeit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($logs as $log)
+                            @php
+                                $ai      = $actionIcons[$log['action_type']] ?? ['icon' => '⚙️', 'color' => '#9ca3af'];
+                                $success = $log['status'] === 'success';
+                                $detail  = match($log['action_type']) {
+                                    'send_email', 'send_delayed_email' => $log['payload']['to'] ?? ($log['payload']['subject'] ?? ''),
+                                    'change_step'         => $log['payload']['new_step_label'] ?? '',
+                                    'update_device_field' => ($log['payload']['field'] ?? '') . ' → ' . ($log['payload']['new'] ?? ''),
+                                    'notify_employee'     => count($log['payload']['notified'] ?? []) . ' Mitarbeiter',
+                                    'send_allowance'      => $log['payload']['email'] ?? '',
+                                    default               => '',
+                                };
+                            @endphp
+                            <tr style="border-bottom:1px solid rgba(0,0,0,.04); {{ $loop->last ? 'border-bottom:none;' : '' }} background:{{ $success ? 'transparent' : 'rgba(239,68,68,.02)' }};"
+                                class="dark:bg-transparent">
+                                <td style="padding:9px 14px;">
+                                    <span style="font-size:15px;">{{ $ai['icon'] }}</span>
+                                </td>
+                                <td style="padding:9px 14px;">
+                                    <span style="font-weight:600; color:#374151;" class="dark:text-gray-300">
+                                        {{ \App\Models\AutomationAction::actionLabels()[$log['action_type']] ?? $log['action_type'] }}
+                                    </span>
+                                    @if ($log['device_id'])
+                                        <a href="/admin/devices/{{ $log['device_id'] }}"
+                                           style="display:block; font-size:10px; color:#6366f1; text-decoration:none;">
+                                            Gerät #{{ $log['device_id'] }}
+                                        </a>
+                                    @endif
+                                </td>
+                                <td style="padding:9px 14px; color:#6b7280; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                    {{ $log['rule_name'] }}
+                                </td>
+                                <td style="padding:9px 14px; color:#9ca3af; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                                    title="{{ $detail }}">
+                                    {{ $detail ?: ($log['error'] ? Str::limit($log['error'], 40) : '—') }}
+                                </td>
+                                <td style="padding:9px 14px;">
+                                    @if ($success)
+                                        <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;
+                                                     background:rgba(16,185,129,.1); color:#10b981; border:1px solid rgba(16,185,129,.2);">
+                                            ✓ Erfolgreich
+                                        </span>
+                                    @else
+                                        <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;
+                                                     background:rgba(239,68,68,.1); color:#ef4444; border:1px solid rgba(239,68,68,.2);">
+                                            ✕ Fehler
+                                        </span>
+                                    @endif
+                                </td>
+                                <td style="padding:9px 14px; text-align:right; color:#9ca3af; white-space:nowrap; font-size:11px;">
+                                    {{ \Carbon\Carbon::parse($log['created_at'])->diffForHumans() }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 
     {{-- Auto-refresh every 30 seconds --}}
