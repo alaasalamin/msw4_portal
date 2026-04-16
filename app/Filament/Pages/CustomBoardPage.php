@@ -67,8 +67,7 @@ class CustomBoardPage extends Page
                     NavigationItem::make($page->name)
                         ->url('/admin/board/' . $page->slug)
                         ->icon($page->icon ?: 'heroicon-o-clipboard-document-list')
-                        ->group('Boards')
-                        ->sort($page->sort_order)
+                        ->sort(10 + $page->sort_order) // after Dashboard (sort -2/null)
                         ->badge(
                             CustomPageEntry::where('custom_page_id', $page->id)
                                 ->whereNull('resolved_at')
