@@ -10,9 +10,12 @@ use Illuminate\Support\Str;
 
 class CustomPage extends Model
 {
-    protected $fillable = ['name', 'slug', 'icon', 'color', 'description', 'sort_order', 'form_id'];
+    protected $fillable = ['name', 'slug', 'icon', 'color', 'description', 'sort_order', 'form_id', 'workflow_step_ids'];
 
-    protected $casts = ['sort_order' => 'integer'];
+    protected $casts = [
+        'sort_order'        => 'integer',
+        'workflow_step_ids' => 'array',
+    ];
 
     protected static function booted(): void
     {

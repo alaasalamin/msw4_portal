@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CustomPageResource\Pages;
 use App\Models\CustomForm;
 use App\Models\CustomPage;
+use App\Models\WorkflowPhase;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -61,9 +62,26 @@ class CustomPageResource extends Resource
                 ColorPicker::make('color')->default('#6366f1'),
                 TextInput::make('sort_order')->numeric()->default(0),
                 Textarea::make('description')->rows(2)->columnSpanFull(),
+                Select::make('workflow_step_ids')
+                    ->label('Show devices at these steps')
+                    ->placeholder('None — only automation-added entries')
+                    ->options(function () {
+                        return WorkflowPhase::with(['steps' => fn ($q) => $q->orderBy('sort_order')])
+                            ->orderBy('sort_order')
+                            ->get()
+                            ->mapWithKeys(fn ($phase) => [
+                                $phase->label => $phase->steps->pluck('label', 'id'),
+                            ]);
+                    })
+                    ->multiple()
+                    ->nullable()
+                    ->searchable()
+                    ->helperText('Devices currently at any of these steps will appear on this board.')
+                    ->columnSpanFull(),
+
                 Select::make('form_id')
                     ->label('Show form submissions on this page')
-                    ->placeholder('None — device entries only')
+                    ->placeholder('None — no form submissions table')
                     ->options(fn () => CustomForm::orderBy('name')->pluck('name', 'id'))
                     ->nullable()
                     ->searchable()

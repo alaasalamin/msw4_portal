@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\CustomPage;
 use App\Models\CustomPageEntry;
+use App\Models\Device;
 use App\Models\FormSubmission;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
@@ -40,6 +41,17 @@ class CustomBoardPage extends Page
             ->where('custom_page_id', $this->board->id)
             ->whereNull('resolved_at')
             ->latest()
+            ->get();
+    }
+
+    public function getStepDevices()
+    {
+        $stepIds = $this->board?->workflow_step_ids ?? [];
+        if (empty($stepIds)) return collect();
+
+        return Device::with('workflowStep')
+            ->whereIn('workflow_step_id', $stepIds)
+            ->orderBy('received_at', 'desc')
             ->get();
     }
 

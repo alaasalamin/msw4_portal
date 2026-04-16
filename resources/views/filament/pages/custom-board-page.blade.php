@@ -165,6 +165,65 @@
         </div>
     @endif
 
+    {{-- ── Step-filtered devices ───────────────────────────────────────── --}}
+    @if(!empty($board?->workflow_step_ids))
+        @php $stepDevices = $this->getStepDevices(); @endphp
+        <div style="margin-top:{{ $entries->isEmpty() ? '0' : '36px' }};">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                <span style="display:inline-flex; align-items:center; justify-content:center;
+                             width:28px; height:28px; border-radius:8px;
+                             background:rgba({{ implode(',', array_map('hexdec', str_split(ltrim($color,'#'),2))) }},.12); color:{{ $color }};">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3m-3 3.75h3M8.25 8.25h.008v.008H8.25V8.25Zm0 3.75h.008v.008H8.25V12Zm0 3.75h.008v.008H8.25v-.008Z"/>
+                    </svg>
+                </span>
+                <span style="font-size:14px; font-weight:700; color:#111827;" class="dark:text-white">
+                    Devices at selected steps
+                </span>
+                <span style="font-size:11px; padding:2px 8px; border-radius:12px; background:rgba({{ implode(',', array_map('hexdec', str_split(ltrim($color,'#'),2))) }},.1); color:{{ $color }}; font-weight:600;">
+                    {{ $stepDevices->count() }}
+                </span>
+            </div>
+
+            @if($stepDevices->isEmpty())
+                <div style="text-align:center; padding:28px; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb; color:#9ca3af; font-size:13px;" class="dark:bg-white/5 dark:border-white/10">
+                    No devices at these steps right now.
+                </div>
+            @else
+                <div class="cb-grid">
+                    @foreach($stepDevices as $device)
+                        <a href="/admin/devices/{{ $device->id }}" class="cb-card cb-link" style="display:block; text-decoration:none;">
+                            <div class="cb-card-ticket">{{ $device->ticket_number }}</div>
+                            <div class="cb-card-device">{{ $device->brand }} {{ $device->model }}</div>
+                            <div class="cb-card-customer">{{ $device->customer_name ?: '—' }}</div>
+                            <div class="cb-card-meta" style="margin-top:8px;">
+                                <span class="cb-chip cb-chip-step">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:10px;height:10px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"/>
+                                    </svg>
+                                    {{ $device->workflowStep?->label ?? '—' }}
+                                </span>
+                                @if($device->storage_box)
+                                    <span class="cb-chip cb-chip-box">📦 {{ $device->storage_box }}</span>
+                                @endif
+                                @if($device->priority && $device->priority !== 'normal')
+                                    <span class="cb-chip" style="background:rgba(239,68,68,.08); color:#ef4444;">
+                                        {{ ucfirst($device->priority) }}
+                                    </span>
+                                @endif
+                            </div>
+                            @if($device->received_at)
+                                <div class="cb-card-footer" style="margin-top:10px;">
+                                    <div class="cb-card-time">{{ $device->received_at->diffForHumans() }}</div>
+                                </div>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    @endif
+
     {{-- ── Form submissions table (shown when a form is linked) ──────────── --}}
     @if($board?->form_id)
         @php $submissions = $this->getSubmissions(); $form = $board->form; @endphp
