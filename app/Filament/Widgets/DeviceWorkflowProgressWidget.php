@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Device;
 use App\Models\WorkflowPhase;
+use App\Models\WorkflowStep;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,7 +14,10 @@ class DeviceWorkflowProgressWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
-    public ?Model $record = null;
+    public ?Model  $record          = null;
+    public ?int    $pendingStepId   = null;
+    public ?string $pendingStepLabel = null;
+    public ?string $flashMessage    = null;
 
     public function getDevice(): ?Device
     {
@@ -29,13 +33,12 @@ class DeviceWorkflowProgressWidget extends Widget
             ->get();
 
         if (! $device?->workflow_step_id) {
-            return ['phases' => $phases, 'currentStepId' => null, 'currentPhaseId' => null, 'currentStepIndex' => null];
+            return ['phases' => $phases, 'currentStepId' => null, 'currentPhaseId' => null, 'currentStepIndex' => null, 'currentPhaseOrder' => 0];
         }
 
-        $currentStep  = $device->workflowStep;
+        $currentStep    = $device->workflowStep;
         $currentPhaseId = $currentStep?->phase_id;
 
-        // Find the current step's index within its phase
         $currentStepIndex = null;
         if ($currentStep) {
             $phase = $phases->firstWhere('id', $currentPhaseId);
@@ -44,7 +47,6 @@ class DeviceWorkflowProgressWidget extends Widget
             }
         }
 
-        // Determine phase order: before, current, after
         $currentPhaseOrder = $phases->firstWhere('id', $currentPhaseId)?->sort_order ?? 0;
 
         return [
@@ -54,5 +56,45 @@ class DeviceWorkflowProgressWidget extends Widget
             'currentStepIndex'  => $currentStepIndex,
             'currentPhaseOrder' => $currentPhaseOrder,
         ];
+    }
+
+    /** User clicks a node — stage it for confirmation */
+    public function selectStep(int $stepId): void
+    {
+        $device = $this->getDevice();
+        if (! $device) return;
+
+        // Clicking the already-pending or current step cancels
+        if ($this->pendingStepId === $stepId || $device->workflow_step_id === $stepId) {
+            $this->pendingStepId    = null;
+            $this->pendingStepLabel = null;
+            return;
+        }
+
+        $step = WorkflowStep::find($stepId);
+        if (! $step) return;
+
+        $this->pendingStepId    = $stepId;
+        $this->pendingStepLabel = $step->label;
+    }
+
+    /** User confirmed — save the new step */
+    public function confirmStep(): void
+    {
+        $device = $this->getDevice();
+        if (! $device || ! $this->pendingStepId) return;
+
+        $device->update(['workflow_step_id' => $this->pendingStepId]);
+        $this->record = $device->fresh('workflowStep');
+
+        $this->flashMessage     = 'Schritt geändert zu „' . $this->pendingStepLabel . '"';
+        $this->pendingStepId    = null;
+        $this->pendingStepLabel = null;
+    }
+
+    public function cancelStep(): void
+    {
+        $this->pendingStepId    = null;
+        $this->pendingStepLabel = null;
     }
 }
