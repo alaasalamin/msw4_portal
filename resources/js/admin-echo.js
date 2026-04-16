@@ -78,30 +78,34 @@ function _getBellAudio() {
         if (!_bellUri) _bellUri = _makeBellUri();
         _bellAudio = new Audio(_bellUri);
         _bellAudio.volume = 0.8;
-        _bellAudio.addEventListener('error', e => console.error('[AdminEcho] bell load error:', e));
     }
     return _bellAudio;
 }
 
-// Unlock: silently play+pause during a real user gesture
-function _unlockBell() {
-    if (_bellReady) return;
-    const a = _getBellAudio();
-    a.volume = 0;
-    a.play()
-        .then(() => { a.pause(); a.currentTime = 0; a.volume = 0.8; _bellReady = true; console.log('[AdminEcho] bell unlocked ✓'); })
-        .catch(e  => console.warn('[AdminEcho] bell unlock failed:', e.message));
-}
-['click', 'keydown', 'touchend', 'pointerdown'].forEach(ev =>
-    document.addEventListener(ev, _unlockBell, { passive: true })
-);
-
-function playBell() {
-    if (!_bellReady) { console.warn('[AdminEcho] bell not ready — click the page first'); return; }
+// Called from a button click — unlocks AND plays the bell in one gesture
+async function unlockAndPlayBell() {
     const a = _getBellAudio();
     a.currentTime = 0;
-    a.play().catch(e => console.warn('[AdminEcho] bell play failed:', e.message));
+    a.volume = 0.8;
+    try {
+        await a.play();
+        _bellReady = true;
+        console.log('[AdminEcho] bell unlocked ✓');
+    } catch (e) {
+        console.warn('[AdminEcho] bell unlock failed:', e.message);
+    }
 }
+
+// Called automatically from the poll timer — only works after unlockAndPlayBell()
+function playBell() {
+    if (!_bellReady) return;
+    const a = _getBellAudio();
+    a.currentTime = 0;
+    a.play().catch(() => {});
+}
+
+window._unlockAndPlayBell = unlockAndPlayBell;
+window._playAdminBell     = playBell;
 
 // Debug helper
 window._bellDebug = () => ({

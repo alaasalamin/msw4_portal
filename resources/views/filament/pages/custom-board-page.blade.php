@@ -450,23 +450,21 @@
         }
     }
 
-    // "Enable sound" button: clicking it unlocks audio AND plays confirmation bell
+    // "Enable sound" button
     const soundBtn = document.getElementById('cb-sound-btn');
     if (soundBtn) {
-        // Hide once audio is already unlocked (e.g. navigated back to page)
+        // Already unlocked (e.g. navigated back) — hide immediately
         if (window._bellDebug && window._bellDebug().ready) {
             soundBtn.style.display = 'none';
         }
 
-        soundBtn.addEventListener('click', () => {
-            // _unlockBell runs via the global click listener automatically,
-            // but we also explicitly play so the user hears confirmation
-            setTimeout(() => {
-                playBell();
-                soundBtn.textContent = '🔔 Sound on';
-                soundBtn.style.opacity = '0';
-                setTimeout(() => soundBtn.style.display = 'none', 400);
-            }, 80); // small delay so _unlockBell fires first
+        soundBtn.addEventListener('click', async () => {
+            if (typeof window._unlockAndPlayBell === 'function') {
+                await window._unlockAndPlayBell();   // unlocks + plays in one gesture
+            }
+            soundBtn.style.transition = 'opacity .3s';
+            soundBtn.style.opacity = '0';
+            setTimeout(() => { soundBtn.style.display = 'none'; }, 350);
         });
     }
 
