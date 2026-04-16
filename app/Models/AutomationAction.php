@@ -28,6 +28,7 @@ class AutomationAction extends Model
             'send_delayed_email'  => '⏱ Verzögerte E-Mail senden',
             'change_step'         => 'Schritt wechseln',
             'update_device_field' => 'Gerätefeld aktualisieren',
+            'add_to_page'         => 'Zu Seite hinzufügen',
             'generate_invoice'    => 'Rechnung generieren (RSW)',
         ];
     }

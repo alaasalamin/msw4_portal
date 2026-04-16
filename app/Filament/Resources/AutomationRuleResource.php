@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AutomationRuleResource\Pages;
 use App\Models\AutomationAction;
 use App\Models\AutomationRule;
+use App\Models\CustomPage;
 use App\Models\WorkflowStep;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
@@ -243,6 +244,21 @@ class AutomationRuleResource extends Resource
                             )
                             ->required(fn (Get $get) => $get('action_type') === 'change_step')
                             ->visible(fn (Get $get) => $get('action_type') === 'change_step'),
+
+                        // ── add_to_page ─────────────────────────────────────
+                        Select::make('action_config.page_id')
+                            ->label('Seite')
+                            ->options(fn () => CustomPage::orderBy('sort_order')->pluck('name', 'id'))
+                            ->required(fn (Get $get) => $get('action_type') === 'add_to_page')
+                            ->searchable()
+                            ->visible(fn (Get $get) => $get('action_type') === 'add_to_page'),
+
+                        Textarea::make('action_config.notes')
+                            ->label('Notiz (optional)')
+                            ->rows(2)
+                            ->placeholder('z.B. Ersatzteil fehlt für {{brand}} {{model}} ({{ticket}})')
+                            ->helperText('Variablen: {{ticket}}, {{brand}}, {{model}}, {{customer}}')
+                            ->visible(fn (Get $get) => $get('action_type') === 'add_to_page'),
 
                         // ── generate_invoice ────────────────────────────────
                         TextInput::make('action_config.template')

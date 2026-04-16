@@ -8,6 +8,7 @@ use App\Actions\Automation\NotifyEmployeeAction;
 use App\Actions\Automation\SendAllowanceAction;
 use App\Actions\Automation\SendDelayedEmailAction;
 use App\Actions\Automation\SendEmailAction;
+use App\Actions\Automation\AddToPageAction;
 use App\Actions\Automation\UpdateDeviceFieldAction;
 use App\Models\AutomationAction;
 use App\Models\AutomationLog;
@@ -74,6 +75,7 @@ class RunAutomationAction implements ShouldQueue
             'send_delayed_email'  => new SendDelayedEmailAction(),
             'change_step'         => new ChangeStepAction(),
             'update_device_field' => new UpdateDeviceFieldAction(),
+            'add_to_page'         => new AddToPageAction(),
             'generate_invoice'    => new GenerateInvoiceAction(),
             default               => throw new \RuntimeException("Unknown action type: {$this->action->action_type}"),
         };
