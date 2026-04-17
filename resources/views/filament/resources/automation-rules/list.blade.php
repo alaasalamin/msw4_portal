@@ -17,6 +17,7 @@
             'notify_employee'     => ['icon' => '🔔', 'color' => '#f59e0b', 'label' => 'Mitarbeiter'],
             'send_email'          => ['icon' => '✉️',  'color' => '#10b981', 'label' => 'E-Mail'],
             'send_delayed_email'  => ['icon' => '⏱',  'color' => '#6366f1', 'label' => 'Verzögerte E-Mail'],
+            'send_email_template' => ['icon' => '📧', 'color' => '#0ea5e9', 'label' => 'E-Mail-Vorlage'],
             'change_step'         => ['icon' => '➡️',  'color' => '#ec4899', 'label' => 'Schritt wechseln'],
             'update_device_field' => ['icon' => '✏️',  'color' => '#14b8a6', 'label' => 'Feld aktualisieren'],
             'generate_invoice'    => ['icon' => '🧾', 'color' => '#eab308', 'label' => 'RSW Rechnung'],
@@ -34,6 +35,9 @@
                 'notify_employee'   => empty($cfg['employee_ids']) ? 'Alle Mitarbeiter' : count($cfg['employee_ids']) . ' Mitarbeiter',
                 'send_email'        => $cfg['subject'] ?? 'Kein Betreff',
                 'send_delayed_email'  => 'Nach ' . $delayLabel($cfg) . ' → ' . ($cfg['subject'] ?? 'Kein Betreff'),
+                'send_email_template' => isset($cfg['template_id'])
+                    ? (\App\Models\EmailTemplate::find($cfg['template_id'])?->name ?? 'Unbekannte Vorlage')
+                    : 'Keine Vorlage',
                 'update_device_field' => match($cfg['field'] ?? '') {
                     'estimated_cost' => '€ Geschätzt → ' . ($cfg['value'] ?? '?'),
                     'final_cost'     => '€ Endpreis → ' . ($cfg['value'] ?? '?'),

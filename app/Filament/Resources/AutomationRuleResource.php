@@ -6,6 +6,7 @@ use App\Filament\Resources\AutomationRuleResource\Pages;
 use App\Models\AutomationAction;
 use App\Models\AutomationRule;
 use App\Models\CustomPage;
+use App\Models\EmailTemplate;
 use App\Models\WorkflowStep;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
@@ -259,6 +260,28 @@ class AutomationRuleResource extends Resource
                             ->placeholder('z.B. Ersatzteil fehlt für {{brand}} {{model}} ({{ticket}})')
                             ->helperText('Variablen: {{ticket}}, {{brand}}, {{model}}, {{customer}}')
                             ->visible(fn (Get $get) => $get('action_type') === 'add_to_page'),
+
+                        // ── send_email_template ─────────────────────────────
+                        Select::make('action_config.template_id')
+                            ->label('E-Mail-Vorlage')
+                            ->options(fn () => EmailTemplate::orderBy('name')->pluck('name', 'id'))
+                            ->required(fn (Get $get) => $get('action_type') === 'send_email_template')
+                            ->searchable()
+                            ->live()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_email_template'),
+
+                        Select::make('action_config.recipient')
+                            ->label('Empfänger')
+                            ->options(['customer' => 'Kunde (aus Gerät)', 'custom' => 'Benutzerdefiniert'])
+                            ->default('customer')
+                            ->live()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_email_template'),
+
+                        TextInput::make('action_config.custom_email')
+                            ->label('E-Mail-Adresse')
+                            ->email()
+                            ->visible(fn (Get $get) => $get('action_type') === 'send_email_template'
+                                && $get('action_config.recipient') === 'custom'),
 
                         // ── generate_invoice ────────────────────────────────
                         TextInput::make('action_config.template')

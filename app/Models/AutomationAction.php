@@ -26,6 +26,7 @@ class AutomationAction extends Model
             'notify_employee'     => 'Mitarbeiter benachrichtigen',
             'send_email'          => 'E-Mail senden',
             'send_delayed_email'  => '⏱ Verzögerte E-Mail senden',
+            'send_email_template' => '📧 E-Mail-Vorlage senden',
             'change_step'         => 'Schritt wechseln',
             'update_device_field' => 'Gerätefeld aktualisieren',
             'add_to_page'         => 'Zu Seite hinzufügen',
