@@ -93,6 +93,7 @@ class CustomPageResource extends Resource
                     ->label('Visible to employees')
                     ->relationship('employees', 'name', fn ($query) => $query->where('type', 'employee'))
                     ->multiple()
+                    ->searchable(false)
                     ->placeholder('All employees')
                     ->helperText('Leave empty to show to all employees.')
                     ->columnSpanFull(),
