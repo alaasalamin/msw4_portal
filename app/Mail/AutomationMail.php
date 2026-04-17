@@ -31,11 +31,22 @@ class AutomationMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: $this->mailSubject);
+        return new Envelope(
+            subject: $this->mailSubject,
+            replyTo: [
+                new \Illuminate\Mail\Mailables\Address(
+                    config('mail.from.address'),
+                    config('mail.from.name'),
+                ),
+            ],
+        );
     }
 
     public function content(): Content
     {
-        return new Content(view: 'mail.automation');
+        return new Content(
+            view:     'mail.automation',
+            text:     'mail.automation-text',
+        );
     }
 }

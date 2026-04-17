@@ -46,8 +46,10 @@
                         <td style="background:#ffffff;border-radius:0 0 16px 16px;padding:20px 36px 28px;
                                    border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">
                             <div style="font-size:12px;color:#94a3b8;line-height:1.6;">
-                                Diese E-Mail wurde automatisch von MSW Repair gesendet.<br>
-                                Bitte antworten Sie nicht direkt auf diese E-Mail.
+                                Bei Fragen können Sie uns unter
+                                <a href="mailto:{{ config('mail.from.address') }}"
+                                   style="color:#6366f1;text-decoration:none;">{{ config('mail.from.address') }}</a>
+                                erreichen.
                             </div>
                         </td>
                     </tr>
