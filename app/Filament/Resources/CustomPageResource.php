@@ -93,7 +93,6 @@ class CustomPageResource extends Resource
                     ->label('Visible to employees')
                     ->relationship('employees', 'name')
                     ->multiple()
-                    ->preloadOptions()
                     ->placeholder('All employees')
                     ->helperText('Leave empty to show to all employees.')
                     ->columnSpanFull(),
