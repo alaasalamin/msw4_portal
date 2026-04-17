@@ -21,27 +21,26 @@
         </svg>
     </button>
 
-    {{-- Modal overlay --}}
+    {{-- Modal --}}
     @if($open)
         <div
             style="position:fixed; inset:0; z-index:9998; background:rgba(0,0,0,0.35);"
             wire:click="toggle"
         ></div>
 
-        <div
+        <div class="nav-pref-panel"
             style="position:fixed; top:56px; right:16px; z-index:9999;
-                   width:260px; background:#fff; border-radius:12px;
-                   box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:20px;
+                   width:260px; border-radius:12px; padding:20px;
                    font-family:inherit;"
         >
-            <p style="margin:0 0 14px; font-size:13px; font-weight:600; color:#111827;">
+            <p class="nav-pref-title" style="margin:0 0 14px; font-size:13px; font-weight:600;">
                 Seitenleiste anpassen
             </p>
 
             <div style="display:flex; flex-direction:column; gap:10px;">
                 @foreach($allGroups as $group)
-                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;
-                                  font-size:13px; color:#374151;">
+                    <label class="nav-pref-label" style="display:flex; align-items:center; gap:10px;
+                                  cursor:pointer; font-size:13px;">
                         <input
                             type="checkbox"
                             value="{{ $group }}"
@@ -68,3 +67,21 @@
     @endif
 
 </div>
+
+<style>
+    /* Light mode */
+    .nav-pref-panel {
+        background: #fff;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .nav-pref-title { color: #111827; }
+    .nav-pref-label { color: #374151; }
+
+    /* Dark mode */
+    .dark .nav-pref-panel {
+        background: #1e2533;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .dark .nav-pref-title { color: #f3f4f6; }
+    .dark .nav-pref-label { color: #d1d5db; }
+</style>
