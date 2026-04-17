@@ -32,12 +32,27 @@ class AdminPanelProvider extends PanelProvider
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::GLOBAL_SEARCH_AFTER,
-            fn () => Blade::render('<x-admin-notification-bell />'),
+            fn () => Blade::render('<x-admin-notification-bell /><x-admin-nav-preferences />'),
         );
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::BODY_END,
             fn () => Blade::render('<x-admin-echo-setup />'),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            function (): string {
+                $hidden = auth('employee')->user()?->nav_preferences['hidden_groups'] ?? [];
+                if (empty($hidden)) return '';
+
+                $css = implode('', array_map(
+                    fn (string $g) => '[data-group-label="' . e($g) . '"]{display:none!important;}',
+                    $hidden,
+                ));
+
+                return "<style>{$css}</style>";
+            },
         );
     }
 

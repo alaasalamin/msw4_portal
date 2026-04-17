@@ -15,7 +15,7 @@ class NotificationBell extends Component
 
     private function getUser(): ?User
     {
-        $admin = auth('admin')->user();
+        $admin = auth('employee')->user();
         return $admin ? User::find($admin->id) : null;
     }
 
