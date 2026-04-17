@@ -4,7 +4,7 @@ namespace App\Filament\Resources\FormSubmissionResource\Pages;
 
 use App\Filament\Resources\FormSubmissionResource;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Pages\ListRecords\Tab;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListFormSubmissions extends ListRecords
