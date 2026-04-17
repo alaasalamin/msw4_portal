@@ -708,14 +708,16 @@
                     </button>
                 </div>
 
-                <div style="display:flex; flex-direction:column; gap:6px; max-height:360px; overflow-y:auto;">
+                <div style="display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;">
                     @foreach($stepsByPhase as $phase => $steps)
                         <div style="font-size:10px; font-weight:700; letter-spacing:.06em; color:#9ca3af; text-transform:uppercase; padding:4px 0 2px; margin-top:4px;">
                             {{ $phase }}
                         </div>
                         @foreach($steps as $step)
                             <button type="button"
-                                wire:click="$set('changeStepValue', {{ $step->id }})"
+                                wire:click="selectChangeStep({{ $step->id }})"
+                                wire:loading.attr="disabled"
+                                wire:target="selectChangeStep"
                                 style="text-align:left; padding:9px 12px; border-radius:8px; border:1.5px solid {{ $changeStepValue == $step->id ? '#6366f1' : 'transparent' }}; background:{{ $changeStepValue == $step->id ? 'rgba(99,102,241,.08)' : 'transparent' }}; cursor:pointer; font-size:13px; font-weight:{{ $changeStepValue == $step->id ? '600' : '400' }}; color:{{ $changeStepValue == $step->id ? '#6366f1' : 'inherit' }}; width:100%; transition:all .12s;"
                                 class="cb-step-option {{ $changeStepValue == $step->id ? 'cb-step-option-active' : '' }}">
                                 @if($changeStepValue == $step->id)
@@ -724,10 +726,40 @@
                                     </svg>
                                 @endif
                                 {{ $step->label }}
+                                @if(!empty($step->custom_fields))
+                                    <span style="margin-left:6px; font-size:9px; background:rgba(245,158,11,.15); color:#d97706; border-radius:4px; padding:1px 5px; font-weight:600; vertical-align:middle;">fields</span>
+                                @endif
                             </button>
                         @endforeach
                     @endforeach
                 </div>
+
+                {{-- Custom fields for selected step --}}
+                @if(!empty($changeStepCustomFields))
+                    <div style="margin-top:14px; padding-top:14px; border-top:1px solid #e5e7eb;" class="dark:border-white/10">
+                        <div style="font-size:10px; font-weight:700; letter-spacing:.06em; color:#6366f1; text-transform:uppercase; margin-bottom:10px;">
+                            Fill in step details
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            @foreach($changeStepCustomFields as $i => $field)
+                                <div>
+                                    <label class="cb-view-label" style="margin-bottom:4px;">
+                                        {{ $field['label'] }}
+                                        @if(!empty($field['required']))
+                                            <span style="color:#ef4444;">*</span>
+                                        @endif
+                                    </label>
+                                    <input
+                                        type="{{ $field['type'] ?? 'text' }}"
+                                        wire:model="changeStepFieldValues.{{ $i }}"
+                                        placeholder="{{ $field['placeholder'] ?? '' }}"
+                                        class="cb-reply-input"
+                                    >
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 <div class="cb-modal-actions" style="margin-top:18px;">
                     <button type="button" class="cb-modal-cancel" wire:click="cancelChangeStep">Cancel</button>

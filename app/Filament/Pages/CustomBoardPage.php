@@ -30,8 +30,10 @@ class CustomBoardPage extends Page
     public ?int $deleteSubmissionId = null;
 
     // Change step modal
-    public ?int $changeStepDeviceId  = null;
-    public ?int $changeStepValue     = null;
+    public ?int   $changeStepDeviceId    = null;
+    public ?int   $changeStepValue       = null;
+    public array  $changeStepCustomFields = [];   // [{label, type?, required?}, ...]
+    public array  $changeStepFieldValues  = [];   // indexed values matching $changeStepCustomFields
 
     // View modal
     public ?int $viewSubmissionId = null;
@@ -132,25 +134,67 @@ class CustomBoardPage extends Page
         $device = Device::find($deviceId);
         if (! $device) return;
 
-        $this->changeStepDeviceId = $deviceId;
-        $this->changeStepValue    = $device->workflow_step_id;
+        $this->changeStepDeviceId    = $deviceId;
+        $this->changeStepValue       = $device->workflow_step_id;
+        $this->changeStepCustomFields = [];
+        $this->changeStepFieldValues  = [];
+    }
+
+    /** Called when user clicks a step option in the modal */
+    public function selectChangeStep(int $stepId): void
+    {
+        $this->changeStepValue = $stepId;
+
+        $step = WorkflowStep::find($stepId);
+        $fields = $step?->custom_fields ?? [];
+
+        $this->changeStepCustomFields = $fields;
+
+        // Pre-populate from existing step_data if any
+        $device   = Device::find($this->changeStepDeviceId);
+        $stepData = $device?->step_data ?? [];
+        $saved    = $stepData[(string) $stepId] ?? [];
+
+        $this->changeStepFieldValues = array_map(
+            fn ($f) => $saved[$f['label']] ?? '',
+            $fields
+        );
     }
 
     public function applyChangeStep(): void
     {
         if (! $this->changeStepDeviceId || ! $this->changeStepValue) return;
 
-        Device::where('id', $this->changeStepDeviceId)
-            ->update(['workflow_step_id' => $this->changeStepValue]);
+        $device   = Device::find($this->changeStepDeviceId);
+        if (! $device) return;
 
-        $this->changeStepDeviceId = null;
-        $this->changeStepValue    = null;
+        $update = ['workflow_step_id' => $this->changeStepValue];
+
+        // If the target step has custom fields, persist the filled values
+        if (! empty($this->changeStepCustomFields)) {
+            $stepData = $device->step_data ?? [];
+            $values   = [];
+            foreach ($this->changeStepCustomFields as $i => $field) {
+                $values[$field['label']] = $this->changeStepFieldValues[$i] ?? '';
+            }
+            $stepData[(string) $this->changeStepValue] = $values;
+            $update['step_data'] = $stepData;
+        }
+
+        $device->update($update);
+
+        $this->changeStepDeviceId    = null;
+        $this->changeStepValue       = null;
+        $this->changeStepCustomFields = [];
+        $this->changeStepFieldValues  = [];
     }
 
     public function cancelChangeStep(): void
     {
-        $this->changeStepDeviceId = null;
-        $this->changeStepValue    = null;
+        $this->changeStepDeviceId    = null;
+        $this->changeStepValue       = null;
+        $this->changeStepCustomFields = [];
+        $this->changeStepFieldValues  = [];
     }
 
     public function getAllSteps(): \Illuminate\Support\Collection
