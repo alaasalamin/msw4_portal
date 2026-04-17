@@ -91,7 +91,7 @@ Route::get('/admin/api/board-counts', function () {
     $counts = CustomPage::orderBy('sort_order')->get()->mapWithKeys(function (CustomPage $page) {
         $total = CustomPageEntry::where('custom_page_id', $page->id)->whereNull('resolved_at')->count();
         if ($page->form_id) {
-            $total += FormSubmission::where('form_id', $page->form_id)->count();
+            $total += FormSubmission::where('form_id', $page->form_id)->whereNull('replied_at')->count();
         }
         if (! empty($page->workflow_step_ids)) {
             $total += Device::whereIn('workflow_step_id', $page->workflow_step_ids)->count();

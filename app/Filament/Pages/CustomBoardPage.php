@@ -251,9 +251,11 @@ class CustomBoardPage extends Page
                         ->whereNull('resolved_at')
                         ->count();
 
-                    // Form submissions
+                    // Form submissions (only unreplied)
                     if ($page->form_id) {
-                        $total += FormSubmission::where('form_id', $page->form_id)->count();
+                        $total += FormSubmission::where('form_id', $page->form_id)
+                            ->whereNull('replied_at')
+                            ->count();
                     }
 
                     // Step-filtered devices
