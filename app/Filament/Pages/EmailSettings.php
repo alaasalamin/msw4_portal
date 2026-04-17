@@ -25,15 +25,16 @@ class EmailSettings extends Page
 
     public function mount(): void
     {
+        // Fall back to the current runtime config (sourced from .env) when DB is empty
         $this->form->fill([
-            'mail_mailer'            => Setting::get('mail_mailer', 'smtp'),
-            'mail_host'              => Setting::get('mail_host'),
-            'mail_port'              => Setting::get('mail_port', '587'),
-            'mail_encryption'        => Setting::get('mail_encryption', 'tls'),
-            'mail_username'          => Setting::get('mail_username'),
-            'mail_password'          => Setting::get('mail_password'),
-            'mail_from_address'      => Setting::get('mail_from_address'),
-            'mail_from_name'         => Setting::get('mail_from_name', Setting::get('site_name', config('app.name'))),
+            'mail_mailer'       => Setting::get('mail_mailer',       config('mail.default', 'smtp')),
+            'mail_host'         => Setting::get('mail_host',         config('mail.mailers.smtp.host')),
+            'mail_port'         => Setting::get('mail_port',         config('mail.mailers.smtp.port', 587)),
+            'mail_encryption'   => Setting::get('mail_encryption',   config('mail.mailers.smtp.encryption', 'tls')),
+            'mail_username'     => Setting::get('mail_username',     config('mail.mailers.smtp.username')),
+            'mail_password'     => Setting::get('mail_password',     config('mail.mailers.smtp.password')),
+            'mail_from_address' => Setting::get('mail_from_address', config('mail.from.address')),
+            'mail_from_name'    => Setting::get('mail_from_name',    config('mail.from.name', config('app.name'))),
         ]);
     }
 
@@ -138,9 +139,46 @@ class EmailSettings extends Page
         ]);
     }
 
+    public function sendTest(): void
+    {
+        $to = auth('admin')->user()?->email ?? Setting::get('mail_from_address');
+
+        if (! $to) {
+            Notification::make()->title('No recipient email found')->danger()->send();
+            return;
+        }
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($to)->send(
+                new \App\Mail\AutomationMail(
+                    subject:      'MSW — Test Email',
+                    body:         "This is a test email from MSW Repair.\n\nIf you received this, your email settings are working correctly.",
+                    ticketNumber: '',
+                    deviceLabel:  '',
+                )
+            );
+
+            Notification::make()
+                ->title("Test email sent to {$to}")
+                ->success()
+                ->send();
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('Failed to send test email')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('test')
+                ->label('Send test email')
+                ->action('sendTest')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('gray'),
             Action::make('save')
                 ->label('Save')
                 ->action('save')
