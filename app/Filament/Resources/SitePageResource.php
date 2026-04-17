@@ -9,6 +9,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -208,6 +209,47 @@ class SitePageResource extends Resource
                                     ->options(['light' => 'Light (white)', 'dark' => 'Dark (zinc-900)', 'muted' => 'Muted (zinc-50)'])
                                     ->default('light'),
                             ])->columns(2),
+
+                        // ── Carousel ──────────────────────────────────────────
+                        Block::make('carousel')
+                            ->label('Image Carousel')
+                            ->icon('heroicon-o-photo')
+                            ->schema([
+                                TextInput::make('heading')->label('Heading (optional)')->maxLength(150),
+                                Select::make('interval')
+                                    ->label('Autoplay interval')
+                                    ->options(['3000' => '3 seconds', '5000' => '5 seconds', '8000' => '8 seconds'])
+                                    ->default('5000'),
+                                Select::make('theme')
+                                    ->options(['dark' => 'Dark', 'light' => 'Light'])
+                                    ->default('dark'),
+                                Repeater::make('slides')
+                                    ->label('Slides')
+                                    ->schema([
+                                        FileUpload::make('image')
+                                            ->label('Image')
+                                            ->image()
+                                            ->disk('public')
+                                            ->visibility('public')
+                                            ->directory('sections/carousel')
+                                            ->required(),
+                                        TextInput::make('caption')
+                                            ->label('Caption (optional)')
+                                            ->maxLength(200),
+                                        TextInput::make('link_url')
+                                            ->label('Link URL (optional)')
+                                            ->maxLength(500)
+                                            ->url(),
+                                        TextInput::make('link_label')
+                                            ->label('Link button label')
+                                            ->maxLength(60)
+                                            ->placeholder('Learn more'),
+                                    ])
+                                    ->columns(2)
+                                    ->addActionLabel('Add slide')
+                                    ->defaultItems(0)
+                                    ->columnSpanFull(),
+                            ])->columns(3),
 
                         // ── Text Block ────────────────────────────────────────
                         Block::make('text_block')
