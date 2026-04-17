@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class WorkflowStep extends Model
 {
-    protected $fillable = ['phase_id', 'label', 'sort_order', 'custom_fields'];
+    protected $fillable = ['phase_id', 'label', 'sort_order', 'custom_fields', 'email_template_ids'];
 
-    protected $casts = ['sort_order' => 'integer', 'custom_fields' => 'array'];
+    protected $casts = ['sort_order' => 'integer', 'custom_fields' => 'array', 'email_template_ids' => 'array'];
 
     public function employees(): BelongsToMany
     {

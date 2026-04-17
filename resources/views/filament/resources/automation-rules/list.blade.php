@@ -412,7 +412,13 @@
                                     right:calc(16px + (100% - 32px) / {{ $count }} / 2);"></div>
                         <div style="display:grid; grid-template-columns:repeat({{ $count }}, 1fr); gap:4px; position:relative; z-index:1;">
                             @foreach ($items as $i => $step)
-                                @php $fields = $step->custom_fields ?? []; $hasFields = count($fields) > 0; @endphp
+                                @php
+                                    $fields      = $step->custom_fields ?? [];
+                                    $tplIds      = $step->email_template_ids ?? [];
+                                    $hasFields   = count($fields) > 0;
+                                    $hasTpls     = count($tplIds) > 0;
+                                    $hasSubnodes = $hasFields || $hasTpls;
+                                @endphp
                                 <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
 
                                     {{-- Node --}}
@@ -423,8 +429,8 @@
                                     {{-- Step label --}}
                                     <p class="wfa-step-label">{{ $step->label }}</p>
 
-                                    {{-- Branch sub-notes --}}
-                                    @if ($hasFields)
+                                    {{-- Branch sub-notes (fields + email templates) --}}
+                                    @if ($hasSubnodes)
                                         <div class="wfa-branch">
                                             <div class="wfa-branch-line"></div>
                                             <div class="wfa-branch-dot"></div>
@@ -434,6 +440,15 @@
                                                         <span class="wfa-subnote-bullet">▸</span>
                                                         <span class="wfa-subnote-label">{{ $field['label'] }}</span>
                                                     </div>
+                                                @endforeach
+                                                @foreach ($tplIds as $tplId)
+                                                    @php $tplName = \App\Models\EmailTemplate::find($tplId)?->name; @endphp
+                                                    @if ($tplName)
+                                                        <div class="wfa-subnote" style="color:#0ea5e9;">
+                                                            <span class="wfa-subnote-bullet">📧</span>
+                                                            <span class="wfa-subnote-label">{{ $tplName }}</span>
+                                                        </div>
+                                                    @endif
                                                 @endforeach
                                             </div>
                                         </div>
@@ -494,6 +509,45 @@
                             + Hinzufügen
                         </button>
                     </div>
+
+                    {{-- ── Email templates linked to this step ───────────── --}}
+                    @php $allTemplates = $this->getAllEmailTemplates(); @endphp
+                    <div class="wfa-section-label" style="margin-top:20px;">
+                        <span style="margin-right:6px;">📧</span> Auto-E-Mails bei diesem Schritt
+                    </div>
+
+                    @if (empty($stepEmailTemplateIds))
+                        <div class="wfa-empty-fields">Noch keine E-Mail-Vorlagen verknüpft.</div>
+                    @else
+                        @foreach ($stepEmailTemplateIds as $tplId)
+                            @php $tpl = $allTemplates->firstWhere('id', $tplId); @endphp
+                            @if ($tpl)
+                                <div class="wfa-field-row">
+                                    <div class="wfa-field-icon">📧</div>
+                                    <span class="wfa-field-name" style="flex:1;">{{ $tpl->name }}</span>
+                                    <span class="wfa-field-type" style="max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ $tpl->subject }}">{{ Str::limit($tpl->subject, 30) }}</span>
+                                    <button type="button" class="wfa-field-remove"
+                                            wire:click="removeEmailTemplate({{ $tpl->id }})"
+                                            title="Entfernen">✕</button>
+                                </div>
+                            @endif
+                        @endforeach
+                    @endif
+
+                    {{-- Add template --}}
+                    @if ($allTemplates->whereNotIn('id', $stepEmailTemplateIds)->isNotEmpty())
+                        <div class="wfa-add-row" style="margin-top:8px;">
+                            <select wire:model="addTemplateId" class="wfa-add-input" style="flex:1;">
+                                <option value="">— Vorlage wählen —</option>
+                                @foreach ($allTemplates->whereNotIn('id', $stepEmailTemplateIds) as $tpl)
+                                    <option value="{{ $tpl->id }}">{{ $tpl->name }}</option>
+                                @endforeach
+                            </select>
+                            <button type="button" class="wfa-add-btn" wire:click="addEmailTemplate">
+                                + Hinzufügen
+                            </button>
+                        </div>
+                    @endif
 
                     {{-- ── Automations linked to this step ────────────────── --}}
                     @php
