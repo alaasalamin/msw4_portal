@@ -8,6 +8,7 @@ use App\Models\CustomPageEntry;
 use App\Models\Device;
 use App\Models\FormSubmission;
 use App\Models\WorkflowStep;
+use Filament\Facades\Filament;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Mail;
@@ -323,7 +324,13 @@ class CustomBoardPage extends Page
     public static function getNavigationItems(): array
     {
         try {
+            $employeeId = Filament::auth()->user()?->id;
+
             return CustomPage::orderBy('sort_order')
+                ->where(function ($q) use ($employeeId) {
+                    $q->doesntHave('employees')
+                      ->orWhereHas('employees', fn ($q) => $q->where('employee_id', $employeeId));
+                })
                 ->get()
                 ->map(function (CustomPage $page) {
                     $total = 0;

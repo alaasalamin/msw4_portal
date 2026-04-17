@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CustomPageResource\Pages;
 use App\Models\CustomForm;
 use App\Models\CustomPage;
+use App\Models\Employee;
 use App\Models\WorkflowPhase;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
@@ -86,6 +87,15 @@ class CustomPageResource extends Resource
                     ->nullable()
                     ->searchable()
                     ->helperText('If selected, a submissions table for this form will appear on the board view.')
+                    ->columnSpanFull(),
+
+                Select::make('employees')
+                    ->label('Visible to employees')
+                    ->relationship('employees', 'name')
+                    ->multiple()
+                    ->preloadOptions()
+                    ->placeholder('All employees')
+                    ->helperText('Leave empty to show to all employees.')
                     ->columnSpanFull(),
             ])->columns(2),
         ]);

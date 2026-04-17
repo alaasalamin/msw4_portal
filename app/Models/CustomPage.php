@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\CustomForm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -39,5 +40,10 @@ class CustomPage extends Model
     public function activeEntries(): HasMany
     {
         return $this->hasMany(CustomPageEntry::class)->whereNull('resolved_at');
+    }
+
+    public function employees(): BelongsToMany
+    {
+        return $this->belongsToMany(Employee::class, 'custom_page_employee', 'custom_page_id', 'employee_id');
     }
 }
