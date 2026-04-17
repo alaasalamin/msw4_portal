@@ -39,7 +39,7 @@ class NavPreferences extends Component
         ]);
 
         $this->open = false;
-        $this->redirect(request()->url(), navigate: false);
+        $this->js('window.location.reload()');
     }
 
     private function employee(): ?Employee
