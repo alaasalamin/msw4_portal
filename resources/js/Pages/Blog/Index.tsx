@@ -76,10 +76,11 @@ interface Props extends PageProps {
     };
     categories: Category[];
     activeCategory?: Category | null;
+    canonicalUrl: string;
     homepage: HomepageContent;
 }
 
-interface SharedProps { site: { name: string } }
+interface SharedProps { site?: { name: string } }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -105,10 +106,13 @@ const GRADIENTS = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function BlogIndex({ auth, posts, categories, activeCategory, homepage }: Props) {
-    const { site } = usePage<SharedProps>().props;
-    const siteName = site?.name ?? 'Blog';
-    const pageTitle = activeCategory ? `${activeCategory.name} — Blog` : 'Blog';
+export default function BlogIndex({ auth, posts, categories, activeCategory, canonicalUrl, homepage }: Props) {
+    const { site } = usePage().props as unknown as SharedProps;
+    const siteName  = site?.name ?? 'Blog';
+    const pageTitle = activeCategory ? `${activeCategory.name} — ${siteName}` : `Blog — ${siteName}`;
+    const metaDesc  = activeCategory
+        ? `Browse all articles in ${activeCategory.name}.`
+        : `Insights, updates and stories from the ${siteName} team.`;
 
     const portalLink = auth?.customer
         ? { href: '/customer/dashboard', label: 'Kundenbereich' }
@@ -120,7 +124,19 @@ export default function BlogIndex({ auth, posts, categories, activeCategory, hom
 
     return (
         <>
-            <Head title={pageTitle} />
+            <Head>
+                <title>{pageTitle}</title>
+                <meta name="description"      content={metaDesc} />
+                <link rel="canonical"         href={canonicalUrl} />
+                <meta property="og:type"      content="website" />
+                <meta property="og:url"       content={canonicalUrl} />
+                <meta property="og:site_name" content={siteName} />
+                <meta property="og:title"     content={pageTitle} />
+                <meta property="og:description" content={metaDesc} />
+                <meta name="twitter:card"     content="summary" />
+                <meta name="twitter:title"    content={pageTitle} />
+                <meta name="twitter:description" content={metaDesc} />
+            </Head>
 
             <Navbar portalLink={portalLink} canLogin={true} />
 

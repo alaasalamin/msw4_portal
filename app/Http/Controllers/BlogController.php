@@ -24,9 +24,10 @@ class BlogController extends Controller
             ->get(['id', 'name', 'slug']);
 
         return Inertia::render('Blog/Index', [
-            'posts'      => $posts,
-            'categories' => $categories,
-            'homepage'   => HomepageController::content(),
+            'posts'        => $posts,
+            'categories'   => $categories,
+            'canonicalUrl' => url()->current(),
+            'homepage'     => HomepageController::content(),
         ]);
     }
 
@@ -41,8 +42,10 @@ class BlogController extends Controller
             ->firstOrFail();
 
         return Inertia::render('Blog/Show', [
-            'post'     => $post,
-            'homepage' => HomepageController::content(),
+            'post'         => $post,
+            'canonicalUrl' => url()->current(),
+            'imageUrl'     => $post->featured_image ? url('storage/' . $post->featured_image) : null,
+            'homepage'     => HomepageController::content(),
         ]);
     }
 
@@ -82,10 +85,11 @@ class BlogController extends Controller
             ->get(['id', 'name', 'slug']);
 
         return Inertia::render('Blog/Index', [
-            'posts'           => $posts,
-            'categories'      => $categories,
-            'activeCategory'  => $cat,
-            'homepage'        => HomepageController::content(),
+            'posts'          => $posts,
+            'categories'     => $categories,
+            'activeCategory' => $cat,
+            'canonicalUrl'   => url()->current(),
+            'homepage'       => HomepageController::content(),
         ]);
     }
 }

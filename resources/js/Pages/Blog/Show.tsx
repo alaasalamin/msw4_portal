@@ -48,14 +48,31 @@ interface Post {
 
 interface Props extends PageProps {
     post: Post;
+    canonicalUrl: string;
+    imageUrl: string | null;
     homepage: HomepageContent;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function BlogShow({ auth, post, homepage }: Props) {
-    const metaTitle = post.meta_title || post.title;
-    const metaDesc  = post.meta_description || post.excerpt || undefined;
+export default function BlogShow({ auth, post, canonicalUrl, imageUrl, homepage }: Props) {
+    const metaTitle  = post.meta_title || post.title;
+    const metaDesc   = post.meta_description || post.excerpt || '';
+    const siteName   = (homepage as any)?.site?.name ?? 'MSW Repair';
+    const publishedIso = post.published_at;
+
+    const jsonLd = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: metaTitle,
+        description: metaDesc || undefined,
+        image: imageUrl || undefined,
+        datePublished: publishedIso,
+        author: { '@type': 'Person', name: post.author.name },
+        publisher: { '@type': 'Organization', name: siteName },
+        url: canonicalUrl,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+    });
 
     const portalLink = auth?.customer
         ? { href: '/customer/dashboard', label: 'Kundenbereich' }
@@ -70,11 +87,31 @@ export default function BlogShow({ auth, post, homepage }: Props) {
             <Head>
                 <title>{metaTitle}</title>
                 {metaDesc && <meta name="description" content={metaDesc} />}
-                <meta property="og:title" content={metaTitle} />
+
+                {/* Canonical */}
+                <link rel="canonical" href={canonicalUrl} />
+
+                {/* Open Graph */}
+                <meta property="og:type"        content="article" />
+                <meta property="og:url"         content={canonicalUrl} />
+                <meta property="og:site_name"   content={siteName} />
+                <meta property="og:title"       content={metaTitle} />
                 {metaDesc && <meta property="og:description" content={metaDesc} />}
-                {post.featured_image && (
-                    <meta property="og:image" content={`/storage/${post.featured_image}`} />
-                )}
+                {imageUrl  && <meta property="og:image"       content={imageUrl} />}
+                {imageUrl  && <meta property="og:image:width"  content="1200" />}
+                {imageUrl  && <meta property="og:image:height" content="630" />}
+                <meta property="article:published_time" content={publishedIso} />
+                <meta property="article:author"         content={post.author.name} />
+                {post.category && <meta property="article:section" content={post.category.name} />}
+
+                {/* Twitter / X */}
+                <meta name="twitter:card"        content={imageUrl ? 'summary_large_image' : 'summary'} />
+                <meta name="twitter:title"       content={metaTitle} />
+                {metaDesc && <meta name="twitter:description" content={metaDesc} />}
+                {imageUrl  && <meta name="twitter:image"       content={imageUrl} />}
+
+                {/* JSON-LD */}
+                <script type="application/ld+json">{jsonLd}</script>
             </Head>
 
             <Navbar portalLink={portalLink} canLogin={true} />
