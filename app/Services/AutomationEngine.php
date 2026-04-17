@@ -35,9 +35,12 @@ class AutomationEngine
         }
     }
 
-    /** Send any email templates attached directly to the device's current workflow step */
+    /** Send any email templates attached directly to the device's new workflow step */
     private static function sendStepEmailTemplates(Device $device): void
     {
+        // No email on file → nothing to send, skip silently
+        if (empty($device->customer_email)) return;
+
         $step = WorkflowStep::find($device->workflow_step_id);
         if (! $step || empty($step->email_template_ids)) return;
 

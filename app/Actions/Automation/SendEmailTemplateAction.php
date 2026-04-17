@@ -22,8 +22,8 @@ class SendEmailTemplateAction
             default  => $device->customer_email,
         };
 
-        if (! $recipient) {
-            throw new \RuntimeException("No recipient email available for device #{$device->id}.");
+        if (! filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException("No valid recipient email for device #{$device->id} (ticket: {$device->ticket_number}).");
         }
 
         ['subject' => $subject, 'body' => $body] = $template->render($device);
