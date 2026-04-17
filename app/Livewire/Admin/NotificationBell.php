@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -15,8 +16,8 @@ class NotificationBell extends Component
 
     private function getUser(): ?User
     {
-        $admin = auth('employee')->user();
-        return $admin ? User::find($admin->id) : null;
+        $auth = Filament::auth()->user();
+        return $auth ? User::find($auth->id) : null;
     }
 
     private function loadNotifications(User $user): array

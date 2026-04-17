@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Employee;
+use Filament\Facades\Filament;
 use Livewire\Component;
 
 class NavPreferences extends Component
@@ -44,7 +45,8 @@ class NavPreferences extends Component
 
     private function employee(): ?Employee
     {
-        return auth('employee')->user();
+        $auth = Filament::auth()->user();
+        return $auth ? Employee::find($auth->id) : null;
     }
 
     public function render()
