@@ -45,6 +45,20 @@
             padding:3px 8px; border-radius:20px; font-size:10px; font-weight:600;
         }
         .cb-chip-step { background:rgba(99,102,241,.1); color:#6366f1; }
+        .cb-chip-step-btn {
+            border:none; cursor:pointer;
+            transition:background .15s, box-shadow .15s;
+        }
+        .cb-chip-step-btn:hover {
+            background:rgba(99,102,241,.18);
+            box-shadow:0 0 0 1.5px rgba(99,102,241,.35);
+        }
+        .cb-step-option:hover:not(.cb-step-option-active) {
+            background:rgba(99,102,241,.05) !important;
+        }
+        .dark .cb-step-option:hover:not(.cb-step-option-active) {
+            background:rgba(99,102,241,.1) !important;
+        }
         .cb-chip-box  { background:rgba(16,185,129,.1); color:#10b981; }
 
         .cb-card-notes {
@@ -431,17 +445,25 @@
             @else
                 <div class="cb-grid">
                     @foreach($stepDevices as $device)
-                        <a href="/admin/devices/{{ $device->id }}" class="cb-card cb-link" style="display:block; text-decoration:none;">
-                            <div class="cb-card-ticket">{{ $device->ticket_number }}</div>
-                            <div class="cb-card-device">{{ $device->brand }} {{ $device->model }}</div>
-                            <div class="cb-card-customer">{{ $device->customer_name ?: '—' }}</div>
+                        <div class="cb-card">
+                            <a href="/admin/devices/{{ $device->id }}" class="cb-link" style="text-decoration:none; display:block;">
+                                <div class="cb-card-ticket">{{ $device->ticket_number }}</div>
+                                <div class="cb-card-device">{{ $device->brand }} {{ $device->model }}</div>
+                                <div class="cb-card-customer">{{ $device->customer_name ?: '—' }}</div>
+                            </a>
                             <div class="cb-card-meta" style="margin-top:8px;">
-                                <span class="cb-chip cb-chip-step">
+                                <button type="button"
+                                    wire:click="openChangeStep({{ $device->id }})"
+                                    class="cb-chip cb-chip-step cb-chip-step-btn"
+                                    title="Click to change step">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:10px;height:10px;">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"/>
                                     </svg>
                                     {{ $device->workflowStep?->label ?? '—' }}
-                                </span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:8px;height:8px;opacity:.6;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                    </svg>
+                                </button>
                                 @if($device->storage_box)
                                     <span class="cb-chip cb-chip-box">📦 {{ $device->storage_box }}</span>
                                 @endif
@@ -456,7 +478,7 @@
                                     <div class="cb-card-time">{{ $device->received_at->diffForHumans() }}</div>
                                 </div>
                             @endif
-                        </a>
+                        </div>
                     @endforeach
                 </div>
             @endif
@@ -659,6 +681,69 @@
             </div>
         </div>
     </div>
+@endif
+
+{{-- ── Change step modal ────────────────────────────────────────────────── --}}
+@if($changeStepDeviceId)
+    @php
+        $csDevice = \App\Models\Device::find($changeStepDeviceId);
+        $allSteps = $this->getAllSteps();
+        $stepsByPhase = $allSteps->groupBy(fn($s) => $s->phase?->name ?? 'General');
+    @endphp
+    @if($csDevice)
+        <div class="cb-modal-backdrop" wire:click.self="cancelChangeStep">
+            <div class="cb-modal" style="max-width:400px;">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px;">
+                    <div>
+                        <div class="cb-modal-title">Change step</div>
+                        <div class="cb-modal-desc" style="margin-top:2px;">
+                            {{ $csDevice->ticket_number }} — {{ $csDevice->brand }} {{ $csDevice->model }}
+                        </div>
+                    </div>
+                    <button type="button" wire:click="cancelChangeStep"
+                        style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:2px;margin-left:12px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:6px; max-height:360px; overflow-y:auto;">
+                    @foreach($stepsByPhase as $phase => $steps)
+                        <div style="font-size:10px; font-weight:700; letter-spacing:.06em; color:#9ca3af; text-transform:uppercase; padding:4px 0 2px; margin-top:4px;">
+                            {{ $phase }}
+                        </div>
+                        @foreach($steps as $step)
+                            <button type="button"
+                                wire:click="$set('changeStepValue', {{ $step->id }})"
+                                style="text-align:left; padding:9px 12px; border-radius:8px; border:1.5px solid {{ $changeStepValue == $step->id ? '#6366f1' : 'transparent' }}; background:{{ $changeStepValue == $step->id ? 'rgba(99,102,241,.08)' : 'transparent' }}; cursor:pointer; font-size:13px; font-weight:{{ $changeStepValue == $step->id ? '600' : '400' }}; color:{{ $changeStepValue == $step->id ? '#6366f1' : 'inherit' }}; width:100%; transition:all .12s;"
+                                class="cb-step-option {{ $changeStepValue == $step->id ? 'cb-step-option-active' : '' }}">
+                                @if($changeStepValue == $step->id)
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width:12px;height:12px;display:inline;vertical-align:middle;margin-right:4px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                    </svg>
+                                @endif
+                                {{ $step->label }}
+                            </button>
+                        @endforeach
+                    @endforeach
+                </div>
+
+                <div class="cb-modal-actions" style="margin-top:18px;">
+                    <button type="button" class="cb-modal-cancel" wire:click="cancelChangeStep">Cancel</button>
+                    <button type="button" class="cb-reply-send"
+                        wire:click="applyChangeStep"
+                        wire:loading.attr="disabled"
+                        wire:target="applyChangeStep"
+                        @if(!$changeStepValue || $changeStepValue == $csDevice->workflow_step_id) disabled @endif
+                        style="opacity: {{ (!$changeStepValue || $changeStepValue == $csDevice->workflow_step_id) ? '.45' : '1' }}; cursor: {{ (!$changeStepValue || $changeStepValue == $csDevice->workflow_step_id) ? 'not-allowed' : 'pointer' }};">
+                        <span wire:loading.remove wire:target="applyChangeStep">Move</span>
+                        <span wire:loading wire:target="applyChangeStep">Moving…</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 @endif
 
 {{-- ── View submission modal ────────────────────────────────────────────── --}}

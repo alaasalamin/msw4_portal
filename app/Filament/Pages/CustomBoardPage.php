@@ -7,6 +7,7 @@ use App\Models\CustomPage;
 use App\Models\CustomPageEntry;
 use App\Models\Device;
 use App\Models\FormSubmission;
+use App\Models\WorkflowStep;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Mail;
@@ -27,6 +28,10 @@ class CustomBoardPage extends Page
 
     // Delete modal
     public ?int $deleteSubmissionId = null;
+
+    // Change step modal
+    public ?int $changeStepDeviceId  = null;
+    public ?int $changeStepValue     = null;
 
     // View modal
     public ?int $viewSubmissionId = null;
@@ -118,6 +123,39 @@ class CustomBoardPage extends Page
     public function cancelDeleteSubmission(): void
     {
         $this->deleteSubmissionId = null;
+    }
+
+    // ── Change step ───────────────────────────────────────────────────────────
+
+    public function openChangeStep(int $deviceId): void
+    {
+        $device = Device::find($deviceId);
+        if (! $device) return;
+
+        $this->changeStepDeviceId = $deviceId;
+        $this->changeStepValue    = $device->workflow_step_id;
+    }
+
+    public function applyChangeStep(): void
+    {
+        if (! $this->changeStepDeviceId || ! $this->changeStepValue) return;
+
+        Device::where('id', $this->changeStepDeviceId)
+            ->update(['workflow_step_id' => $this->changeStepValue]);
+
+        $this->changeStepDeviceId = null;
+        $this->changeStepValue    = null;
+    }
+
+    public function cancelChangeStep(): void
+    {
+        $this->changeStepDeviceId = null;
+        $this->changeStepValue    = null;
+    }
+
+    public function getAllSteps(): \Illuminate\Support\Collection
+    {
+        return WorkflowStep::with('phase')->orderBy('sort_order')->get();
     }
 
     // ── View ──────────────────────────────────────────────────────────────────
