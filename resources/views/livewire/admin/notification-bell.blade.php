@@ -8,10 +8,8 @@
         style="position:relative; display:flex; align-items:center; justify-content:center;
                width:36px; height:36px; border-radius:8px; border:none; cursor:pointer;
                background:transparent; color:#6b7280; transition:background 0.15s, color 0.15s;"
-        @mouseenter="const dark = document.documentElement.classList.contains('dark');
-                     $el.style.background = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
-                     $el.style.color = dark ? '#f9fafb' : '#111827';"
-        @mouseleave="$el.style.background='transparent'; $el.style.color='#6b7280';"
+        onmouseenter="var d=document.documentElement.classList.contains('dark');this.style.background=d?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.05)';this.style.color=d?'#f9fafb':'#111827';"
+        onmouseleave="this.style.background='transparent';this.style.color='#6b7280';"
         title="Benachrichtigungen"
     >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
