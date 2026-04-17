@@ -17,7 +17,7 @@ class EmailSettings extends Page
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-envelope'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Configuration'; }
-    public static function getNavigationSort(): ?int                    { return 3; }
+    public static function getNavigationSort(): ?int                    { return 4; }
     public static function getNavigationLabel(): string                 { return 'Email Settings'; }
     public function getTitle(): string                                  { return 'Email Settings'; }
 

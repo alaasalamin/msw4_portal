@@ -31,7 +31,7 @@ class AutomationRuleResource extends Resource
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-bolt'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Workflow'; }
-    public static function getNavigationSort(): ?int                    { return 5; }
+    public static function getNavigationSort(): ?int                    { return 3; }
     public static function getNavigationLabel(): string                 { return 'Automationen'; }
     public static function getModelLabel(): string                      { return 'Automation'; }
     public static function getPluralModelLabel(): string                { return 'Automationen'; }

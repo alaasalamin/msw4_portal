@@ -21,7 +21,7 @@ class EmailTemplateResource extends Resource
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-envelope-open'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Content'; }
-    public static function getNavigationSort(): ?int                    { return 5; }
+    public static function getNavigationSort(): ?int                    { return 4; }
     public static function getNavigationLabel(): string                 { return 'Auto-Response Emails'; }
     public static function getModelLabel(): string                      { return 'Email Template'; }
     public static function getPluralModelLabel(): string                { return 'Email Templates'; }

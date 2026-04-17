@@ -10,8 +10,8 @@ class ScheduledJobs extends Page
     protected string $view = 'filament.pages.scheduled-jobs';
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-clock'; }
-    public static function getNavigationGroup(): string|\UnitEnum|null  { return null; }
-    public static function getNavigationSort(): ?int                    { return 99; }
+    public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Configuration'; }
+    public static function getNavigationSort(): ?int                    { return 7; }
     public static function getNavigationLabel(): string                 { return 'Job-Übersicht'; }
     public function getTitle(): string                                   { return 'Job-Übersicht'; }
 

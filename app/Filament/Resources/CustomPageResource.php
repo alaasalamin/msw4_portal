@@ -24,8 +24,8 @@ class CustomPageResource extends Resource
     protected static ?string $model = CustomPage::class;
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-rectangle-stack'; }
-    public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Settings'; }
-    public static function getNavigationSort(): ?int                    { return 10; }
+    public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Configuration'; }
+    public static function getNavigationSort(): ?int                    { return 6; }
     public static function getNavigationLabel(): string                 { return 'Dynamic Pages'; }
     public static function getModelLabel(): string                      { return 'Dynamic Page'; }
 

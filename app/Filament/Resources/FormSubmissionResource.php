@@ -26,7 +26,7 @@ class FormSubmissionResource extends Resource
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-inbox-arrow-down'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Content'; }
-    public static function getNavigationSort(): ?int                    { return 4; }
+    public static function getNavigationSort(): ?int                    { return 3; }
     public static function getNavigationLabel(): string                 { return 'Form Submissions'; }
     public static function getModelLabel(): string                      { return 'Submission'; }
     public static function getPluralModelLabel(): string                { return 'Form Submissions'; }

@@ -12,7 +12,7 @@ class WorkflowEmployees extends Page
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-users'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Workflow'; }
-    public static function getNavigationSort(): ?int                    { return 4; }
+    public static function getNavigationSort(): ?int                    { return 2; }
     public static function getNavigationLabel(): string                 { return 'Mitarbeiter'; }
     public function getTitle(): string                                  { return 'Mitarbeiter & Zuständigkeiten'; }
 

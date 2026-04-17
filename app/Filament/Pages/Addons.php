@@ -16,7 +16,7 @@ class Addons extends Page
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-puzzle-piece'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Configuration'; }
-    public static function getNavigationSort(): ?int                    { return 2; }
+    public static function getNavigationSort(): ?int                    { return 3; }
     public static function getNavigationLabel(): string                 { return 'Add-ons'; }
     public function getTitle(): string                                  { return 'Add-ons'; }
 

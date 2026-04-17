@@ -25,7 +25,7 @@ class CustomFormResource extends Resource
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-clipboard-document'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Content'; }
-    public static function getNavigationSort(): ?int                    { return 3; }
+    public static function getNavigationSort(): ?int                    { return 2; }
     public static function getNavigationLabel(): string                 { return 'Forms'; }
     public static function getModelLabel(): string                      { return 'Form'; }
     public static function getPluralModelLabel(): string                { return 'Forms'; }

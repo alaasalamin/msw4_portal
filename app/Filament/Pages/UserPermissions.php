@@ -16,7 +16,7 @@ class UserPermissions extends Page
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-lock-closed'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Configuration'; }
-    public static function getNavigationSort(): ?int                    { return 4; }
+    public static function getNavigationSort(): ?int                    { return 5; }
     public static function getNavigationLabel(): string                 { return 'User Permissions'; }
     public function getTitle(): string                                  { return 'User Permissions'; }
 
