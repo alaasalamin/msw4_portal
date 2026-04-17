@@ -91,7 +91,7 @@ class CustomPageResource extends Resource
 
                 Select::make('employees')
                     ->label('Visible to employees')
-                    ->relationship('employees', 'name')
+                    ->relationship('employees', 'name', fn ($q) => $q->where('type', 'employee'))
                     ->multiple()
                     ->placeholder('All employees')
                     ->helperText('Leave empty to show to all employees.')
