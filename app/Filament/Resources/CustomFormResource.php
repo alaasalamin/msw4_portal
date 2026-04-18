@@ -130,6 +130,30 @@ class CustomFormResource extends Resource
                 ])
                 ->columnSpan(1),
 
+            // ── Bottom: CRM Integration ──────────────────────────────────────
+            Section::make('CRM Integration')
+                ->description('When enabled, every new submission is automatically sent to the CRM and stored in its own table.')
+                ->schema([
+                    Toggle::make('crm_sync')
+                        ->label('Send submissions to CRM')
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set, $get) {
+                            if ($state && blank($get('crm_key'))) {
+                                $set('crm_key', bin2hex(random_bytes(16)));
+                            }
+                        }),
+
+                    TextInput::make('crm_key')
+                        ->label('CRM Key')
+                        ->helperText('Auto-generated. The CRM will create a table named after this form\'s slug to store submissions.')
+                        ->readOnly()
+                        ->visible(fn (Get $get) => (bool) $get('crm_sync'))
+                        ->columnSpanFull(),
+                ])
+                ->columns(1)
+                ->collapsible()
+                ->columnSpanFull(),
+
             // ── Bottom: Preset Replies ───────────────────────────────────────
             Section::make('Preset Replies')
                 ->description('Save reply templates for this form. Use {{Field Label}} to insert submission values — e.g. {{Name}}, {{Email}}.')

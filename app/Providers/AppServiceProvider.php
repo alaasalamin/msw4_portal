@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Models\SitePage;
 use App\Models\UserTypePermission;
 use App\Observers\DeviceObserver;
+use App\Observers\FormSubmissionObserver;
 use App\Observers\PostObserver;
 use App\Observers\SitePageObserver;
 use Illuminate\Support\Facades\Gate;
@@ -39,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Device::observe(DeviceObserver::class);
         Post::observe(PostObserver::class);
         SitePage::observe(SitePageObserver::class);
+        \App\Models\FormSubmission::observe(FormSubmissionObserver::class);
 
         $this->applyMailSettingsFromDatabase();
 
