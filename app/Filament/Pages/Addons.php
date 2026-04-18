@@ -9,6 +9,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Http;
 
 class Addons extends Page
 {
@@ -22,16 +23,57 @@ class Addons extends Page
 
     public ?array $data = [];
 
+    // null = untested, 'ok' = connected, 'error' = failed
+    public ?string $crmStatus  = null;
+    public ?string $crmMessage = null;
+    public bool    $crmTesting = false;
+
     public function mount(): void
     {
         $this->form->fill([
-            'rsw_url'          => Setting::get('rsw_url'),
-            'rsw_secret'       => Setting::get('rsw_secret'),
-            'crm_url'          => Setting::get('crm_url'),
-            'crm_secret'       => Setting::get('crm_secret'),
-            'dhl_billing_email' => Setting::get('dhl_billing_email'),
+            'rsw_url'              => Setting::get('rsw_url'),
+            'rsw_secret'           => Setting::get('rsw_secret'),
+            'crm_url'              => Setting::get('crm_url'),
+            'crm_secret'           => Setting::get('crm_secret'),
+            'dhl_billing_email'    => Setting::get('dhl_billing_email'),
             'dhl_billing_password' => Setting::get('dhl_billing_password'),
         ]);
+    }
+
+    public function testCrm(): void
+    {
+        $this->crmTesting = true;
+        $this->crmStatus  = null;
+        $this->crmMessage = null;
+
+        $url    = rtrim($this->data['crm_url'] ?? Setting::get('crm_url') ?? '', '/');
+        $secret = $this->data['crm_secret'] ?? Setting::get('crm_secret') ?? '';
+
+        if (blank($url) || blank($secret)) {
+            $this->crmStatus  = 'error';
+            $this->crmMessage = 'URL or secret is missing.';
+            $this->crmTesting = false;
+            return;
+        }
+
+        try {
+            $response = Http::timeout(5)
+                ->withHeader('X-Secret-Key', $secret)
+                ->get($url . '/api/ping');
+
+            if ($response->successful() && ($response->json('status') === 'ok')) {
+                $this->crmStatus  = 'ok';
+                $this->crmMessage = 'Connected to ' . ($response->json('app') ?? 'CRM');
+            } else {
+                $this->crmStatus  = 'error';
+                $this->crmMessage = 'HTTP ' . $response->status() . ': ' . ($response->json('error') ?? 'Unexpected response');
+            }
+        } catch (\Throwable $e) {
+            $this->crmStatus  = 'error';
+            $this->crmMessage = $e->getMessage();
+        }
+
+        $this->crmTesting = false;
     }
 
     public function form(Schema $schema): Schema
@@ -63,7 +105,15 @@ class Addons extends Page
                         ->password()
                         ->revealable()
                         ->maxLength(500),
-                ])->columns(2),
+                ])->columns(2)
+                  ->footerActions([
+                      \Filament\Actions\Action::make('test_crm')
+                          ->label('Test Connection')
+                          ->icon('heroicon-o-signal')
+                          ->color('gray')
+                          ->action('testCrm'),
+                  ])
+                  ->footerActionsAlignment(\Filament\Support\Enums\Alignment::Start),
 
                 Section::make('DHL Billing')->schema([
                     TextInput::make('dhl_billing_email')
@@ -94,10 +144,14 @@ class Addons extends Page
 
         if (!empty($changed)) {
             activity('addons')
-                ->causedBy(auth('admin')->user())
+                ->causedBy(auth('employee')->user())
                 ->withProperties($changed)
                 ->log('Updated add-on settings');
         }
+
+        // Reset status when credentials change
+        $this->crmStatus  = null;
+        $this->crmMessage = null;
 
         Notification::make()
             ->title('Add-ons saved')
