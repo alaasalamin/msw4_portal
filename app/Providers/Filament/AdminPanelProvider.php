@@ -67,7 +67,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Indigo,
             ])
-            ->brandName('Mitarbeiterbereich')
+            ->brandName('MSW 4')
             ->navigationGroups([
                 NavigationGroup::make('Operations'),
                 NavigationGroup::make('Workflow'),

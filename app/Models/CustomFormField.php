@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CustomFormField extends Model
 {
-    protected $fillable = ['form_id', 'label', 'type', 'placeholder', 'is_required', 'options', 'sort_order'];
+    protected $fillable = ['form_id', 'label', 'type', 'placeholder', 'is_required', 'col_span', 'options', 'sort_order'];
 
     protected $casts = [
         'is_required' => 'boolean',

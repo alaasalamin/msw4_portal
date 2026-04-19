@@ -7,6 +7,7 @@ interface FormField {
     type: string;
     placeholder: string | null;
     is_required: boolean;
+    col_span: 'full' | 'half';
     options: Array<{ label: string; value: string }> | null;
     sort_order: number;
 }
@@ -96,7 +97,7 @@ export default function FormSection({
 
     return (
         <section className={`${bg} py-16 px-4`}>
-            <div className="mx-auto max-w-xl">
+            <div className="mx-auto max-w-2xl">
                 {title && (
                     <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
                         {title}
@@ -116,9 +117,33 @@ export default function FormSection({
                         <p className={`text-base font-semibold ${isDark ? 'text-white' : 'text-zinc-800'}`}>{success}</p>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        {fields.map(field => (
-                            <div key={field.id}>
+                    <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
+                        {fields.map(field => {
+                            if (field.type === 'spacer') {
+                                return (
+                                    <div key={field.id} className="col-span-2">
+                                        <hr className={isDark ? 'border-zinc-700' : 'border-zinc-200'} />
+                                    </div>
+                                );
+                            }
+
+                            if (field.type === 'subheading') {
+                                return (
+                                    <div key={field.id} className="col-span-2">
+                                        <h3 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-zinc-800'}`}>
+                                            {field.label}
+                                        </h3>
+                                        {field.placeholder && (
+                                            <p className={`text-sm mt-0.5 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                                {field.placeholder}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            }
+
+                            return (
+                            <div key={field.id} className={field.col_span === 'half' ? 'col-span-1' : 'col-span-2'}>
                                 <label className={labelBase}>
                                     {field.label}
                                     {field.is_required && <span className="ml-1 text-red-400">*</span>}
@@ -169,12 +194,13 @@ export default function FormSection({
                                     <p key={i} className={errorCls}>{err}</p>
                                 ))}
                             </div>
-                        ))}
+                            );
+                        })}
 
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="w-full rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600 disabled:opacity-60"
+                            className="col-span-2 w-full rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600 disabled:opacity-60"
                         >
                             {submitting ? 'Sending…' : 'Send'}
                         </button>
