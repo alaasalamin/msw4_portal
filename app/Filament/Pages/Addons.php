@@ -23,20 +23,23 @@ class Addons extends Page
 
     public ?array $data = [];
 
-    // null = untested, 'ok' = connected, 'error' = failed
     public ?string $crmStatus  = null;
     public ?string $crmMessage = null;
     public bool    $crmTesting = false;
 
+    public ?string $dhlStatus  = null;
+    public ?string $dhlMessage = null;
+    public bool    $dhlTesting = false;
+
     public function mount(): void
     {
         $this->form->fill([
-            'rsw_url'              => Setting::get('rsw_url'),
-            'rsw_secret'           => Setting::get('rsw_secret'),
-            'crm_url'              => Setting::get('crm_url'),
-            'crm_secret'           => Setting::get('crm_secret'),
-            'dhl_billing_email'    => Setting::get('dhl_billing_email'),
-            'dhl_billing_password' => Setting::get('dhl_billing_password'),
+            'rsw_url'      => Setting::get('rsw_url'),
+            'rsw_secret'   => Setting::get('rsw_secret'),
+            'crm_url'      => Setting::get('crm_url'),
+            'crm_secret'   => Setting::get('crm_secret'),
+            'dhl_username' => Setting::get('dhl_username'),
+            'dhl_password' => Setting::get('dhl_password'),
         ]);
     }
 
@@ -74,6 +77,51 @@ class Addons extends Page
         }
 
         $this->crmTesting = false;
+    }
+
+    public function testDhl(): void
+    {
+        $this->dhlTesting = true;
+        $this->dhlStatus  = null;
+        $this->dhlMessage = null;
+
+        $username = $this->data['dhl_username'] ?? Setting::get('dhl_username') ?? '';
+        $password = $this->data['dhl_password'] ?? Setting::get('dhl_password') ?? '';
+        $apiKey   = config('dhl.api_key');
+        $baseUrl  = config('dhl.base_url');
+
+        if (blank($username) || blank($password)) {
+            $this->dhlStatus  = 'error';
+            $this->dhlMessage = 'Username or password is missing.';
+            $this->dhlTesting = false;
+            return;
+        }
+
+        try {
+            $response = Http::timeout(8)
+                ->withBasicAuth($username, $password)
+                ->withHeaders([
+                    'dhl-api-key' => $apiKey,
+                    'Accept'      => 'application/json',
+                ])
+                ->get($baseUrl . '/orders', [
+                    'shipmentTrackingNumber' => 'TEST000000000',
+                ]);
+
+            // 401 = bad credentials, anything else = auth passed
+            if ($response->status() === 401) {
+                $this->dhlStatus  = 'error';
+                $this->dhlMessage = 'Invalid credentials (401 Unauthorized)';
+            } else {
+                $this->dhlStatus  = 'ok';
+                $this->dhlMessage = 'Connected to DHL API successfully';
+            }
+        } catch (\Throwable $e) {
+            $this->dhlStatus  = 'error';
+            $this->dhlMessage = $e->getMessage();
+        }
+
+        $this->dhlTesting = false;
     }
 
     public function form(Schema $schema): Schema
@@ -115,17 +163,24 @@ class Addons extends Page
                   ])
                   ->footerActionsAlignment(\Filament\Support\Enums\Alignment::Start),
 
-                Section::make('DHL Billing')->schema([
-                    TextInput::make('dhl_billing_email')
-                        ->label('Billing Email')
-                        ->email()
+                Section::make('DHL')->schema([
+                    TextInput::make('dhl_username')
+                        ->label('DHL Username')
                         ->maxLength(255),
-                    TextInput::make('dhl_billing_password')
-                        ->label('Billing Password')
+                    TextInput::make('dhl_password')
+                        ->label('DHL Password')
                         ->password()
                         ->revealable()
                         ->maxLength(500),
-                ])->columns(2),
+                ])->columns(2)
+                  ->footerActions([
+                      \Filament\Actions\Action::make('test_dhl')
+                          ->label('Test Connection')
+                          ->icon('heroicon-o-signal')
+                          ->color('gray')
+                          ->action('testDhl'),
+                  ])
+                  ->footerActionsAlignment(\Filament\Support\Enums\Alignment::Start),
             ]);
     }
 
@@ -137,7 +192,7 @@ class Addons extends Page
         foreach ($data as $key => $value) {
             $old = Setting::get($key);
             Setting::set($key, $value);
-            if ($old !== $value && !in_array($key, ['rsw_secret', 'crm_secret', 'dhl_billing_password'])) {
+            if ($old !== $value && !in_array($key, ['rsw_secret', 'crm_secret', 'dhl_password'])) {
                 $changed[$key] = $value;
             }
         }
@@ -149,9 +204,10 @@ class Addons extends Page
                 ->log('Updated add-on settings');
         }
 
-        // Reset status when credentials change
-        $this->crmStatus  = null;
+        $this->crmStatus = null;
         $this->crmMessage = null;
+        $this->dhlStatus = null;
+        $this->dhlMessage = null;
 
         Notification::make()
             ->title('Add-ons saved')

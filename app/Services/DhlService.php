@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
@@ -22,8 +23,8 @@ class DhlService
         $this->trackingUrl          = config('dhl.tracking_url');
         $this->apiKey               = config('dhl.api_key');
         $this->apiSecret            = config('dhl.api_secret');
-        $this->username             = config('dhl.username');
-        $this->password             = config('dhl.password');
+        $this->username             = Setting::get('dhl_username') ?: config('dhl.username');
+        $this->password             = Setting::get('dhl_password') ?: config('dhl.password');
         $this->billingDomestic      = config('dhl.billing_number_domestic');
         $this->billingInternational = config('dhl.billing_number_international');
     }
