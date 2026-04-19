@@ -3,8 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\DeviceResource\Pages;
+use App\Models\Contact;
 use App\Models\Device;
+use App\Models\Setting;
 use App\Models\WorkflowPhase;
+use App\Services\DhlService;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -16,6 +19,8 @@ use Filament\Schemas\Schema;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -33,7 +38,7 @@ class DeviceResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['ticket_number', 'customer_name', 'customer_email', 'customer_phone', 'storage_box', 'brand', 'model'];
+        return ['ticket_number', 'storage_box', 'brand', 'model', 'contact.name', 'contact.email', 'contact.phone'];
     }
 
     public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
@@ -63,7 +68,7 @@ class DeviceResource extends Resource
 
     public static function getGlobalSearchEloquentQuery(): Builder
     {
-        return parent::getGlobalSearchEloquentQuery()->with('workflowStep');
+        return parent::getGlobalSearchEloquentQuery()->with(['workflowStep', 'contact']);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -98,10 +103,22 @@ class DeviceResource extends Resource
             ])->columns(2),
 
             Section::make('Customer')->schema([
-                TextInput::make('customer_name'),
-                TextInput::make('customer_email')->email(),
-                TextInput::make('customer_phone'),
-            ])->columns(3),
+                Select::make('contact_id')
+                    ->label('Customer')
+                    ->options(Contact::orderBy('name')->pluck('name', 'id'))
+                    ->searchable()
+                    ->nullable()
+                    ->createOptionForm([
+                        TextInput::make('name')->required(),
+                        TextInput::make('email')->email(),
+                        TextInput::make('phone'),
+                        TextInput::make('street'),
+                        TextInput::make('house_number')->label('House No.'),
+                        TextInput::make('postal_code'),
+                        TextInput::make('city'),
+                    ])
+                    ->createOptionUsing(fn (array $data) => Contact::create($data)->id),
+            ])->columns(1),
 
             Section::make('Device')->schema([
                 TextInput::make('brand'),
@@ -129,7 +146,7 @@ class DeviceResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('ticket_number')->searchable()->sortable(),
-                TextColumn::make('customer_name')->searchable(),
+                TextColumn::make('contact.name')->label('Customer')->searchable(),
                 TextColumn::make('brand'),
                 TextColumn::make('model'),
                 TextColumn::make('storage_box')
@@ -169,6 +186,70 @@ class DeviceResource extends Resource
                     ]),
             ])
             ->actions([
+                Action::make('download_dhl_label')
+                    ->label('DHL Label')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->url(fn (Device $record): string => $record->dhl_label_url ?? '#')
+                    ->openUrlInNewTab()
+                    ->visible(fn (Device $record): bool => filled($record->dhl_label_url)),
+
+                Action::make('generate_dhl_label')
+                    ->label('Generate DHL Label')
+                    ->icon('heroicon-o-printer')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Generate DHL Label')
+                    ->modalDescription('Creates a 0.2 kg DHL shipment from company address to the customer address.')
+                    ->visible(fn (Device $record): bool => blank($record->dhl_label_url))
+                    ->action(function (Device $record) {
+                        $contact = $record->contact;
+
+                        if (! $contact) {
+                            Notification::make()->title('No customer linked to this device')->danger()->send();
+                            return;
+                        }
+
+                        if (blank($contact->street) || blank($contact->postal_code) || blank($contact->city)) {
+                            Notification::make()->title('Customer address is incomplete')->body('Please add street, postal code and city to the customer profile.')->danger()->send();
+                            return;
+                        }
+
+                        try {
+                            $result = app(DhlService::class)->createShipment([
+                                'type'                   => 'domestic',
+                                'sender_name'            => Setting::get('company_owner_name'),
+                                'sender_company'         => Setting::get('company_name'),
+                                'sender_email'           => Setting::get('company_email'),
+                                'sender_phone'           => Setting::get('company_phone'),
+                                'sender_street'          => Setting::get('company_street'),
+                                'sender_house_number'    => Setting::get('company_house_number'),
+                                'sender_postal_code'     => Setting::get('company_postal_code'),
+                                'sender_city'            => Setting::get('company_city'),
+                                'sender_country'         => 'DEU',
+                                'recipient_name'         => $contact->name,
+                                'recipient_street'       => $contact->street,
+                                'recipient_house_number' => $contact->house_number,
+                                'recipient_postal_code'  => $contact->postal_code,
+                                'recipient_city'         => $contact->city,
+                                'recipient_country'      => 'DEU',
+                                'recipient_email'        => $contact->email,
+                                'recipient_phone'        => $contact->phone,
+                                'weight_kg'              => 0.2,
+                                'reference'              => $record->ticket_number,
+                            ]);
+
+                            $record->update([
+                                'dhl_tracking_number' => $result['tracking_number'],
+                                'dhl_label_url'       => $result['label_url'],
+                            ]);
+
+                            Notification::make()->title('DHL label generated')->success()->send();
+                        } catch (\RuntimeException $e) {
+                            Notification::make()->title('DHL Error')->body($e->getMessage())->danger()->persistent()->send();
+                        }
+                    }),
+
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),

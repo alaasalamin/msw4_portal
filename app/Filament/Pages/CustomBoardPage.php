@@ -80,17 +80,19 @@ class CustomBoardPage extends Page
         $stepIds = $this->board?->workflow_step_ids ?? [];
         if (empty($stepIds)) return collect();
 
-        $q = Device::with('workflowStep')
+        $q = Device::with(['workflowStep', 'contact'])
             ->whereIn('workflow_step_id', $stepIds);
 
         if ($term = trim($this->search)) {
             $q->where(fn ($w) => $w
-                ->where('ticket_number', 'like', "%$term%")
-                ->orWhere('customer_name', 'like', "%$term%")
-                ->orWhere('brand',         'like', "%$term%")
-                ->orWhere('model',         'like', "%$term%")
-                ->orWhere('storage_box',   'like', "%$term%")
-                ->orWhere('customer_phone','like', "%$term%")
+                ->where('devices.ticket_number', 'like', "%$term%")
+                ->orWhere('devices.brand',        'like', "%$term%")
+                ->orWhere('devices.model',        'like', "%$term%")
+                ->orWhere('devices.storage_box',  'like', "%$term%")
+                ->orWhereHas('contact', fn ($c) => $c
+                    ->where('name',  'like', "%$term%")
+                    ->orWhere('phone', 'like', "%$term%")
+                )
             );
         }
 

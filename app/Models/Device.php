@@ -15,7 +15,7 @@ class Device extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['workflow_step_id', 'priority', 'ticket_number', 'customer_name', 'brand', 'model'])
+            ->logOnly(['workflow_step_id', 'priority', 'ticket_number', 'contact_id', 'brand', 'model'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn (string $eventName) => "Device {$eventName}");
     }
@@ -24,10 +24,8 @@ class Device extends Model
         'ticket_number',
         'technician_id',
         'coordinator_id',
+        'contact_id',
         'workflow_step_id',
-        'customer_name',
-        'customer_email',
-        'customer_phone',
         'brand',
         'model',
         'serial_number',
@@ -42,6 +40,8 @@ class Device extends Model
         'received_at',
         'estimated_completion',
         'completed_at',
+        'dhl_tracking_number',
+        'dhl_label_url',
     ];
 
     protected $casts = [
@@ -67,6 +67,11 @@ class Device extends Model
         return 'REP-' . $year . '-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
     }
 
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
     public function technician(): BelongsTo
     {
         return $this->belongsTo(User::class, 'technician_id');
@@ -86,6 +91,11 @@ class Device extends Model
     {
         return $this->hasMany(DeviceNote::class)->latest();
     }
+
+    // Accessors for backward compatibility with automation/email code
+    public function getCustomerNameAttribute(): ?string  { return $this->contact?->name; }
+    public function getCustomerEmailAttribute(): ?string { return $this->contact?->email; }
+    public function getCustomerPhoneAttribute(): ?string { return $this->contact?->phone; }
 
     public function getDaysInShopAttribute(): int
     {
