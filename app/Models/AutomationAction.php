@@ -31,6 +31,7 @@ class AutomationAction extends Model
             'update_device_field' => 'Gerätefeld aktualisieren',
             'add_to_page'         => 'Zu Seite hinzufügen',
             'generate_invoice'    => 'Rechnung generieren (RSW)',
+            'generate_dhl_label'  => '📦 DHL Label generieren',
         ];
     }
 }

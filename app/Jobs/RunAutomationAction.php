@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Actions\Automation\ChangeStepAction;
+use App\Actions\Automation\GenerateDhlLabelAction;
 use App\Actions\Automation\GenerateInvoiceAction;
 use App\Actions\Automation\NotifyEmployeeAction;
 use App\Actions\Automation\SendAllowanceAction;
@@ -79,6 +80,7 @@ class RunAutomationAction implements ShouldQueue
             'update_device_field'  => new UpdateDeviceFieldAction(),
             'add_to_page'          => new AddToPageAction(),
             'generate_invoice'     => new GenerateInvoiceAction(),
+            'generate_dhl_label'   => new GenerateDhlLabelAction(),
             default                => throw new \RuntimeException("Unknown action type: {$this->action->action_type}"),
         };
     }
