@@ -1,10 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { PageProps } from '@/types';
-import { HomepageContent } from './Welcome/types';
-import Navbar        from './Welcome/Navbar';
-import FooterSection from './Welcome/FooterSection';
+import DynamicHeader from './Welcome/Sections/DynamicHeader';
+import DynamicFooter from './Welcome/Sections/DynamicFooter';
 
-// Section components
+// Page-builder section components (Site Page editor blocks)
 import PageHero      from './Sections/PageHero';
 import StatsBanner   from './Sections/StatsBanner';
 import FeaturesGrid  from './Sections/FeaturesGrid';
@@ -38,19 +37,21 @@ interface SitePageData {
     sections: Array<{ type: string; data: Record<string, any> }> | null;
 }
 
+interface ThemeSection {
+    id: string;
+    type: string;
+    settings: Record<string, unknown>;
+}
+
 type Props = PageProps<{
     page: SitePageData;
-    homepage: HomepageContent;
+    homepage?: { sections?: ThemeSection[] } & Record<string, unknown>;
 }>;
 
-export default function DynamicPage({ auth, page, homepage }: Props) {
-    const portalLink = auth?.customer
-        ? { href: '/customer/dashboard', label: 'Kundenbereich' }
-        : auth?.partner
-        ? { href: '/partner/dashboard', label: 'Partnerbereich' }
-        : auth?.employee
-        ? { href: '/employee/dashboard', label: 'Mitarbeiterbereich' }
-        : null;
+export default function DynamicPage({ page, homepage }: Props) {
+    const themeSections = homepage?.sections ?? [];
+    const headerSection = themeSections.find((s) => s.type === 'header');
+    const footerSection = themeSections.find((s) => s.type === 'footer');
 
     const sections = page.sections ?? [];
 
@@ -58,24 +59,30 @@ export default function DynamicPage({ auth, page, homepage }: Props) {
         <>
             <Head title={page.meta_title || page.title} />
 
-            <Navbar portalLink={portalLink} canLogin={true} />
+            {headerSection && <DynamicHeader settings={headerSection.settings as never} />}
 
-            {/* Push content below fixed navbar */}
-            <div className="pt-16">
-                {sections.length === 0 ? (
-                    <div className="flex min-h-[60vh] items-center justify-center bg-zinc-50">
-                        <p className="text-sm text-zinc-400">No sections added yet.</p>
-                    </div>
-                ) : (
-                    sections.map((section, i) => {
-                        const Component = SECTION_MAP[section.type];
-                        if (!Component) return null;
-                        return <Component key={i} {...section.data} />;
-                    })
-                )}
-            </div>
+            {sections.length === 0 ? (
+                <div style={{
+                    minHeight: '60vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#fafafa',
+                    color: '#9ca3af',
+                    fontSize: '0.875rem',
+                    fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                }}>
+                    No sections added yet.
+                </div>
+            ) : (
+                sections.map((section, i) => {
+                    const Component = SECTION_MAP[section.type];
+                    if (!Component) return null;
+                    return <Component key={i} {...section.data} />;
+                })
+            )}
 
-            <FooterSection footer={homepage.footer} />
+            {footerSection && <DynamicFooter settings={footerSection.settings as never} />}
         </>
     );
 }

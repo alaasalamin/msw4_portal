@@ -15,6 +15,16 @@
             $ogImage     = Setting::get('og_image') ? asset('storage/' . Setting::get('og_image')) : null;
             $favicon     = Setting::get('favicon') ? asset('storage/' . Setting::get('favicon')) : null;
             $ga          = Setting::get('google_analytics');
+
+            // ── Theme primary color: pulled from the Theme Builder header section.
+            // If the user explicitly set "Primary brand color" we use it; otherwise
+            // we auto-track the header's background so the legacy orange accents
+            // disappear without needing a second config step.
+            $themeSections   = json_decode(Setting::get('home_sections') ?? '', true) ?: [];
+            $headerSettings  = (collect($themeSections)->firstWhere('type', 'header')['settings'] ?? []);
+            $primaryHex      = $headerSettings['primary']
+                              ?? $headerSettings['bg']
+                              ?? '#0f172a';
         @endphp
 
         <title inertia>%s | {{ $siteName }}</title>
@@ -73,6 +83,53 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+        {{-- Theme: derive a full palette from the header's primary color and
+             remap every orange Tailwind utility used in the legacy blog/page
+             templates so the brand color is theme-driven. --}}
+        <style>
+            :root {
+                --primary:     {{ $primaryHex }};
+                --primary-50:  color-mix(in srgb, {{ $primaryHex }}  8%, white);
+                --primary-100: color-mix(in srgb, {{ $primaryHex }} 16%, white);
+                --primary-200: color-mix(in srgb, {{ $primaryHex }} 32%, white);
+                --primary-300: color-mix(in srgb, {{ $primaryHex }} 50%, white);
+                --primary-400: color-mix(in srgb, {{ $primaryHex }} 70%, white);
+                --primary-500: color-mix(in srgb, {{ $primaryHex }} 88%, white);
+                --primary-600: {{ $primaryHex }};
+                --primary-700: color-mix(in srgb, {{ $primaryHex }} 85%, black);
+                --primary-800: color-mix(in srgb, {{ $primaryHex }} 70%, black);
+                --primary-900: color-mix(in srgb, {{ $primaryHex }} 55%, black);
+            }
+            /* color */
+            .text-orange-100              { color: var(--primary-100) !important; }
+            .text-orange-300              { color: var(--primary-300) !important; }
+            .text-orange-400              { color: var(--primary-400) !important; }
+            .text-orange-500              { color: var(--primary-500) !important; }
+            .text-orange-600              { color: var(--primary-600) !important; }
+            .hover\:text-orange-500:hover { color: var(--primary-500) !important; }
+            .hover\:text-orange-600:hover { color: var(--primary-600) !important; }
+            .group:hover .group-hover\:text-orange-500 { color: var(--primary-500) !important; }
+            .group:hover .group-hover\:text-orange-600 { color: var(--primary-600) !important; }
+            /* background */
+            .bg-orange-50                 { background-color: var(--primary-50)  !important; }
+            .bg-orange-400                { background-color: var(--primary-400) !important; }
+            .bg-orange-500                { background-color: var(--primary-500) !important; }
+            .bg-orange-600                { background-color: var(--primary-600) !important; }
+            .hover\:bg-orange-50:hover    { background-color: var(--primary-50)  !important; }
+            .hover\:bg-orange-100:hover   { background-color: var(--primary-100) !important; }
+            .hover\:bg-orange-500:hover   { background-color: var(--primary-500) !important; }
+            .hover\:bg-orange-600:hover   { background-color: var(--primary-600) !important; }
+            /* border */
+            .border-orange-100            { border-color: var(--primary-100) !important; }
+            .border-orange-200            { border-color: var(--primary-200) !important; }
+            .border-orange-400            { border-color: var(--primary-400) !important; }
+            .border-orange-500            { border-color: var(--primary-500) !important; }
+            .hover\:border-orange-200:hover { border-color: var(--primary-200) !important; }
+            /* ring (focus rings) */
+            .ring-orange-400              { --tw-ring-color: var(--primary-400) !important; }
+            .focus-visible\:ring-orange-400:focus-visible { --tw-ring-color: var(--primary-400) !important; }
+        </style>
 
         <!-- Scripts -->
         @routes

@@ -1,56 +1,67 @@
 import { Head } from '@inertiajs/react';
-import { PageProps } from '@/types';
-import { HomepageContent } from './Welcome/types';
-import Navbar           from './Welcome/Navbar';
-import HeroSection      from './Welcome/HeroSection';
-import StatsSection     from './Welcome/StatsSection';
-import ServicesSection  from './Welcome/ServicesSection';
-import HowItWorksSection from './Welcome/HowItWorksSection';
-import PartnersSection  from './Welcome/PartnersSection';
-import TestimonialsSection from './Welcome/TestimonialsSection';
-import FooterSection    from './Welcome/FooterSection';
+import DynamicHeader    from './Welcome/Sections/DynamicHeader';
+import DynamicHero      from './Welcome/Sections/DynamicHero';
+import DynamicTextBlock from './Welcome/Sections/DynamicTextBlock';
+import DynamicTeam      from './Welcome/Sections/DynamicTeam';
+import DynamicBlogPosts from './Welcome/Sections/DynamicBlogPosts';
+import DynamicMap       from './Welcome/Sections/DynamicMap';
+import DynamicReviews   from './Welcome/Sections/DynamicReviews';
+import DynamicFooter    from './Welcome/Sections/DynamicFooter';
 
-type WelcomeProps = PageProps<{
-    canLogin: boolean;
-    canRegister: boolean;
-    canResetPassword: boolean;
-    homepage: HomepageContent;
-}>;
+interface Section {
+    id: string;
+    type: 'header' | 'hero' | 'text' | 'team' | 'blog_posts' | 'map' | 'reviews' | 'footer';
+    settings: Record<string, unknown>;
+}
 
-export default function Welcome({ auth, canLogin, canRegister, canResetPassword, homepage }: WelcomeProps) {
-    const portalLink = auth?.customer
-        ? { href: '/customer/dashboard', label: 'Kundenbereich' }
-        : auth?.partner
-        ? { href: '/partner/dashboard', label: 'Partnerbereich' }
-        : auth?.employee
-        ? { href: '/employee/dashboard', label: 'Mitarbeiterbereich' }
-        : null;
+interface WelcomeProps {
+    homepage?: { sections?: Section[] } & Record<string, unknown>;
+}
+
+function renderSection(section: Section) {
+    switch (section.type) {
+        case 'header': return <DynamicHeader    key={section.id} settings={section.settings as never} />;
+        case 'hero':   return <DynamicHero      key={section.id} settings={section.settings as never} />;
+        case 'text':   return <DynamicTextBlock key={section.id} settings={section.settings as never} />;
+        case 'team':       return <DynamicTeam      key={section.id} settings={section.settings as never} />;
+        case 'blog_posts': return <DynamicBlogPosts key={section.id} settings={section.settings as never} />;
+        case 'map':        return <DynamicMap       key={section.id} settings={section.settings as never} />;
+        case 'reviews':    return <DynamicReviews   key={section.id} settings={section.settings as never} />;
+        case 'footer':     return <DynamicFooter    key={section.id} settings={section.settings as never} />;
+        default:       return null;
+    }
+}
+
+export default function Welcome({ homepage }: WelcomeProps) {
+    const sections = homepage?.sections ?? [];
+
+    if (sections.length === 0) {
+        return (
+            <>
+                <Head title="Hello World" />
+                <main
+                    style={{
+                        minHeight: '100vh',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#ffffff',
+                        color: '#000000',
+                        fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                    }}
+                >
+                    <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 5rem)', fontWeight: 600, letterSpacing: '-0.03em', margin: 0 }}>
+                        Hello World!
+                    </h1>
+                </main>
+            </>
+        );
+    }
 
     return (
         <>
-            <Head title="Moon.Repair — Handy Reparatur & Datenrettung in Forchheim" />
-
-            <Navbar portalLink={portalLink} canLogin={canLogin} />
-
-            <HeroSection
-                hero={homepage.hero}
-                canRegister={canRegister}
-                canResetPassword={canResetPassword}
-                portalLink={portalLink}
-                auth={auth}
-            />
-
-            <StatsSection stats={homepage.stats} />
-
-            <ServicesSection services={homepage.services} />
-
-            <HowItWorksSection process={homepage.process} />
-
-            <PartnersSection partners={homepage.partners} />
-
-            <TestimonialsSection testimonials={homepage.testimonials} />
-
-            <FooterSection footer={homepage.footer} />
+            <Head title="Home" />
+            {sections.map(renderSection)}
         </>
     );
 }

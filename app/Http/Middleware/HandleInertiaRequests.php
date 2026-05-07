@@ -48,6 +48,16 @@ class HandleInertiaRequests extends Middleware
                     'whatsapp'  => Setting::get('social_whatsapp'),
                 ]),
             ],
+            'company' => [
+                'name'        => Setting::get('company_name'),
+                'email'       => Setting::get('company_email'),
+                'phone'       => Setting::get('company_phone'),
+                'street'      => Setting::get('company_street'),
+                'houseNumber' => Setting::get('company_house_number'),
+                'postalCode'  => Setting::get('company_postal_code'),
+                'city'        => Setting::get('company_city'),
+                'country'     => Setting::get('company_country'),
+            ],
             'nav_pages' => SitePage::where('status', 'published')
                 ->orderBy('created_at')
                 ->get(['title', 'slug'])

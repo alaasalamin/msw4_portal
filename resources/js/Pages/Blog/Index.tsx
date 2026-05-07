@@ -1,8 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
 import { HomepageContent } from '@/Pages/Welcome/types';
-import Navbar        from '@/Pages/Welcome/Navbar';
-import FooterSection from '@/Pages/Welcome/FooterSection';
+import DynamicHeader from '@/Pages/Welcome/Sections/DynamicHeader';
+import DynamicFooter from '@/Pages/Welcome/Sections/DynamicFooter';
+
+interface ThemeSection { id: string; type: string; settings: Record<string, unknown> }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -106,7 +108,7 @@ const GRADIENTS = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function BlogIndex({ auth, posts, categories, activeCategory, canonicalUrl, homepage }: Props) {
+export default function BlogIndex({ posts, categories, activeCategory, canonicalUrl, homepage }: Props) {
     const { site } = usePage().props as unknown as SharedProps;
     const siteName  = site?.name ?? 'Blog';
     const pageTitle = activeCategory ? `${activeCategory.name} — ${siteName}` : `Blog — ${siteName}`;
@@ -114,13 +116,9 @@ export default function BlogIndex({ auth, posts, categories, activeCategory, can
         ? `Browse all articles in ${activeCategory.name}.`
         : `Insights, updates and stories from the ${siteName} team.`;
 
-    const portalLink = auth?.customer
-        ? { href: '/customer/dashboard', label: 'Kundenbereich' }
-        : auth?.partner
-        ? { href: '/partner/dashboard', label: 'Partnerbereich' }
-        : auth?.employee
-        ? { href: '/employee/dashboard', label: 'Mitarbeiterbereich' }
-        : null;
+    const themeSections: ThemeSection[] = (homepage as any)?.sections ?? [];
+    const headerSection = themeSections.find((s) => s.type === 'header');
+    const footerSection = themeSections.find((s) => s.type === 'footer');
 
     return (
         <>
@@ -138,9 +136,9 @@ export default function BlogIndex({ auth, posts, categories, activeCategory, can
                 <meta name="twitter:description" content={metaDesc} />
             </Head>
 
-            <Navbar portalLink={portalLink} canLogin={true} />
+            {headerSection && <DynamicHeader settings={headerSection.settings as never} />}
 
-            <div className="min-h-dvh bg-zinc-50 pt-16">
+            <div className="min-h-dvh bg-zinc-50">
 
                 {/* ── Hero ────────────────────────────────────────────────── */}
                 <div className="bg-white border-b border-zinc-200">
@@ -190,7 +188,7 @@ export default function BlogIndex({ auth, posts, categories, activeCategory, can
                                 href={route('blog.index')}
                                 className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200"
                                 style={!activeCategory
-                                    ? { background:'#fff7ed', border:'1px solid #fed7aa', color:'#ea580c' }
+                                    ? { background:'var(--primary-50)', border:'1px solid var(--primary-200)', color:'var(--primary-600)' }
                                     : { background:'#fff', border:'1px solid #e4e4e7', color:'#71717a' }
                                 }
                             >
@@ -202,7 +200,7 @@ export default function BlogIndex({ auth, posts, categories, activeCategory, can
                                     href={route('blog.category', { category: cat.slug })}
                                     className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200"
                                     style={activeCategory?.id === cat.id
-                                        ? { background:'#fff7ed', border:'1px solid #fed7aa', color:'#ea580c' }
+                                        ? { background:'var(--primary-50)', border:'1px solid var(--primary-200)', color:'var(--primary-600)' }
                                         : { background:'#fff', border:'1px solid #e4e4e7', color:'#71717a' }
                                     }
                                 >
@@ -260,7 +258,7 @@ export default function BlogIndex({ auth, posts, categories, activeCategory, can
                                         href={link.url}
                                         className="flex items-center justify-center h-9 px-3 rounded-lg text-sm transition-all duration-200"
                                         style={link.active
-                                            ? { background:'#fff7ed', border:'1px solid #fed7aa', color:'#ea580c' }
+                                            ? { background:'var(--primary-50)', border:'1px solid var(--primary-200)', color:'var(--primary-600)' }
                                             : { background:'#fff', border:'1px solid #e4e4e7', color:'#52525b' }
                                         }
                                     >
@@ -275,7 +273,7 @@ export default function BlogIndex({ auth, posts, categories, activeCategory, can
                 </div>
             </div>
 
-            <FooterSection footer={homepage.footer} />
+            {footerSection && <DynamicFooter settings={footerSection.settings as never} />}
         </>
     );
 }

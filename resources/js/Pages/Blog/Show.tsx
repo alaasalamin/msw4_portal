@@ -1,8 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { PageProps } from '@/types';
 import { HomepageContent } from '@/Pages/Welcome/types';
-import Navbar        from '@/Pages/Welcome/Navbar';
-import FooterSection from '@/Pages/Welcome/FooterSection';
+import DynamicHeader from '@/Pages/Welcome/Sections/DynamicHeader';
+import DynamicFooter from '@/Pages/Welcome/Sections/DynamicFooter';
+
+interface ThemeSection { id: string; type: string; settings: Record<string, unknown> }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -55,11 +57,15 @@ interface Props extends PageProps {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function BlogShow({ auth, post, canonicalUrl, imageUrl, homepage }: Props) {
+export default function BlogShow({ post, canonicalUrl, imageUrl, homepage }: Props) {
     const metaTitle  = post.meta_title || post.title;
     const metaDesc   = post.meta_description || post.excerpt || '';
     const siteName   = (homepage as any)?.site?.name ?? 'MSW Repair';
     const publishedIso = post.published_at;
+
+    const themeSections: ThemeSection[] = (homepage as any)?.sections ?? [];
+    const headerSection = themeSections.find((s) => s.type === 'header');
+    const footerSection = themeSections.find((s) => s.type === 'footer');
 
     const jsonLd = JSON.stringify({
         '@context': 'https://schema.org',
@@ -73,14 +79,6 @@ export default function BlogShow({ auth, post, canonicalUrl, imageUrl, homepage 
         url: canonicalUrl,
         mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
     });
-
-    const portalLink = auth?.customer
-        ? { href: '/customer/dashboard', label: 'Kundenbereich' }
-        : auth?.partner
-        ? { href: '/partner/dashboard', label: 'Partnerbereich' }
-        : auth?.employee
-        ? { href: '/employee/dashboard', label: 'Mitarbeiterbereich' }
-        : null;
 
     return (
         <>
@@ -114,9 +112,9 @@ export default function BlogShow({ auth, post, canonicalUrl, imageUrl, homepage 
                 <script type="application/ld+json">{jsonLd}</script>
             </Head>
 
-            <Navbar portalLink={portalLink} canLogin={true} />
+            {headerSection && <DynamicHeader settings={headerSection.settings as never} />}
 
-            <div className="min-h-dvh bg-zinc-50 pt-16">
+            <div className="min-h-dvh bg-zinc-50">
 
                 {/* ── Breadcrumb bar ──────────────────────────────────────── */}
                 <div className="bg-white border-b border-zinc-200">
@@ -218,7 +216,7 @@ export default function BlogShow({ auth, post, canonicalUrl, imageUrl, homepage 
                 </article>
             </div>
 
-            <FooterSection footer={homepage.footer} />
+            {footerSection && <DynamicFooter settings={footerSection.settings as never} />}
 
             {/* ── Prose styles ──────────────────────────────────────────── */}
             <style>{`

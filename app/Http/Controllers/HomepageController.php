@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\Setting;
 
 class HomepageController extends Controller
@@ -16,6 +17,26 @@ class HomepageController extends Controller
             json_decode(Setting::get($key) ?? '', true) ?? $default;
 
         return [
+            'sections' => $j('home_sections', []),
+            // Pool of recent published posts the blog_posts section can pick from.
+            'posts' => Post::with('category')
+                ->published()
+                ->orderBy('published_at', 'desc')
+                ->limit(30)
+                ->get()
+                ->map(fn (Post $p) => [
+                    'title'         => $p->title,
+                    'excerpt'       => $p->excerpt,
+                    'href'          => '/blog/' . $p->fullSlug(),
+                    'image'         => $p->featured_image ? asset('storage/' . $p->featured_image) : null,
+                    'publishedAt'   => $p->published_at?->toIso8601String(),
+                    'category'      => $p->category ? [
+                        'name' => $p->category->name,
+                        'slug' => $p->category->slug,
+                        'href' => '/blog/category/' . $p->category->slug,
+                    ] : null,
+                ])
+                ->all(),
             'hero' => [
                 'badge'        => Setting::get('home_hero_badge',         'Forchheim, Bayern · Zertifizierter Reparaturbetrieb'),
                 'title'        => Setting::get('home_hero_title',         'Handy Reparatur &amp; <span class="text-orange-400">Datenrettung</span>'),
