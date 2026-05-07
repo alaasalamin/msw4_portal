@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\ThemeBuilder;
 
+use App\Models\Setting;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -81,7 +82,7 @@ class SectionRegistry
     {
         return match ($type) {
             'header' => [
-                'logo'       => 'Brand',
+                'logo'       => Setting::get('company_name') ?: 'Brand',
                 'logoImage'  => null,    // relative path within the public disk (overrides text when set)
                 'logoHeight' => 48,      // displayed pixel height of the logo image
                 'linksMode'  => 'auto',  // 'auto' = pull from published Site Pages, 'custom' = use links[]
