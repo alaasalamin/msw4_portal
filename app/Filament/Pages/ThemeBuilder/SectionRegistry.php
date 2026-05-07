@@ -61,6 +61,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-envelope',
                 'desc'  => 'Embed any form from /admin/forms with a heading and paragraph.',
             ],
+            'pricing' => [
+                'label' => 'Pricing',
+                'icon'  => 'heroicon-o-currency-dollar',
+                'desc'  => 'Pricing tier cards with features and a call-to-action button.',
+            ],
             'footer' => [
                 'label' => 'Footer',
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
@@ -111,6 +116,56 @@ class SectionRegistry
                 'align'      => 'left',
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
+            ],
+            'pricing' => [
+                'heading'         => 'Simple, transparent pricing',
+                'subtitle'        => 'Pick a plan that fits where you are today. Upgrade any time.',
+                'columns'         => 3,
+                'plans'           => [
+                    [
+                        'name'        => 'Starter',
+                        'price'       => '0',
+                        'currency'    => '$',
+                        'period'      => '/month',
+                        'description' => 'For trying things out.',
+                        'features'    => "1 project\nCommunity support\nBasic analytics",
+                        'buttonText'  => 'Get started',
+                        'buttonHref'  => '#',
+                        'highlighted' => false,
+                        'badge'       => '',
+                    ],
+                    [
+                        'name'        => 'Pro',
+                        'price'       => '29',
+                        'currency'    => '$',
+                        'period'      => '/month',
+                        'description' => 'For growing teams.',
+                        'features'    => "Unlimited projects\nPriority support\nAdvanced analytics\nIntegrations",
+                        'buttonText'  => 'Start free trial',
+                        'buttonHref'  => '#',
+                        'highlighted' => true,
+                        'badge'       => 'Most popular',
+                    ],
+                    [
+                        'name'        => 'Enterprise',
+                        'price'       => 'Custom',
+                        'currency'    => '',
+                        'period'      => '',
+                        'description' => 'For large organisations.',
+                        'features'    => "Everything in Pro\nDedicated account manager\nSLA & uptime guarantee\nCustom contracts",
+                        'buttonText'  => 'Talk to sales',
+                        'buttonHref'  => 'mailto:sales@example.com',
+                        'highlighted' => false,
+                        'badge'       => '',
+                    ],
+                ],
+                'bg'              => '#ffffff',
+                'fg'              => '#0f172a',
+                'mutedFg'         => '#64748b',
+                'cardBg'          => '#ffffff',
+                'cardBorder'      => '#e5e7eb',
+                'highlightedBg'   => '#0f172a',
+                'highlightedFg'   => '#ffffff',
             ],
             'form' => [
                 'heading'    => 'Contact us',
@@ -310,6 +365,90 @@ class SectionRegistry
                     ->schema([
                         ColorPicker::make('settings.bg')->label('Background'),
                         ColorPicker::make('settings.fg')->label('Text color'),
+                    ])->columns(2),
+            ],
+
+            'pricing' => [
+                Section::make('Heading')
+                    ->schema([
+                        TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
+                        Textarea::make('settings.subtitle')->label('Subtitle')->rows(2)->maxLength(220),
+                    ])->columns(1),
+
+                Section::make('Plans')
+                    ->schema([
+                        Repeater::make('settings.plans')
+                            ->label('Pricing plans')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Plan name')
+                                    ->required()
+                                    ->maxLength(40),
+                                TextInput::make('description')
+                                    ->label('Tagline')
+                                    ->maxLength(120),
+                                TextInput::make('currency')
+                                    ->label('Currency symbol')
+                                    ->maxLength(4)
+                                    ->default('$')
+                                    ->helperText('Leave empty for "Custom" prices.'),
+                                TextInput::make('price')
+                                    ->label('Price')
+                                    ->required()
+                                    ->maxLength(20)
+                                    ->helperText('Number, or text like "Custom".'),
+                                TextInput::make('period')
+                                    ->label('Period')
+                                    ->maxLength(20)
+                                    ->placeholder('/month'),
+                                Textarea::make('features')
+                                    ->label('Features')
+                                    ->required()
+                                    ->rows(5)
+                                    ->maxLength(800)
+                                    ->helperText('One feature per line.'),
+                                TextInput::make('buttonText')
+                                    ->label('Button label')
+                                    ->maxLength(40)
+                                    ->default('Get started'),
+                                TextInput::make('buttonHref')
+                                    ->label('Button URL')
+                                    ->maxLength(200)
+                                    ->default('#'),
+                                \Filament\Forms\Components\Toggle::make('highlighted')
+                                    ->label('Highlight this plan')
+                                    ->default(false),
+                                TextInput::make('badge')
+                                    ->label('Badge text (e.g. "Most popular")')
+                                    ->maxLength(40),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->cloneable()
+                            ->reorderable()
+                            ->addActionLabel('Add plan')
+                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'New plan'),
+                    ])->columns(1),
+
+                Section::make('Layout')
+                    ->schema([
+                        Select::make('settings.columns')
+                            ->label('Columns (desktop)')
+                            ->options([1 => '1', 2 => '2', 3 => '3', 4 => '4'])
+                            ->default(3)
+                            ->required()
+                            ->dehydrateStateUsing(fn ($state) => (int) $state),
+                    ])->columns(1),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Heading / plan name color'),
+                        ColorPicker::make('settings.mutedFg')->label('Muted text color'),
+                        ColorPicker::make('settings.cardBg')->label('Card background'),
+                        ColorPicker::make('settings.cardBorder')->label('Card border'),
+                        ColorPicker::make('settings.highlightedBg')->label('Highlighted card background'),
+                        ColorPicker::make('settings.highlightedFg')->label('Highlighted card text'),
                     ])->columns(2),
             ],
 
