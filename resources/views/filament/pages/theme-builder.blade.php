@@ -9,38 +9,44 @@
         {{-- ── Section list ────────────────────────────────────────── --}}
         <aside style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04); position:sticky; top:16px;">
             {{-- Save / Discard bar --}}
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #f3f4f6;">
+            <div class="tb-savebar" x-bind:class="pendingCount > 0 ? 'is-pending' : ''">
+                <div class="tb-pill" x-show="pendingCount > 0" x-cloak title="Unsaved changes">
+                    <span class="tb-pill-dot"></span>
+                    <span x-text="pendingCount"></span>
+                </div>
+
                 <button
                     type="button"
+                    class="tb-btn tb-btn-save"
+                    x-bind:class="saving ? 'is-loading' : ''"
                     x-bind:disabled="pendingCount === 0 || saving"
                     x-on:click="saveAll()"
-                    x-bind:style="(pendingCount === 0 || saving)
-                        ? 'background:#e5e7eb; color:#9ca3af; cursor:not-allowed; border:1px solid #e5e7eb;'
-                        : 'background:#0284c7; color:#fff; cursor:pointer; border:1px solid #0284c7;'"
-                    style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;
-                           font-size:13px; font-weight:600; border-radius:8px; padding:8px 12px; transition:background .12s;"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px; height:14px;" x-show="!saving">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.4" stroke="currentColor" class="tb-btn-icon" x-show="!saving">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5" />
                     </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="width:14px; height:14px; animation:spin 1s linear infinite;" x-show="saving" x-cloak>
-                        <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path style="opacity:.75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="tb-btn-icon tb-btn-spinner" x-show="saving" x-cloak>
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/>
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" opacity=".95"/>
                     </svg>
-                    <span x-text="saving ? 'Saving…' : (pendingCount === 0 ? 'Save' : 'Save ' + pendingCount + ' change' + (pendingCount === 1 ? '' : 's'))"></span>
+                    <span class="tb-btn-label" x-text="saving
+                        ? 'Saving…'
+                        : (pendingCount === 0
+                            ? 'No changes'
+                            : 'Save ' + pendingCount + ' change' + (pendingCount === 1 ? '' : 's'))"></span>
                 </button>
+
                 <button
                     type="button"
+                    class="tb-btn tb-btn-discard"
                     x-bind:disabled="pendingCount === 0 || saving"
                     x-on:click="discardAll()"
-                    x-bind:style="(pendingCount === 0 || saving)
-                        ? 'background:#fff; color:#9ca3af; cursor:not-allowed; border:1px solid #e5e7eb;'
-                        : 'background:#fff; color:#374151; cursor:pointer; border:1px solid #e5e7eb;'"
-                    style="display:inline-flex; align-items:center; justify-content:center; gap:4px;
-                           font-size:12px; font-weight:500; border-radius:8px; padding:8px 10px;"
                     title="Discard pending changes"
                 >
-                    Discard
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="tb-btn-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6M9 8l6 6" />
+                    </svg>
+                    <span class="tb-btn-label">Discard</span>
                 </button>
             </div>
 
@@ -135,7 +141,141 @@
 
     <x-filament-actions::modals />
 
-    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* ── Save bar container ─────────────────────────────────── */
+        .tb-savebar {
+            display:flex; align-items:center; gap:8px;
+            padding:10px;
+            background:#f9fafb;
+            border:1px solid #f3f4f6;
+            border-radius:12px;
+            margin-bottom:14px;
+            transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+        .tb-savebar.is-pending {
+            background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: #fcd34d;
+            box-shadow: 0 1px 0 rgba(245,158,11,.06), 0 4px 12px -4px rgba(245,158,11,.25);
+        }
+
+        /* ── Pending pill ───────────────────────────────────────── */
+        .tb-pill {
+            display:inline-flex; align-items:center; gap:6px;
+            font-size:11px; font-weight:700; line-height:1; color:#fff;
+            padding:6px 9px;
+            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius:9999px;
+            box-shadow: 0 1px 2px rgba(217,119,6,.45), inset 0 1px 0 rgba(255,255,255,.30);
+            letter-spacing:.02em;
+        }
+        .tb-pill-dot {
+            display:inline-block; width:6px; height:6px; border-radius:9999px;
+            background:#fff;
+            box-shadow: 0 0 0 0 rgba(255,255,255,.8);
+            animation: tb-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes tb-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.85); }
+            50%      { box-shadow: 0 0 0 5px rgba(255,255,255,0); }
+        }
+
+        /* ── Buttons (shared) ───────────────────────────────────── */
+        .tb-btn {
+            display:inline-flex; align-items:center; justify-content:center; gap:7px;
+            font-size:13px; font-weight:600; line-height:1;
+            letter-spacing:.01em;
+            padding:9px 14px;
+            border-radius:9px;
+            border:1px solid transparent;
+            cursor:pointer;
+            user-select:none;
+            white-space:nowrap;
+            transition:
+                transform .08s ease,
+                background .14s ease,
+                box-shadow .14s ease,
+                border-color .14s ease,
+                color .14s ease;
+            -webkit-font-smoothing:antialiased;
+        }
+        .tb-btn:focus { outline: none; }
+        .tb-btn:focus-visible {
+            box-shadow: 0 0 0 3px rgba(14,165,233,.35);
+        }
+        .tb-btn-icon {
+            width:15px; height:15px;
+            flex-shrink:0;
+        }
+        .tb-btn-spinner {
+            animation: tb-spin .9s linear infinite;
+        }
+        @keyframes tb-spin { to { transform: rotate(360deg); } }
+
+        /* ── Save (primary) ─────────────────────────────────────── */
+        .tb-btn-save {
+            flex:1;
+            color:#fff;
+            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            border-color: #0369a1;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,.25) inset,
+                0 1px 2px rgba(2,132,199,.35),
+                0 2px 6px -2px rgba(2,132,199,.45);
+            text-shadow: 0 1px 0 rgba(7, 89, 133, .25);
+        }
+        .tb-btn-save:hover:not(:disabled) {
+            background: linear-gradient(180deg, #0ea5e9 0%, #0369a1 100%);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,.30) inset,
+                0 2px 4px rgba(2,132,199,.4),
+                0 6px 14px -3px rgba(2,132,199,.5);
+            transform: translateY(-0.5px);
+        }
+        .tb-btn-save:active:not(:disabled) {
+            transform: translateY(1px);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,.25) inset,
+                0 1px 1px rgba(2,132,199,.4);
+        }
+        .tb-btn-save:disabled {
+            cursor:not-allowed;
+            color:#9ca3af;
+            background:#fff;
+            border-color:#e5e7eb;
+            box-shadow:none;
+            text-shadow:none;
+        }
+        .tb-btn-save.is-loading { cursor: wait; }
+
+        /* ── Discard (secondary / destructive) ──────────────────── */
+        .tb-btn-discard {
+            color:#b91c1c;
+            background:#fff;
+            border-color:#fecaca;
+            box-shadow: 0 1px 0 rgba(0,0,0,.02);
+        }
+        .tb-btn-discard:hover:not(:disabled) {
+            color:#991b1b;
+            background:#fef2f2;
+            border-color:#fca5a5;
+            box-shadow: 0 1px 2px rgba(220,38,38,.15);
+        }
+        .tb-btn-discard:active:not(:disabled) {
+            transform: translateY(1px);
+            background:#fee2e2;
+        }
+        .tb-btn-discard:disabled {
+            cursor:not-allowed;
+            color:#d1d5db;
+            background:#fff;
+            border-color:#e5e7eb;
+            box-shadow:none;
+        }
+
+        .tb-btn-label { line-height: 1; }
+    </style>
 
     <script>
         function themeBuilder() {
