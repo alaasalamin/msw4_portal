@@ -66,6 +66,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-currency-dollar',
                 'desc'  => 'Pricing tier cards with features and a call-to-action button.',
             ],
+            'faq' => [
+                'label' => 'FAQ',
+                'icon'  => 'heroicon-o-question-mark-circle',
+                'desc'  => 'Frequently asked questions, optionally collapsible.',
+            ],
             'footer' => [
                 'label' => 'Footer',
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
@@ -116,6 +121,24 @@ class SectionRegistry
                 'align'      => 'left',
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
+            ],
+            'faq' => [
+                'heading'      => 'Frequently asked questions',
+                'subtitle'     => 'Quick answers to questions you may have.',
+                'items'        => [
+                    ['question' => 'How long do repairs usually take?', 'answer' => 'Most repairs are completed within 24 hours. We will send you an update as soon as your device is ready.'],
+                    ['question' => 'Do you offer a warranty?',          'answer' => 'Yes — every repair comes with a 90-day warranty on both parts and labour.'],
+                    ['question' => 'Can I track my repair status?',     'answer' => 'Absolutely. Once your device is checked in, you can follow progress in real time from your portal account.'],
+                    ['question' => 'What payment methods do you accept?', 'answer' => 'Card, bank transfer, and (for B2B accounts) consolidated monthly invoicing.'],
+                ],
+                'layout'       => 'accordion',
+                'expandFirst'  => true,
+                'columns'      => 1,
+                'bg'           => '#ffffff',
+                'fg'           => '#0f172a',
+                'mutedFg'      => '#475569',
+                'cardBg'       => '#f8fafc',
+                'borderColor'  => '#e5e7eb',
             ],
             'pricing' => [
                 'heading'         => 'Simple, transparent pricing',
@@ -365,6 +388,64 @@ class SectionRegistry
                     ->schema([
                         ColorPicker::make('settings.bg')->label('Background'),
                         ColorPicker::make('settings.fg')->label('Text color'),
+                    ])->columns(2),
+            ],
+
+            'faq' => [
+                Section::make('Heading')
+                    ->schema([
+                        TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
+                        Textarea::make('settings.subtitle')->label('Subtitle')->rows(2)->maxLength(220),
+                    ])->columns(1),
+
+                Section::make('Questions')
+                    ->schema([
+                        Repeater::make('settings.items')
+                            ->label('FAQ items')
+                            ->schema([
+                                TextInput::make('question')
+                                    ->label('Question')
+                                    ->required()
+                                    ->maxLength(200),
+                                Textarea::make('answer')
+                                    ->label('Answer')
+                                    ->required()
+                                    ->rows(3)
+                                    ->maxLength(1000),
+                            ])
+                            ->columns(1)
+                            ->collapsible()
+                            ->cloneable()
+                            ->reorderable()
+                            ->addActionLabel('Add question')
+                            ->itemLabel(fn (array $state): ?string => $state['question'] ?? 'New question'),
+                    ])->columns(1),
+
+                Section::make('Layout')
+                    ->schema([
+                        Select::make('settings.layout')
+                            ->label('Display style')
+                            ->options([
+                                'accordion' => 'Accordion (collapsible, click to expand)',
+                                'open'      => 'Always open',
+                                'two-col'   => 'Two-column grid (always open)',
+                            ])
+                            ->default('accordion')
+                            ->required()
+                            ->live(),
+                        \Filament\Forms\Components\Toggle::make('settings.expandFirst')
+                            ->label('Expand first item by default')
+                            ->default(true)
+                            ->visible(fn (Get $get) => $get('settings.layout') === 'accordion'),
+                    ])->columns(2),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Question color'),
+                        ColorPicker::make('settings.mutedFg')->label('Answer color'),
+                        ColorPicker::make('settings.cardBg')->label('Card / row background'),
+                        ColorPicker::make('settings.borderColor')->label('Border / divider color'),
                     ])->columns(2),
             ],
 

@@ -8,11 +8,12 @@ import DynamicMap       from './Welcome/Sections/DynamicMap';
 import DynamicReviews   from './Welcome/Sections/DynamicReviews';
 import DynamicForm      from './Welcome/Sections/DynamicForm';
 import DynamicPricing   from './Welcome/Sections/DynamicPricing';
+import DynamicFaq       from './Welcome/Sections/DynamicFaq';
 import DynamicFooter    from './Welcome/Sections/DynamicFooter';
 
 interface Section {
     id: string;
-    type: 'header' | 'hero' | 'text' | 'team' | 'blog_posts' | 'map' | 'reviews' | 'form' | 'pricing' | 'footer';
+    type: 'header' | 'hero' | 'text' | 'team' | 'blog_posts' | 'map' | 'reviews' | 'form' | 'pricing' | 'faq' | 'footer';
     settings: Record<string, unknown>;
 }
 
@@ -31,6 +32,7 @@ function renderSection(section: Section) {
         case 'reviews':    return <DynamicReviews   key={section.id} settings={section.settings as never} />;
         case 'form':       return <DynamicForm      key={section.id} settings={section.settings as never} />;
         case 'pricing':    return <DynamicPricing   key={section.id} settings={section.settings as never} />;
+        case 'faq':        return <DynamicFaq       key={section.id} settings={section.settings as never} />;
         case 'footer':     return <DynamicFooter    key={section.id} settings={section.settings as never} />;
         default:       return null;
     }
