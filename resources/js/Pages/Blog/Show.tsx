@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { PageProps } from '@/types';
-import { HomepageContent } from '@/Pages/Welcome/types';
 import DynamicHeader from '@/Pages/Welcome/Sections/DynamicHeader';
 import DynamicFooter from '@/Pages/Welcome/Sections/DynamicFooter';
 
 interface ThemeSection { id: string; type: string; settings: Record<string, unknown> }
+interface Homepage     { sections?: ThemeSection[] }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -52,7 +52,7 @@ interface Props extends PageProps {
     post: Post;
     canonicalUrl: string;
     imageUrl: string | null;
-    homepage: HomepageContent;
+    homepage: Homepage;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ export default function BlogShow({ post, canonicalUrl, imageUrl, homepage }: Pro
     const siteName   = (homepage as any)?.site?.name ?? 'MSW Repair';
     const publishedIso = post.published_at;
 
-    const themeSections: ThemeSection[] = (homepage as any)?.sections ?? [];
+    const themeSections: ThemeSection[] = homepage?.sections ?? [];
     const headerSection = themeSections.find((s) => s.type === 'header');
     const footerSection = themeSections.find((s) => s.type === 'footer');
 

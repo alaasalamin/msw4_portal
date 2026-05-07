@@ -1,10 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
-import { HomepageContent } from '@/Pages/Welcome/types';
 import DynamicHeader from '@/Pages/Welcome/Sections/DynamicHeader';
 import DynamicFooter from '@/Pages/Welcome/Sections/DynamicFooter';
 
 interface ThemeSection { id: string; type: string; settings: Record<string, unknown> }
+interface Homepage     { sections?: ThemeSection[] }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -79,7 +79,7 @@ interface Props extends PageProps {
     categories: Category[];
     activeCategory?: Category | null;
     canonicalUrl: string;
-    homepage: HomepageContent;
+    homepage: Homepage;
 }
 
 interface SharedProps { site?: { name: string } }
@@ -116,7 +116,7 @@ export default function BlogIndex({ posts, categories, activeCategory, canonical
         ? `Browse all articles in ${activeCategory.name}.`
         : `Insights, updates and stories from the ${siteName} team.`;
 
-    const themeSections: ThemeSection[] = (homepage as any)?.sections ?? [];
+    const themeSections: ThemeSection[] = homepage?.sections ?? [];
     const headerSection = themeSections.find((s) => s.type === 'header');
     const footerSection = themeSections.find((s) => s.type === 'footer');
 
