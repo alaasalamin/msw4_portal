@@ -76,6 +76,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-megaphone',
                 'desc'  => 'Bold call-to-action strip with one or two buttons.',
             ],
+            'stats' => [
+                'label' => 'Stats Counter',
+                'icon'  => 'heroicon-o-chart-bar',
+                'desc'  => 'Row of big numbers that count up when scrolled into view.',
+            ],
             'footer' => [
                 'label' => 'Footer',
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
@@ -126,6 +131,23 @@ class SectionRegistry
                 'align'      => 'left',
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
+            ],
+            'stats' => [
+                'heading'    => 'Numbers worth bragging about',
+                'subtitle'   => '',
+                'columns'    => 4,
+                'align'      => 'center',
+                'animate'    => true,
+                'stats'      => [
+                    ['value' => '13810', 'prefix' => '', 'suffix' => '',  'label' => 'Devices repaired',   'description' => 'Across the last 24 months.'],
+                    ['value' => '320',   'prefix' => '', 'suffix' => '+', 'label' => 'B2B partners',        'description' => 'Retailers, telcos and insurers.'],
+                    ['value' => '98.6',  'prefix' => '', 'suffix' => '%', 'label' => 'Satisfaction rate',   'description' => 'Based on post-repair surveys.'],
+                    ['value' => '24',    'prefix' => '<', 'suffix' => 'h','label' => 'Avg. turnaround',     'description' => 'For most standard repairs.'],
+                ],
+                'bg'         => '#ffffff',
+                'fg'         => '#0f172a',
+                'mutedFg'    => '#64748b',
+                'accent'     => '#0284c7',
             ],
             'cta' => [
                 'heading'         => 'Ready to get started?',
@@ -409,6 +431,74 @@ class SectionRegistry
                     ->schema([
                         ColorPicker::make('settings.bg')->label('Background'),
                         ColorPicker::make('settings.fg')->label('Text color'),
+                    ])->columns(2),
+            ],
+
+            'stats' => [
+                Section::make('Heading')
+                    ->schema([
+                        TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
+                        Textarea::make('settings.subtitle')->label('Subtitle')->rows(2)->maxLength(220),
+                    ])->columns(1),
+
+                Section::make('Stats')
+                    ->schema([
+                        Repeater::make('settings.stats')
+                            ->label('Stats')
+                            ->schema([
+                                TextInput::make('value')
+                                    ->label('Value')
+                                    ->required()
+                                    ->maxLength(20)
+                                    ->helperText('Numbers animate up when in view (e.g. 13810 → 13,810).'),
+                                TextInput::make('prefix')
+                                    ->label('Prefix')
+                                    ->maxLength(8)
+                                    ->placeholder('e.g. < or $'),
+                                TextInput::make('suffix')
+                                    ->label('Suffix')
+                                    ->maxLength(8)
+                                    ->placeholder('e.g. % or +'),
+                                TextInput::make('label')
+                                    ->label('Label')
+                                    ->required()
+                                    ->maxLength(60),
+                                TextInput::make('description')
+                                    ->label('Description (optional)')
+                                    ->maxLength(120),
+                            ])
+                            ->columns(3)
+                            ->collapsible()
+                            ->cloneable()
+                            ->reorderable()
+                            ->addActionLabel('Add stat')
+                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'New stat'),
+                    ])->columns(1),
+
+                Section::make('Layout')
+                    ->schema([
+                        Select::make('settings.columns')
+                            ->label('Columns (desktop)')
+                            ->options([2 => '2', 3 => '3', 4 => '4', 5 => '5', 6 => '6'])
+                            ->default(4)
+                            ->required()
+                            ->dehydrateStateUsing(fn ($state) => (int) $state),
+                        Select::make('settings.align')
+                            ->label('Alignment')
+                            ->options(['center' => 'Centered', 'left' => 'Left'])
+                            ->default('center')
+                            ->required(),
+                        \Filament\Forms\Components\Toggle::make('settings.animate')
+                            ->label('Count up on scroll into view')
+                            ->default(true),
+                    ])->columns(3),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Number color'),
+                        ColorPicker::make('settings.mutedFg')->label('Label / description color'),
+                        ColorPicker::make('settings.accent')->label('Prefix / suffix accent'),
                     ])->columns(2),
             ],
 
