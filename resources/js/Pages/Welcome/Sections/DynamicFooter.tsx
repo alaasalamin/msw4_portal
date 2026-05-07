@@ -98,7 +98,8 @@ export default function DynamicFooter({ settings }: { settings: FooterSettings }
         year:    String(new Date().getFullYear()),
     };
     const tagline = interpolate(settings.tagline, tplVars);
-    const small   = interpolate(settings.small, tplVars);
+    // Bottom-bar small print is fixed site-wide — not user-editable.
+    const small   = 'bizo.technology';
     const hasAddress   = !!(company.name || addressLines.length || company.email || company.phone);
     const hasPages     = footer_pages.length > 0;
     const hasSitemap   = footer_categories.length > 0;

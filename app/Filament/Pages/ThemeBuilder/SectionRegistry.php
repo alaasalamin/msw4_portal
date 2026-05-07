@@ -589,10 +589,6 @@ class SectionRegistry
                             ->required()
                             ->maxLength(200)
                             ->helperText('Use {{company}} and {{year}} placeholders — they resolve to the live company name and current year.'),
-                        TextInput::make('settings.small')
-                            ->label('Small print (bottom bar)')
-                            ->maxLength(120)
-                            ->helperText('Same {{company}} / {{year}} placeholders are supported here too.'),
                     ])->columns(1),
                 Section::make('Visible columns')
                     ->description('Toggle the columns you want in the footer. Their content is pulled from your other admin areas.')
