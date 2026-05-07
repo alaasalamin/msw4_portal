@@ -55,6 +55,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-star',
                 'desc'  => 'Grid of customer reviews with stars, photo, name, and quote.',
             ],
+            'form' => [
+                'label' => 'Form',
+                'icon'  => 'heroicon-o-envelope',
+                'desc'  => 'Embed any form from /admin/forms with a heading and paragraph.',
+            ],
             'footer' => [
                 'label' => 'Footer',
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
@@ -105,6 +110,16 @@ class SectionRegistry
                 'align'      => 'left',
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
+            ],
+            'form' => [
+                'heading'    => 'Contact us',
+                'paragraph'  => 'Have a question or want to work together? Fill out the form below and we will get back to you shortly.',
+                'form_id'    => null,
+                'theme'      => 'light',
+                'align'      => 'center',
+                'bg'         => '#ffffff',
+                'fg'         => '#0f172a',
+                'mutedFg'    => '#64748b',
             ],
             'reviews' => [
                 'heading'      => 'What customers say',
@@ -295,6 +310,53 @@ class SectionRegistry
                         ColorPicker::make('settings.bg')->label('Background'),
                         ColorPicker::make('settings.fg')->label('Text color'),
                     ])->columns(2),
+            ],
+
+            'form' => [
+                Section::make('Content')
+                    ->schema([
+                        TextInput::make('settings.heading')
+                            ->label('Heading')
+                            ->maxLength(120)
+                            ->placeholder('Contact us'),
+                        Textarea::make('settings.paragraph')
+                            ->label('Paragraph')
+                            ->rows(3)
+                            ->maxLength(600)
+                            ->helperText('Optional copy shown above the form.'),
+                        Select::make('settings.align')
+                            ->label('Alignment of heading + paragraph')
+                            ->options(['left' => 'Left', 'center' => 'Center'])
+                            ->default('center'),
+                    ])->columns(1),
+
+                Section::make('Form')
+                    ->schema([
+                        Select::make('settings.form_id')
+                            ->label('Pick a form')
+                            ->options(fn () => \App\Models\CustomForm::orderBy('name')->pluck('name', 'id')->toArray())
+                            ->searchable()
+                            ->required()
+                            ->native(false)
+                            ->dehydrateStateUsing(fn ($state) => $state ? (int) $state : null)
+                            ->helperText('Manage forms in /admin/forms.'),
+                        Select::make('settings.theme')
+                            ->label('Form theme')
+                            ->options([
+                                'light' => 'Light',
+                                'muted' => 'Muted',
+                                'dark'  => 'Dark',
+                            ])
+                            ->default('light')
+                            ->required(),
+                    ])->columns(2),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Heading color'),
+                        ColorPicker::make('settings.mutedFg')->label('Paragraph color'),
+                    ])->columns(3),
             ],
 
             'reviews' => [

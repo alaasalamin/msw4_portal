@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomForm;
 use App\Models\Post;
 use App\Models\Setting;
 
@@ -16,8 +17,24 @@ class HomepageController extends Controller
         $j = fn(string $key, array $default) =>
             json_decode(Setting::get($key) ?? '', true) ?? $default;
 
+        // Hydrate form sections with the actual form + fields so the React
+        // component can render the inputs without an extra fetch.
+        $rawSections = $j('home_sections', []);
+        $sections = array_map(function ($s) {
+            if (($s['type'] ?? null) === 'form') {
+                $formId = $s['settings']['form_id'] ?? null;
+                if ($formId) {
+                    $form = CustomForm::with('fields')->find($formId);
+                    if ($form) {
+                        $s['settings']['form'] = $form->toArray();
+                    }
+                }
+            }
+            return $s;
+        }, $rawSections);
+
         return [
-            'sections' => $j('home_sections', []),
+            'sections' => $sections,
             // Pool of recent published posts the blog_posts section can pick from.
             'posts' => Post::with('category')
                 ->published()
