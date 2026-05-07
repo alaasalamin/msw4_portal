@@ -6,7 +6,8 @@ interface FooterPage     { title: string; href: string }
 interface FooterPost     { title: string; href: string }
 interface FooterCategory { name: string; slug: string; posts: FooterPost[] }
 interface Socials        { facebook?: string; instagram?: string; twitter?: string; linkedin?: string; youtube?: string; tiktok?: string; whatsapp?: string }
-interface SharedProps    { footer_pages: FooterPage[]; footer_categories: FooterCategory[]; site: { socials: Socials } }
+interface Brand          { prefix: string; suffix: string }
+interface SharedProps    { footer_pages: FooterPage[]; footer_categories: FooterCategory[]; site: { socials: Socials; brand?: Brand } }
 
 // ── Social icons ──────────────────────────────────────────────────────────────
 
@@ -60,6 +61,7 @@ interface Props {
 export default function FooterSection({ footer }: Props) {
     const { footer_pages = [], footer_categories = [], site } = usePage<SharedProps>().props;
     const socials: Socials = site?.socials ?? {};
+    const brand: Brand = site?.brand ?? { prefix: 'Moon', suffix: '.Repair' };
     const socialEntries = Object.entries(socials).filter(([, url]) => !!url) as [string, string][];
 
     return (
@@ -74,10 +76,10 @@ export default function FooterSection({ footer }: Props) {
                                 <IconWrench className="h-4 w-4 text-white" />
                             </span>
                             <span className="font-display text-xl font-normal text-white">
-                                Moon<span className="text-orange-400">.Repair</span>
+                                <span data-tb="home_brand_prefix">{brand.prefix}</span><span data-tb="home_brand_suffix" className="text-orange-400">{brand.suffix}</span>
                             </span>
                         </div>
-                        <p className="mt-4 text-sm leading-relaxed text-zinc-400">{footer.tagline}</p>
+                        <p data-tb="home_footer_tagline" className="mt-4 text-sm leading-relaxed text-zinc-400">{footer.tagline}</p>
 
                         {socialEntries.length > 0 && (
                             <div className="mt-6 flex flex-wrap gap-3">
@@ -146,12 +148,12 @@ export default function FooterSection({ footer }: Props) {
                         <ul className="space-y-2 text-sm text-zinc-500">
                             <li>
                                 <a href={`mailto:${footer.emailHello}`} className="transition hover:text-zinc-300">
-                                    {footer.emailHello}
+                                    <span data-tb="home_footer_email_hello">{footer.emailHello}</span>
                                 </a>
                             </li>
                             <li>
                                 <a href={`mailto:${footer.emailPartners}`} className="transition hover:text-zinc-300">
-                                    {footer.emailPartners}
+                                    <span data-tb="home_footer_email_partners">{footer.emailPartners}</span>
                                 </a>
                             </li>
                         </ul>

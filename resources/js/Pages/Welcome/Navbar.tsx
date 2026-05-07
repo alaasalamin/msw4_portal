@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { IconBuilding, IconUser } from './icons';
 
 interface NavPage { label: string; href: string }
+interface Brand   { prefix: string; suffix: string }
 
 interface Props {
     portalLink: { href: string; label: string } | null;
@@ -11,7 +12,8 @@ interface Props {
 
 export default function Navbar({ portalLink, canLogin }: Props) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { nav_pages = [] } = usePage<{ nav_pages: NavPage[] }>().props;
+    const { nav_pages = [], site } = usePage<{ nav_pages: NavPage[]; site: { brand?: Brand } }>().props;
+    const brand: Brand = site?.brand ?? { prefix: 'Moon', suffix: '.Repair' };
 
     return (
         <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-zinc-900/90 backdrop-blur-md">
@@ -32,7 +34,9 @@ export default function Navbar({ portalLink, canLogin }: Props) {
                             <circle cx="15" cy="34" r="1.3" fill="#C0A878"/><circle cx="15" cy="34" r="0.7" fill="#A8906A"/>
                         </svg>
                     </span>
-                    <span className="font-display text-xl font-normal text-white">Moon<span className="text-orange-400">.Repair</span></span>
+                    <span className="font-display text-xl font-normal text-white">
+                        <span data-tb="home_brand_prefix">{brand.prefix}</span><span data-tb="home_brand_suffix" className="text-orange-400">{brand.suffix}</span>
+                    </span>
                 </Link>
 
                 {/* Desktop nav — published pages */}

@@ -34,6 +34,10 @@ class HandleInertiaRequests extends Middleware
                 'name'        => Setting::get('site_name', config('app.name')),
                 'description' => Setting::get('site_description'),
                 'logo'        => $logo ? asset('storage/' . $logo) : null,
+                'brand'       => [
+                    'prefix' => Setting::get('home_brand_prefix', 'Moon'),
+                    'suffix' => Setting::get('home_brand_suffix', '.Repair'),
+                ],
                 'socials'     => array_filter([
                     'facebook'  => Setting::get('social_facebook'),
                     'instagram' => Setting::get('social_instagram'),

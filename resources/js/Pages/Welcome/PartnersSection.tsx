@@ -15,18 +15,18 @@ export default function PartnersSection({ partners }: Props) {
                     <div>
                         <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-3 py-1 text-xs font-medium text-orange-300">
                             <IconBuilding className="h-3.5 w-3.5" />
-                            {partners.label}
+                            <span data-tb="home_partners_label">{partners.label}</span>
                         </span>
-                        <h2 className="font-display mt-4 text-3xl font-normal text-white sm:text-4xl">{partners.title}</h2>
-                        <p className="mt-4 text-lg text-zinc-400">{partners.subtitle}</p>
+                        <h2 data-tb="home_partners_title" className="font-display mt-4 text-3xl font-normal text-white sm:text-4xl">{partners.title}</h2>
+                        <p data-tb="home_partners_subtitle" className="mt-4 text-lg text-zinc-400">{partners.subtitle}</p>
 
                         <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-                            {partners.benefits.map((benefit) => (
-                                <li key={benefit} className="flex items-start gap-2.5 text-sm text-zinc-300">
+                            {partners.benefits.map((benefit, i) => (
+                                <li key={i} className="flex items-start gap-2.5 text-sm text-zinc-300">
                                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-orange-600/30">
                                         <IconCheck className="h-2.5 w-2.5 text-orange-400" />
                                     </span>
-                                    {benefit}
+                                    <span data-tb-list="home_partners_benefits" data-tb-i={i}>{benefit}</span>
                                 </li>
                             ))}
                         </ul>
@@ -49,10 +49,10 @@ export default function PartnersSection({ partners }: Props) {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        {partners.features.map(({ title, desc }) => (
-                            <div key={title} className="rounded-xl border border-white/5 bg-white/5 p-5">
-                                <h3 className="mb-1 text-sm font-semibold text-white">{title}</h3>
-                                <p className="text-xs leading-relaxed text-zinc-400">{desc}</p>
+                        {partners.features.map(({ title, desc }, i) => (
+                            <div key={i} className="rounded-xl border border-white/5 bg-white/5 p-5">
+                                <h3 data-tb-list="home_partners_features" data-tb-i={i} data-tb-f="title" className="mb-1 text-sm font-semibold text-white">{title}</h3>
+                                <p data-tb-list="home_partners_features" data-tb-i={i} data-tb-f="desc" className="text-xs leading-relaxed text-zinc-400">{desc}</p>
                             </div>
                         ))}
                     </div>

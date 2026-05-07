@@ -24,9 +24,9 @@ export default function ServicesSection({ services }: Props) {
         <section id="services" className="bg-zinc-50 py-20 sm:py-28">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl text-center">
-                    <p className="text-sm font-semibold uppercase tracking-widest text-orange-600">{services.label}</p>
-                    <h2 className="font-display mt-3 text-3xl font-normal text-zinc-900 sm:text-4xl">{services.title}</h2>
-                    <p className="mt-4 text-lg text-zinc-500">{services.subtitle}</p>
+                    <p data-tb="home_services_label" className="text-sm font-semibold uppercase tracking-widest text-orange-600">{services.label}</p>
+                    <h2 data-tb="home_services_title" className="font-display mt-3 text-3xl font-normal text-zinc-900 sm:text-4xl">{services.title}</h2>
+                    <p data-tb="home_services_subtitle" className="mt-4 text-lg text-zinc-500">{services.subtitle}</p>
                 </div>
 
                 <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -41,8 +41,8 @@ export default function ServicesSection({ services }: Props) {
                                 <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm">
                                     <Icon className={`h-5 w-5 ${c.icon}`} />
                                 </div>
-                                <h3 className="mb-2 font-semibold text-zinc-900">{title}</h3>
-                                <p className="text-sm leading-relaxed text-zinc-500">{desc}</p>
+                                <h3 data-tb-list="home_services_items" data-tb-i={i} data-tb-f="title" className="mb-2 font-semibold text-zinc-900">{title}</h3>
+                                <p data-tb-list="home_services_items" data-tb-i={i} data-tb-f="desc" className="text-sm leading-relaxed text-zinc-500">{desc}</p>
                             </div>
                         );
                     })}

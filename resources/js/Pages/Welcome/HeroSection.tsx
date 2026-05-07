@@ -31,7 +31,7 @@ export default function HeroSection({ hero, canRegister, canResetPassword, porta
                     <div>
                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5">
                             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-orange-400" />
-                            <span className="text-xs font-medium text-orange-300">{hero.badge}</span>
+                            <span data-tb="home_hero_badge" className="text-xs font-medium text-orange-300">{hero.badge}</span>
                         </div>
 
                         <h1
@@ -39,15 +39,15 @@ export default function HeroSection({ hero, canRegister, canResetPassword, porta
                             dangerouslySetInnerHTML={{ __html: hero.title }}
                         />
 
-                        <p className="mt-6 text-lg leading-relaxed text-zinc-400">{hero.subtitle}</p>
+                        <p data-tb="home_hero_subtitle" className="mt-6 text-lg leading-relaxed text-zinc-400">{hero.subtitle}</p>
 
                         <ul className="mt-8 space-y-3">
-                            {hero.bullets.map((item) => (
-                                <li key={item} className="flex items-center gap-3 text-sm text-zinc-300">
+                            {hero.bullets.map((item, i) => (
+                                <li key={i} className="flex items-center gap-3 text-sm text-zinc-300">
                                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-600/20">
                                         <IconCheck className="h-3 w-3 text-orange-400" />
                                     </span>
-                                    {item}
+                                    <span data-tb-list="home_hero_bullets" data-tb-i={i}>{item}</span>
                                 </li>
                             ))}
                         </ul>
@@ -59,7 +59,7 @@ export default function HeroSection({ hero, canRegister, canResetPassword, porta
                                 ))}
                             </div>
                             <span className="text-sm text-zinc-400">
-                                <strong className="text-white">{hero.rating}</strong> — {hero.repairsCount}
+                                <strong data-tb="home_hero_rating" className="text-white">{hero.rating}</strong> — <span data-tb="home_hero_repairs_count">{hero.repairsCount}</span>
                             </span>
                         </div>
                     </div>
