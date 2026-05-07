@@ -71,6 +71,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-question-mark-circle',
                 'desc'  => 'Frequently asked questions, optionally collapsible.',
             ],
+            'cta' => [
+                'label' => 'CTA Banner',
+                'icon'  => 'heroicon-o-megaphone',
+                'desc'  => 'Bold call-to-action strip with one or two buttons.',
+            ],
             'footer' => [
                 'label' => 'Footer',
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
@@ -121,6 +126,22 @@ class SectionRegistry
                 'align'      => 'left',
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
+            ],
+            'cta' => [
+                'heading'         => 'Ready to get started?',
+                'subtitle'        => 'Get in touch and we will reply within one business day.',
+                'primaryText'     => 'Get started',
+                'primaryHref'     => '#',
+                'secondaryText'   => 'Talk to sales',
+                'secondaryHref'   => 'mailto:hello@example.com',
+                'align'           => 'center',  // 'center' or 'split'
+                'bg'              => '#0f172a',
+                'fg'              => '#ffffff',
+                'mutedFg'         => '#cbd5e1',
+                'primaryBtnBg'    => '#ffffff',
+                'primaryBtnFg'    => '#0f172a',
+                'secondaryBtnBg'  => 'transparent',
+                'secondaryBtnFg'  => '#ffffff',
             ],
             'faq' => [
                 'heading'      => 'Frequently asked questions',
@@ -388,6 +409,58 @@ class SectionRegistry
                     ->schema([
                         ColorPicker::make('settings.bg')->label('Background'),
                         ColorPicker::make('settings.fg')->label('Text color'),
+                    ])->columns(2),
+            ],
+
+            'cta' => [
+                Section::make('Content')
+                    ->schema([
+                        TextInput::make('settings.heading')
+                            ->label('Heading')
+                            ->required()
+                            ->maxLength(160),
+                        Textarea::make('settings.subtitle')
+                            ->label('Subtitle')
+                            ->rows(2)
+                            ->maxLength(280),
+                        Select::make('settings.align')
+                            ->label('Layout')
+                            ->options([
+                                'center' => 'Centered — heading + buttons stacked',
+                                'split'  => 'Split — heading on the left, buttons on the right',
+                            ])
+                            ->default('center')
+                            ->required(),
+                    ])->columns(1),
+
+                Section::make('Buttons')
+                    ->schema([
+                        TextInput::make('settings.primaryText')
+                            ->label('Primary button label')
+                            ->required()
+                            ->maxLength(40),
+                        TextInput::make('settings.primaryHref')
+                            ->label('Primary button URL')
+                            ->required()
+                            ->maxLength(200)
+                            ->default('#'),
+                        TextInput::make('settings.secondaryText')
+                            ->label('Secondary button label (optional)')
+                            ->maxLength(40),
+                        TextInput::make('settings.secondaryHref')
+                            ->label('Secondary button URL')
+                            ->maxLength(200),
+                    ])->columns(2),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Heading color'),
+                        ColorPicker::make('settings.mutedFg')->label('Subtitle color'),
+                        ColorPicker::make('settings.primaryBtnBg')->label('Primary button background'),
+                        ColorPicker::make('settings.primaryBtnFg')->label('Primary button text'),
+                        ColorPicker::make('settings.secondaryBtnBg')->label('Secondary button background'),
+                        ColorPicker::make('settings.secondaryBtnFg')->label('Secondary button text'),
                     ])->columns(2),
             ],
 
