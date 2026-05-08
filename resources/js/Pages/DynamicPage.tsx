@@ -55,6 +55,7 @@ interface SitePageData {
     slug: string;
     meta_title: string | null;
     meta_description: string | null;
+    meta_keywords: string | null;
     status: string;
     sections: Array<{ type: string; data: Record<string, any> }> | null;
     theme_sections: ThemeSection[] | null;
@@ -101,7 +102,10 @@ export default function DynamicPage({ page, homepage }: Props) {
 
     return (
         <>
-            <Head title={page.meta_title || page.title} />
+            <Head title={page.meta_title || page.title}>
+                {page.meta_description && <meta name="description" content={page.meta_description} />}
+                {page.meta_keywords && <meta name="keywords" content={page.meta_keywords} />}
+            </Head>
 
             {headerSection && <DynamicHeader settings={headerSection.settings as never} />}
 

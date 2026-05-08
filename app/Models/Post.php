@@ -25,6 +25,7 @@ class Post extends Model
         'status',
         'meta_title',
         'meta_description',
+        'meta_keywords',
         'published_at',
     ];
 

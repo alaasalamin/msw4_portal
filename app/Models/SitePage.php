@@ -9,7 +9,7 @@ class SitePage extends Model
 {
     protected $table = 'site_pages';
 
-    protected $fillable = ['title', 'slug', 'meta_title', 'meta_description', 'status', 'sections', 'theme_sections'];
+    protected $fillable = ['title', 'slug', 'meta_title', 'meta_description', 'meta_keywords', 'status', 'sections', 'theme_sections'];
 
     protected $casts = [
         'sections'       => 'array',

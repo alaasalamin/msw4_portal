@@ -221,6 +221,7 @@ HTML;
                 return $rec ? [
                     'meta_title'       => $rec->meta_title,
                     'meta_description' => $rec->meta_description,
+                    'meta_keywords'    => $rec->meta_keywords,
                 ] : [];
             })
             ->schema(function (array $arguments) {
@@ -253,6 +254,11 @@ HTML;
                         ->placeholder('A 70–160 character summary that invites the click')
                         ->helperText('Recommended: 70–160 characters.')
                         ->live(debounce: 200),
+                    TextInput::make('meta_keywords')
+                        ->label('Keywords')
+                        ->maxLength(255)
+                        ->placeholder('e.g. laravel, web development, php tips')
+                        ->helperText('Comma-separated. Modern Google ignores these but they still help internal search and other crawlers.'),
                     Placeholder::make('preview')
                         ->label('Live Google preview')
                         ->content(fn (Get $get) => new HtmlString($this->renderSnippetHtml(
@@ -271,6 +277,7 @@ HTML;
                 }
                 $rec->meta_title       = trim($data['meta_title']       ?? '') ?: null;
                 $rec->meta_description = trim($data['meta_description'] ?? '') ?: null;
+                $rec->meta_keywords    = trim($data['meta_keywords']    ?? '') ?: null;
                 $rec->save();
 
                 Notification::make()

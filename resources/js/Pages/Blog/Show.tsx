@@ -44,6 +44,7 @@ interface Post {
     published_at: string;
     meta_title: string | null;
     meta_description: string | null;
+    meta_keywords: string | null;
     author: { name: string };
     category: { id: number; name: string; slug: string } | null;
 }
@@ -85,6 +86,7 @@ export default function BlogShow({ post, canonicalUrl, imageUrl, homepage }: Pro
             <Head>
                 <title>{metaTitle}</title>
                 {metaDesc && <meta name="description" content={metaDesc} />}
+                {post.meta_keywords && <meta name="keywords" content={post.meta_keywords} />}
 
                 {/* Canonical */}
                 <link rel="canonical" href={canonicalUrl} />
