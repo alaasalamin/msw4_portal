@@ -144,6 +144,12 @@ class SectionRegistry
                 ['key' => 'boxed',    'label' => 'Boxed card',   'description' => 'Tinted section bg with the CTA inside an elevated card.'],
                 ['key' => 'inset',    'label' => 'Inset',        'description' => 'Small contained card with rounded corners on a calm bg.'],
             ],
+            'header' => [
+                ['key' => 'classic',  'label' => 'Classic',  'description' => 'Logo on the left, nav links on the right.'],
+                ['key' => 'centered', 'label' => 'Centered', 'description' => 'Logo centered above a thin nav row.'],
+                ['key' => 'split',    'label' => 'Split',    'description' => 'Logo left, nav centered, primary CTA button on the right.'],
+                ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Logo only — every link collapses into a hamburger.'],
+            ],
             default => [],
         };
     }
@@ -161,6 +167,7 @@ class SectionRegistry
     {
         return match ($type) {
             'header' => [
+                'variant'    => 'classic',
                 'logo'       => Setting::get('company_name') ?: 'Brand',
                 'logoImage'  => null,    // relative path within the public disk (overrides text when set)
                 'logoHeight' => 48,      // displayed pixel height of the logo image
@@ -171,6 +178,9 @@ class SectionRegistry
                 'linkColor'  => '#cbd5e1',
                 'primary'    => '#ea580c', // site-wide brand accent (drives buttons, badges, links elsewhere)
                 'sticky'     => true,
+                // Used by the 'split' variant
+                'ctaText'    => '',
+                'ctaHref'    => '#',
             ],
             'hero' => [
                 'variant'    => 'centered',
@@ -439,6 +449,32 @@ class SectionRegistry
     {
         return match ($type) {
             'header' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'classic'  => 'Classic — logo left, nav right',
+                                'centered' => 'Centered — logo above nav',
+                                'split'    => 'Split — logo / nav / CTA',
+                                'minimal'  => 'Minimal — logo only, hamburger nav',
+                            ])
+                            ->default('classic')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                        TextInput::make('settings.ctaText')
+                            ->label('CTA button label')
+                            ->maxLength(40)
+                            ->placeholder('Get started')
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'split')
+                            ->helperText('Used by the Split variant. Leave empty to hide the button.'),
+                        TextInput::make('settings.ctaHref')
+                            ->label('CTA button URL')
+                            ->maxLength(200)
+                            ->default('#')
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'split'),
+                    ])->columns(1),
                 Section::make('Logo')
                     ->schema([
                         FileUpload::make('settings.logoImage')
