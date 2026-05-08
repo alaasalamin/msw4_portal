@@ -16,6 +16,10 @@ interface GallerySettings {
     gap?: number | string;
     showCaptions?: boolean;
     enableLightbox?: boolean;
+    autoplay?: boolean | string | number;
+    autoplayDelay?: number | string;
+    showArrows?: boolean | string | number;
+    showDots?: boolean | string | number;
     bg?: string;
     fg?: string;
     mutedFg?: string;
@@ -280,32 +284,120 @@ function Masonry({ settings, images, enableLightbox, onOpen }: TileProps) {
     );
 }
 
-// ── Variant: carousel (horizontal scroll-snap with prev/next) ──────────────
+// ── Variant: carousel (one slide at a time, dots, autoplay, swipe) ─────────
 
 function Carousel({ settings, images, enableLightbox, onOpen }: TileProps) {
-    const gap = Math.max(0, Math.min(64, Number(settings.gap) || 12));
     const aspect = ASPECT_RATIOS[settings.aspect ?? '16:9'] ?? '16 / 9';
     const showCaptions = settings.showCaptions !== false;
-    const mutedFg = settings.mutedFg ?? '#64748b';
-    const scrollerRef = useRef<HTMLDivElement | null>(null);
+    const total = images.length;
 
-    const scrollBy = (dir: 1 | -1) => {
-        const el = scrollerRef.current;
-        if (!el) return;
-        el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: 'smooth' });
+    const autoplay   = settings.autoplay   !== false && settings.autoplay !== '0' && settings.autoplay !== 0;
+    const showArrows = settings.showArrows !== false && settings.showArrows !== '0' && settings.showArrows !== 0;
+    const showDots   = settings.showDots   !== false && settings.showDots   !== '0' && settings.showDots   !== 0;
+    const delayMs    = Math.max(1000, Math.min(30000, (Number(settings.autoplayDelay) || 5) * 1000));
+
+    const [index, setIndex] = useState(0);
+    const [paused, setPaused] = useState(false);
+
+    const goTo = useCallback((i: number) => setIndex(((i % total) + total) % total), [total]);
+    const prev = useCallback(() => setIndex((i) => (i - 1 + total) % total), [total]);
+    const next = useCallback(() => setIndex((i) => (i + 1) % total), [total]);
+
+    // Autoplay — pauses on hover/focus so users get a chance to read captions.
+    useEffect(() => {
+        if (!autoplay || paused || total <= 1) return;
+        const id = window.setInterval(next, delayMs);
+        return () => window.clearInterval(id);
+    }, [autoplay, paused, total, delayMs, next]);
+
+    // Touch swipe — anything past 40px in either direction snaps to next/prev.
+    const touchStart = useRef<number | null>(null);
+    const onTouchStart = (e: React.TouchEvent) => { touchStart.current = e.touches[0].clientX; };
+    const onTouchEnd = (e: React.TouchEvent) => {
+        if (touchStart.current === null) return;
+        const dx = e.changedTouches[0].clientX - touchStart.current;
+        if (dx > 40) prev();
+        else if (dx < -40) next();
+        touchStart.current = null;
     };
+
+    if (total === 0) return null;
 
     return (
         <>
-            <div style={{ position: 'relative' }}>
-                {images.length > 1 && (
+            <div
+                onMouseEnter={() => setPaused(true)}
+                onMouseLeave={() => setPaused(false)}
+                onFocus={() => setPaused(true)}
+                onBlur={() => setPaused(false)}
+                onTouchStart={onTouchStart}
+                onTouchEnd={onTouchEnd}
+                style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderRadius: 12,
+                    background: '#0f172a',
+                }}
+                aria-roledescription="carousel"
+                aria-label={settings.heading || 'Gallery carousel'}
+            >
+                <div
+                    style={{
+                        display: 'flex',
+                        transform: `translate3d(-${index * 100}%, 0, 0)`,
+                        transition: 'transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1)',
+                        willChange: 'transform',
+                    }}
+                >
+                    {images.map((img, i) => (
+                        <figure
+                            key={i}
+                            aria-roledescription="slide"
+                            aria-label={`${i + 1} of ${total}`}
+                            aria-hidden={i !== index}
+                            style={{
+                                flex: '0 0 100%',
+                                margin: 0,
+                                position: 'relative',
+                            }}
+                        >
+                            <ImageTile
+                                img={img}
+                                index={i}
+                                enableLightbox={enableLightbox}
+                                onOpen={onOpen}
+                                aspect={aspect}
+                                radius={0}
+                            />
+                            {showCaptions && img.caption && (
+                                <figcaption
+                                    style={{
+                                        position: 'absolute',
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        padding: 'clamp(20px, 4vw, 36px) clamp(24px, 5vw, 48px)',
+                                        background: 'linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.0))',
+                                        color: '#ffffff',
+                                        fontSize: 'clamp(0.9375rem, 1.2vw, 1.0625rem)',
+                                        lineHeight: 1.5,
+                                        pointerEvents: 'none',
+                                    }}
+                                >
+                                    {img.caption}
+                                </figcaption>
+                            )}
+                        </figure>
+                    ))}
+                </div>
+
+                {showArrows && total > 1 && (
                     <>
                         <button
                             type="button"
-                            aria-label="Previous"
-                            onClick={() => scrollBy(-1)}
-                            style={{ ...arrowBtnStyle, left: -6 }}
-                            className="tb-gallery-carousel-arrow"
+                            aria-label="Previous slide"
+                            onClick={prev}
+                            style={{ ...arrowBtnStyle, left: 16 }}
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -313,10 +405,9 @@ function Carousel({ settings, images, enableLightbox, onOpen }: TileProps) {
                         </button>
                         <button
                             type="button"
-                            aria-label="Next"
-                            onClick={() => scrollBy(1)}
-                            style={{ ...arrowBtnStyle, right: -6 }}
-                            className="tb-gallery-carousel-arrow"
+                            aria-label="Next slide"
+                            onClick={next}
+                            style={{ ...arrowBtnStyle, right: 16 }}
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -324,39 +415,47 @@ function Carousel({ settings, images, enableLightbox, onOpen }: TileProps) {
                         </button>
                     </>
                 )}
+            </div>
+
+            {showDots && total > 1 && (
                 <div
-                    ref={scrollerRef}
-                    className="tb-gallery-carousel"
+                    role="tablist"
+                    aria-label="Slide indicators"
                     style={{
                         display: 'flex',
-                        gap: `${gap}px`,
-                        overflowX: 'auto',
-                        overflowY: 'hidden',
-                        scrollSnapType: 'x mandatory',
-                        scrollPadding: 12,
-                        paddingBottom: 6,
-                        WebkitOverflowScrolling: 'touch',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 8,
+                        marginTop: 20,
                     }}
                 >
-                    {images.map((img, i) => (
-                        <figure key={i} style={{
-                            margin: 0,
-                            flex: '0 0 auto',
-                            width: 'clamp(240px, 38vw, 420px)',
-                            scrollSnapAlign: 'start',
-                        }}>
-                            <ImageTile img={img} index={i} enableLightbox={enableLightbox} onOpen={onOpen} aspect={aspect} />
-                            {showCaptions && <Caption caption={img.caption} mutedFg={mutedFg} />}
-                        </figure>
-                    ))}
+                    {images.map((_, i) => {
+                        const active = i === index;
+                        return (
+                            <button
+                                key={i}
+                                type="button"
+                                role="tab"
+                                aria-selected={active}
+                                aria-label={`Go to slide ${i + 1}`}
+                                onClick={() => goTo(i)}
+                                style={{
+                                    width: active ? 28 : 8,
+                                    height: 8,
+                                    borderRadius: 9999,
+                                    border: 'none',
+                                    background: active ? 'var(--primary, #0f172a)' : 'rgba(15,23,42,0.22)',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    transition: 'width 250ms ease, background 250ms ease',
+                                }}
+                            />
+                        );
+                    })}
                 </div>
-            </div>
+            )}
+
             <SharedHoverStyles />
-            <style>{`
-                .tb-gallery-carousel { scrollbar-width: thin; scrollbar-color: rgba(15,23,42,0.25) transparent; }
-                .tb-gallery-carousel::-webkit-scrollbar { height: 8px; }
-                .tb-gallery-carousel::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.25); border-radius: 4px; }
-            `}</style>
         </>
     );
 }
@@ -370,13 +469,14 @@ const arrowBtnStyle: React.CSSProperties = {
     height: 44,
     borderRadius: 9999,
     border: '1px solid rgba(15,23,42,0.10)',
-    background: '#ffffff',
+    background: 'rgba(255,255,255,0.95)',
     color: '#0f172a',
     cursor: 'pointer',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 4px 14px rgba(15,23,42,0.16)',
+    boxShadow: '0 4px 14px rgba(15,23,42,0.18)',
+    backdropFilter: 'blur(6px)',
 };
 
 // ── Variant: collage (asymmetric — first image is bigger) ──────────────────

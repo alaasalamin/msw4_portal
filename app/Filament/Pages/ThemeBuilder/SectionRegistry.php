@@ -293,6 +293,11 @@ class SectionRegistry
                 'gap'            => 12,
                 'showCaptions'   => true,
                 'enableLightbox' => true,
+                // Carousel-only options (ignored by other variants)
+                'autoplay'       => true,
+                'autoplayDelay'  => 5, // seconds between slides
+                'showArrows'     => true,
+                'showDots'       => true,
                 'bg'             => '#ffffff',
                 'fg'             => '#0f172a',
                 'mutedFg'        => '#64748b',
@@ -878,6 +883,29 @@ class SectionRegistry
                             ->label('Click to open larger (lightbox)')
                             ->default(true),
                     ])->columns(3),
+
+                Section::make('Carousel options')
+                    ->description('Settings that only apply when the layout is set to Carousel.')
+                    ->visible(fn (Get $get) => $get('settings.variant') === 'carousel')
+                    ->schema([
+                        \Filament\Forms\Components\Toggle::make('settings.autoplay')
+                            ->label('Autoplay')
+                            ->default(true)
+                            ->helperText('Auto-advance slides on a timer. Pauses while the cursor is over the carousel.'),
+                        TextInput::make('settings.autoplayDelay')
+                            ->label('Slide duration (seconds)')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(30)
+                            ->default(5)
+                            ->visible(fn (Get $get) => (bool) $get('settings.autoplay')),
+                        \Filament\Forms\Components\Toggle::make('settings.showArrows')
+                            ->label('Show prev / next arrows')
+                            ->default(true),
+                        \Filament\Forms\Components\Toggle::make('settings.showDots')
+                            ->label('Show pagination dots')
+                            ->default(true),
+                    ])->columns(2),
 
                 Section::make('Style')
                     ->schema([
