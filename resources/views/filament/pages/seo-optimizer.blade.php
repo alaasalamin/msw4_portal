@@ -297,6 +297,7 @@
                                 <th style="text-align:left; padding:10px 14px; font-weight:700;">Meta title</th>
                                 <th style="text-align:left; padding:10px 14px; font-weight:700;">Meta description</th>
                                 <th style="text-align:right; padding:10px 14px; font-weight:700;">Score</th>
+                                <th style="text-align:right; padding:10px 14px; font-weight:700;">&nbsp;</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -351,6 +352,22 @@
                                                      color:{{ $scTone[0] }}; background:{{ $scTone[1] }};">
                                             {{ $sc }}
                                         </span>
+                                    </td>
+                                    <td style="padding:12px 14px; text-align:right; white-space:nowrap;">
+                                        <button
+                                            type="button"
+                                            wire:click="mountAction('editMeta', { type: '{{ $item['kind'] }}', id: {{ (int) $item['id'] }} })"
+                                            title="Edit meta for this {{ strtolower($item['type']) }}"
+                                            style="display:inline-flex; align-items:center; gap:4px; padding:5px 10px;
+                                                   border:1px solid #0369a1; background:linear-gradient(180deg,#38bdf8,#0284c7);
+                                                   color:#fff; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;
+                                                   box-shadow:0 1px 2px rgba(2,132,199,.3), inset 0 1px 0 rgba(255,255,255,.2);"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:11px; height:11px;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
+                                            </svg>
+                                            Edit
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach

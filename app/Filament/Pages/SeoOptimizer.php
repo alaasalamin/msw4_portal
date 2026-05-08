@@ -14,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 class SeoOptimizer extends Page
 {
@@ -127,6 +128,73 @@ class SeoOptimizer extends Page
         Notification::make()->title('SEO settings saved')->success()->send();
     }
 
+    /**
+     * Resolves an audit row's record (Page or Post) by its passed type+id.
+     * Used by the per-row edit action.
+     */
+    protected function resolveRecord(?string $type, $id): ?Model
+    {
+        if (! $type || ! $id) return null;
+        return match ($type) {
+            'page' => SitePage::find($id),
+            'post' => Post::find($id),
+            default => null,
+        };
+    }
+
+    public function editMetaAction(): Action
+    {
+        return Action::make('editMeta')
+            ->label('Edit meta')
+            ->icon('heroicon-m-pencil-square')
+            ->modalWidth('lg')
+            ->modalHeading(function (array $arguments): string {
+                $rec = $this->resolveRecord($arguments['type'] ?? null, $arguments['id'] ?? null);
+                return $rec ? "Edit meta — {$rec->title}" : 'Edit meta';
+            })
+            ->modalDescription('These fields go straight to the page\'s <title> and <meta name="description">. Aim for 30–60 chars and 70–160 chars respectively.')
+            ->modalSubmitActionLabel('Save')
+            ->fillForm(function (array $arguments) {
+                $rec = $this->resolveRecord($arguments['type'] ?? null, $arguments['id'] ?? null);
+                return $rec ? [
+                    'meta_title'       => $rec->meta_title,
+                    'meta_description' => $rec->meta_description,
+                ] : [];
+            })
+            ->schema([
+                TextInput::make('meta_title')
+                    ->label('Meta title')
+                    ->maxLength(120)
+                    ->placeholder('Your headline as it appears in Google')
+                    ->helperText('Recommended: 30–60 characters.')
+                    ->live(debounce: 200)
+                    ->afterStateUpdated(fn () => null),
+                Textarea::make('meta_description')
+                    ->label('Meta description')
+                    ->rows(4)
+                    ->maxLength(280)
+                    ->placeholder('A 70–160 character summary that invites the click')
+                    ->helperText('Recommended: 70–160 characters.')
+                    ->live(debounce: 200),
+            ])
+            ->action(function (array $arguments, array $data) {
+                $rec = $this->resolveRecord($arguments['type'] ?? null, $arguments['id'] ?? null);
+                if (! $rec) {
+                    Notification::make()->title('Could not load record')->danger()->send();
+                    return;
+                }
+                $rec->meta_title       = trim($data['meta_title']       ?? '') ?: null;
+                $rec->meta_description = trim($data['meta_description'] ?? '') ?: null;
+                $rec->save();
+
+                Notification::make()
+                    ->title('Meta saved')
+                    ->body($rec->title)
+                    ->success()
+                    ->send();
+            });
+    }
+
     public function regenerateSitemap(): void
     {
         try {
@@ -158,6 +226,8 @@ class SeoOptimizer extends Page
 
         foreach (SitePage::where('status', 'published')->orderBy('title')->get() as $p) {
             $items[] = $this->auditItem(
+                kind: 'page',
+                id: $p->id,
                 type: 'Page',
                 title: $p->title,
                 url: '/' . $p->slug,
@@ -168,6 +238,8 @@ class SeoOptimizer extends Page
 
         foreach (Post::published()->orderBy('published_at', 'desc')->get() as $p) {
             $items[] = $this->auditItem(
+                kind: 'post',
+                id: $p->id,
                 type: 'Post',
                 title: $p->title,
                 url: '/blog/' . $p->fullSlug(),
@@ -181,7 +253,7 @@ class SeoOptimizer extends Page
         return $items;
     }
 
-    protected function auditItem(string $type, string $title, string $url, ?string $metaTitle, ?string $metaDescription): array
+    protected function auditItem(string $kind, int $id, string $type, string $title, string $url, ?string $metaTitle, ?string $metaDescription): array
     {
         $issues   = [];
         $warnings = [];
@@ -201,6 +273,8 @@ class SeoOptimizer extends Page
         $score = max(0, 100 - count($issues) * 40 - count($warnings) * 10);
 
         return [
+            'kind'            => $kind,
+            'id'              => $id,
             'type'            => $type,
             'title'           => $title,
             'url'             => $url,
