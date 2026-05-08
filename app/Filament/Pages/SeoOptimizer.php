@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\SitePage;
 use App\Services\SitemapService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -50,12 +51,46 @@ class SeoOptimizer extends Page
     public function getSnippetState(): array
     {
         $companyName = Setting::get('company_name') ?: Setting::get('site_name', config('app.name', 'MSW4'));
+        $faviconPath = Setting::get('favicon');
         return [
             'title'       => Setting::get('seo_title') ?: ($companyName . ' — Home'),
             'description' => Setting::get('seo_description', Setting::get('site_description', '')),
             'url'         => rtrim(config('app.url') ?: url('/'), '/'),
             'siteName'    => $companyName,
+            'favicon'     => $faviconPath ? asset('storage/' . $faviconPath) : null,
         ];
+    }
+
+    public function uploadFaviconAction(): Action
+    {
+        return Action::make('uploadFavicon')
+            ->label('Change favicon')
+            ->icon('heroicon-m-photo')
+            ->color('gray')
+            ->modalHeading('Upload favicon')
+            ->modalDescription('PNG, ICO or SVG. Recommended: 32×32 or 64×64. Used in the browser tab and Google search results.')
+            ->modalSubmitActionLabel('Save')
+            ->fillForm(fn () => ['favicon' => Setting::get('favicon')])
+            ->schema([
+                FileUpload::make('favicon')
+                    ->label('Favicon')
+                    ->image()
+                    ->disk('public')
+                    ->directory('settings')
+                    ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'])
+                    ->maxSize(512)
+                    ->imagePreviewHeight('80')
+                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
+                    ->helperText('Saving an empty value clears the favicon and falls back to the letter circle.'),
+            ])
+            ->action(function (array $data) {
+                Setting::set('favicon', $data['favicon'] ?? '');
+                Notification::make()
+                    ->title('Favicon updated')
+                    ->body('The browser tab and Google search snippet will pick this up.')
+                    ->success()
+                    ->send();
+            });
     }
 
     /**

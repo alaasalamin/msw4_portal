@@ -98,6 +98,7 @@
                 description: @js($snippet['description']),
                 url:         @js($snippet['url']),
                 siteName:    @js($snippet['siteName']),
+                favicon:     @js($snippet['favicon']),
                 saving:      false,
                 get titleLen() { return (this.title || '').length; },
                 get descLen()  { return (this.description || '').length; },
@@ -139,23 +140,26 @@
                     <h2 style="font-size:14px; font-weight:600; color:var(--tb-fg); margin:0 0 2px;">Search snippet preview</h2>
                     <p style="font-size:11px; color:var(--tb-muted); margin:0;">Edit on the left, watch the Google result render in real time on the right.</p>
                 </div>
-                <button
-                    type="button"
-                    x-bind:disabled="saving"
-                    x-on:click="saveSnippet"
-                    style="display:inline-flex; align-items:center; gap:6px;
-                           background:#0284c7; color:#fff;
-                           border:1px solid #0369a1; border-radius:8px;
-                           padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer;
-                           box-shadow:0 1px 2px rgba(2,132,199,.3), inset 0 1px 0 rgba(255,255,255,.18);"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" x-show="!saving"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" x-show="saving" x-cloak style="animation:spin 1s linear infinite;">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/>
-                        <path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" opacity=".95"/>
-                    </svg>
-                    <span x-text="saving ? 'Saving…' : 'Save snippet'"></span>
-                </button>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    {{ $this->uploadFaviconAction }}
+                    <button
+                        type="button"
+                        x-bind:disabled="saving"
+                        x-on:click="saveSnippet"
+                        style="display:inline-flex; align-items:center; gap:6px;
+                               background:#0284c7; color:#fff;
+                               border:1px solid #0369a1; border-radius:8px;
+                               padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer;
+                               box-shadow:0 1px 2px rgba(2,132,199,.3), inset 0 1px 0 rgba(255,255,255,.18);"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" x-show="!saving"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" x-show="saving" x-cloak style="animation:spin 1s linear infinite;">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/>
+                            <path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" opacity=".95"/>
+                        </svg>
+                        <span x-text="saving ? 'Saving…' : 'Save snippet'"></span>
+                    </button>
+                </div>
             </div>
 
             <div class="seo-snippet-grid" style="display:grid; grid-template-columns:1fr 1.1fr; gap:18px;">
@@ -238,12 +242,21 @@
                             padding:18px 20px; display:flex; flex-direction:column; gap:6px;
                             box-shadow:0 1px 2px rgba(15,23,42,.04);">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                        <div style="width:18px; height:18px; border-radius:9999px; background:#e8eaed;
-                                    display:flex; align-items:center; justify-content:center;
-                                    font-size:9px; font-weight:700; color:#5f6368;
-                                    text-transform:uppercase;"
-                             x-text="(siteName || 'S').charAt(0)">
-                        </div>
+                        <button
+                            type="button"
+                            wire:click="mountAction('uploadFavicon')"
+                            title="Click to change favicon"
+                            style="position:relative; width:22px; height:22px; padding:0; border-radius:9999px;
+                                   background:#e8eaed; border:none; cursor:pointer; overflow:hidden;
+                                   display:flex; align-items:center; justify-content:center;"
+                        >
+                            <template x-if="favicon">
+                                <img x-bind:src="favicon" alt="" style="width:100%; height:100%; object-fit:cover; display:block;" />
+                            </template>
+                            <template x-if="!favicon">
+                                <span style="font-size:10px; font-weight:700; color:#5f6368; text-transform:uppercase;" x-text="(siteName || 'S').charAt(0)"></span>
+                            </template>
+                        </button>
                         <div style="display:flex; flex-direction:column; line-height:1.2;">
                             <span style="font-size:12px; color:#202124; font-weight:500;" x-text="siteName"></span>
                             <span style="font-size:11px; color:#5f6368;" x-text="prettyUrl"></span>
