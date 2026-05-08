@@ -125,6 +125,12 @@ class SectionRegistry
                 ['key' => 'callout',     'label' => 'Callout box',      'description' => 'Highlighted box with a colored left border. Good for tips and notes.'],
                 ['key' => 'quote',       'label' => 'Pull quote',       'description' => 'Big italic quote with optional attribution.'],
             ],
+            'reviews' => [
+                ['key' => 'cards',          'label' => 'Cards',           'description' => 'Uniform grid of cards with stars, quote, and reviewer.'],
+                ['key' => 'single_featured','label' => 'Single featured', 'description' => 'One spotlighted quote at a time with prev/next controls.'],
+                ['key' => 'bubbles',        'label' => 'Bubbles',         'description' => 'Chat-bubble style cards with a small tail under each one.'],
+                ['key' => 'list',           'label' => 'List',            'description' => 'Vertical list, hairline dividers, no card backgrounds.'],
+            ],
             default => [],
         };
     }
@@ -326,6 +332,7 @@ class SectionRegistry
                 'mutedFg'    => '#64748b',
             ],
             'reviews' => [
+                'variant'      => 'cards',
                 'heading'      => 'What customers say',
                 'subtitle'     => 'Real reviews from real people.',
                 'columns'      => 3,
@@ -1055,6 +1062,22 @@ class SectionRegistry
             ],
 
             'reviews' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'cards'           => 'Cards (grid)',
+                                'single_featured' => 'Single featured (rotates)',
+                                'bubbles'         => 'Bubbles',
+                                'list'            => 'List',
+                            ])
+                            ->default('cards')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
+
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
@@ -1101,7 +1124,9 @@ class SectionRegistry
                             ->options([1 => '1 column', 2 => '2 columns', 3 => '3 columns'])
                             ->default(3)
                             ->required()
-                            ->dehydrateStateUsing(fn ($state) => (int) $state),
+                            ->dehydrateStateUsing(fn ($state) => (int) $state)
+                            ->visible(fn (Get $get) => in_array($get('settings.variant') ?? 'cards', ['cards', 'bubbles'], true))
+                            ->helperText('Single featured shows one at a time; List is always one column.'),
                         \Filament\Forms\Components\Toggle::make('settings.showPhotos')->label('Show photos')->default(true),
                         \Filament\Forms\Components\Toggle::make('settings.showStars') ->label('Show stars')->default(true),
                         \Filament\Forms\Components\Toggle::make('settings.showRole')  ->label('Show role / company')->default(true),
