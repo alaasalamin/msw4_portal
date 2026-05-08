@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react';
+import { useState, type ReactNode } from 'react';
 import { usePage } from '@inertiajs/react';
 
 interface NavLink { label: string; href: string }
@@ -26,21 +26,18 @@ interface HeaderSettings {
 export default function DynamicHeader({ settings }: { settings: HeaderSettings }) {
     const variant = settings.variant ?? 'classic';
     const showBar = settings.showCategoriesBar === true || settings.showCategoriesBar === '1' || settings.showCategoriesBar === 1;
-    let inner: ReactElement;
+    // Categories bar is rendered as the last child INSIDE the <header> so
+    // there is no sibling boundary between the two — they're flush, share
+    // the same sticky behavior, and the Filament settings don't need a
+    // brittle "stick at 64px" hack to align with the actual header height.
+    const bottom: ReactNode = showBar ? <CategoriesBar settings={settings} /> : null;
     switch (variant) {
-        case 'centered': inner = <CenteredHeader settings={settings} />; break;
-        case 'split':    inner = <SplitHeader    settings={settings} />; break;
-        case 'minimal':  inner = <MinimalHeader  settings={settings} />; break;
+        case 'centered': return <CenteredHeader settings={settings} bottom={bottom} />;
+        case 'split':    return <SplitHeader    settings={settings} bottom={bottom} />;
+        case 'minimal':  return <MinimalHeader  settings={settings} bottom={bottom} />;
         case 'classic':
-        default:         inner = <ClassicHeader  settings={settings} />;
+        default:         return <ClassicHeader  settings={settings} bottom={bottom} />;
     }
-    if (!showBar) return inner;
-    return (
-        <>
-            {inner}
-            <CategoriesBar settings={settings} />
-        </>
-    );
 }
 
 // ── Categories bar with per-category hover dropdowns ────────────────────────
@@ -52,7 +49,6 @@ function CategoriesBar({ settings }: { settings: HeaderSettings }) {
 
     const bg = settings.categoriesBarBg ?? '#1f2937';
     const fg = settings.categoriesBarFg ?? '#e5e7eb';
-    const sticky = settings.sticky === true || settings.sticky === '1' || settings.sticky === 1;
 
     return (
         <div
@@ -60,9 +56,6 @@ function CategoriesBar({ settings }: { settings: HeaderSettings }) {
                 background: bg,
                 color: fg,
                 borderTop: '1px solid rgba(255,255,255,.06)',
-                position: sticky ? 'sticky' : 'static',
-                top: sticky ? 64 : undefined, // sit just below the main header when both are sticky
-                zIndex: 49,
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
             }}
         >
@@ -328,7 +321,7 @@ const responsiveCss = `
 
 // ── Variant: classic ───────────────────────────────────────────────────────
 
-function ClassicHeader({ settings }: { settings: HeaderSettings }) {
+function ClassicHeader({ settings, bottom }: { settings: HeaderSettings; bottom?: ReactNode }) {
     const [open, setOpen] = useState(false);
     const d = useDerived(settings);
 
@@ -350,6 +343,7 @@ function ClassicHeader({ settings }: { settings: HeaderSettings }) {
                 <Burger open={open} onToggle={() => setOpen((v) => !v)} color={d.fg} />
             </div>
             <MobileMenu open={open} links={d.links} linkColor={d.linkColor} onLinkClick={() => setOpen(false)} />
+            {bottom}
             <style>{responsiveCss}</style>
         </header>
     );
@@ -357,7 +351,7 @@ function ClassicHeader({ settings }: { settings: HeaderSettings }) {
 
 // ── Variant: centered (logo above nav row) ─────────────────────────────────
 
-function CenteredHeader({ settings }: { settings: HeaderSettings }) {
+function CenteredHeader({ settings, bottom }: { settings: HeaderSettings; bottom?: ReactNode }) {
     const [open, setOpen] = useState(false);
     const d = useDerived(settings);
 
@@ -418,13 +412,14 @@ function CenteredHeader({ settings }: { settings: HeaderSettings }) {
                     </nav>
                 </div>
             )}
+            {bottom}
         </header>
     );
 }
 
 // ── Variant: split (logo / centered nav / CTA button) ──────────────────────
 
-function SplitHeader({ settings }: { settings: HeaderSettings }) {
+function SplitHeader({ settings, bottom }: { settings: HeaderSettings; bottom?: ReactNode }) {
     const [open, setOpen] = useState(false);
     const d = useDerived(settings);
     const ctaText = (settings.ctaText ?? '').trim();
@@ -468,6 +463,7 @@ function SplitHeader({ settings }: { settings: HeaderSettings }) {
                 </div>
             </div>
             <MobileMenu open={open} links={d.links} linkColor={d.linkColor} onLinkClick={() => setOpen(false)} />
+            {bottom}
             <style>{`
                 ${responsiveCss}
                 @media (max-width: 720px) {
@@ -480,7 +476,7 @@ function SplitHeader({ settings }: { settings: HeaderSettings }) {
 
 // ── Variant: minimal (logo only, nav always behind hamburger) ──────────────
 
-function MinimalHeader({ settings }: { settings: HeaderSettings }) {
+function MinimalHeader({ settings, bottom }: { settings: HeaderSettings; bottom?: ReactNode }) {
     const [open, setOpen] = useState(false);
     const d = useDerived(settings);
 
@@ -536,6 +532,7 @@ function MinimalHeader({ settings }: { settings: HeaderSettings }) {
                     </nav>
                 </div>
             )}
+            {bottom}
         </header>
     );
 }
