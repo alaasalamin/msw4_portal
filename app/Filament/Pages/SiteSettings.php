@@ -31,8 +31,6 @@ class SiteSettings extends Page
             'site_name'        => Setting::get('site_name', config('app.name')),
             'site_description' => Setting::get('site_description'),
             'logo'             => Setting::get('logo'),
-            'favicon'          => Setting::get('favicon'),
-            'google_analytics' => Setting::get('google_analytics'),
             'social_facebook'  => Setting::get('social_facebook'),
             'social_instagram' => Setting::get('social_instagram'),
             'social_twitter'   => Setting::get('social_twitter'),
@@ -66,20 +64,6 @@ class SiteSettings extends Page
                         ->disk('public')
                         ->directory('settings')
                         ->helperText('Used in the header and email templates'),
-                    FileUpload::make('favicon')
-                        ->label('Favicon')
-                        ->image()
-                        ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/vnd.microsoft.icon', 'image/svg+xml'])
-                        ->disk('public')
-                        ->directory('settings')
-                        ->helperText('PNG, ICO or SVG — shown in browser tab (32×32 recommended)'),
-                ])->columns(2),
-
-                Section::make('Analytics')->schema([
-                    TextInput::make('google_analytics')
-                        ->label('Google Analytics ID')
-                        ->helperText('e.g. G-XXXXXXXXXX')
-                        ->maxLength(50),
                 ])->columns(1),
 
                 Section::make('Social Media')->schema([
