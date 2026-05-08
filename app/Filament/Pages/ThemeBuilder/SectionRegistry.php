@@ -194,6 +194,12 @@ class SectionRegistry
                 ['key' => 'card',     'label' => 'Card',     'description' => 'Map inside a rounded card with a deep shadow on a tinted bg.'],
                 ['key' => 'bordered', 'label' => 'Bordered', 'description' => 'Map framed by a thick colored border using your primary color.'],
             ],
+            'blog_posts' => [
+                ['key' => 'cards',    'label' => 'Cards',    'description' => 'Uniform grid of post cards with featured image and excerpt.'],
+                ['key' => 'list',     'label' => 'List',     'description' => 'Vertical rows — image on the left, title and excerpt on the right.'],
+                ['key' => 'featured', 'label' => 'Featured', 'description' => 'The first post is a big spotlight; the rest sit in a smaller grid.'],
+                ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Text-only archive list with date and category — no images.'],
+            ],
             default => [],
         };
     }
@@ -454,6 +460,7 @@ class SectionRegistry
                 'mutedFg'           => '#64748b',
             ],
             'blog_posts' => [
+                'variant'      => 'cards',
                 'heading'      => 'From the blog',
                 'subtitle'     => 'Tips, news and announcements.',
                 'limit'        => 6,
@@ -1476,6 +1483,21 @@ class SectionRegistry
             ],
 
             'blog_posts' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'cards'    => 'Cards — uniform grid with images',
+                                'list'     => 'List — image left, content right',
+                                'featured' => 'Featured — first post big, rest smaller',
+                                'minimal'  => 'Minimal — text archive, no images',
+                            ])
+                            ->default('cards')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
