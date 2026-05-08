@@ -150,6 +150,13 @@ class SectionRegistry
                 ['key' => 'split',    'label' => 'Split',    'description' => 'Logo left, nav centered, primary CTA button on the right.'],
                 ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Logo only — every link collapses into a hamburger.'],
             ],
+            'steps' => [
+                ['key' => 'horizontal','label' => 'Horizontal','description' => 'Steps in a row, dashed connector lines between them.'],
+                ['key' => 'vertical',  'label' => 'Vertical',  'description' => 'Timeline list — circles on the left, content on the right.'],
+                ['key' => 'cards',     'label' => 'Cards',     'description' => 'Elevated cards in a grid, no connector lines.'],
+                ['key' => 'arrows',    'label' => 'Arrows',    'description' => 'Horizontal flow with chevron arrows pointing between steps.'],
+                ['key' => 'timeline',  'label' => 'Timeline',  'description' => 'Rich vertical timeline with filled circles and a continuous bar.'],
+            ],
             default => [],
         };
     }
@@ -226,9 +233,10 @@ class SectionRegistry
                 'mutedFg'        => '#64748b',
             ],
             'steps' => [
+                'variant'        => 'horizontal',
                 'heading'        => 'How it works',
                 'subtitle'       => 'A simple, transparent process from start to finish.',
-                'layout'         => 'horizontal',
+                'layout'         => 'horizontal',  // legacy — kept for back-compat with existing rows
                 'showConnectors' => true,
                 'autoNumber'     => true,
                 'steps'          => [
@@ -777,23 +785,30 @@ class SectionRegistry
                             ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'New step'),
                     ])->columns(1),
 
-                Section::make('Layout')
+                Section::make('Design')
                     ->schema([
-                        Select::make('settings.layout')
+                        Select::make('settings.variant')
                             ->label('Layout')
                             ->options([
                                 'horizontal' => 'Horizontal — steps in a row',
                                 'vertical'   => 'Vertical — timeline list',
+                                'cards'      => 'Cards — elevated cards, no connectors',
+                                'arrows'     => 'Arrows — chevron arrows between steps',
+                                'timeline'   => 'Timeline — vertical with filled circles + bar',
                             ])
                             ->default('horizontal')
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
                         \Filament\Forms\Components\Toggle::make('settings.autoNumber')
                             ->label('Auto-number steps (01, 02, 03…)')
                             ->default(true)
                             ->helperText('When on, leave the per-step "Number / label" empty to use this.'),
                         \Filament\Forms\Components\Toggle::make('settings.showConnectors')
                             ->label('Show connector lines between steps')
-                            ->default(true),
+                            ->default(true)
+                            ->visible(fn (Get $get) => in_array($get('settings.variant') ?? 'horizontal', ['horizontal', 'vertical'], true))
+                            ->helperText('Cards / Arrows / Timeline have their own built-in connectors.'),
                     ])->columns(3),
 
                 Section::make('Style')
