@@ -108,55 +108,57 @@ function SplitHero({ settings }: { settings: HeroSettings }) {
                     )}
                 </div>
 
-                <div
-                    className="tb-hero-split-image"
-                    style={{
-                        position: 'relative',
-                        aspectRatio: '4 / 3',
-                        borderRadius: 18,
-                        overflow: 'hidden',
-                        background: 'linear-gradient(135deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.02) 100%)',
-                        boxShadow: '0 18px 40px -16px rgba(15,23,42,0.25)',
-                    }}
-                >
-                    {settings.image ? (
+                {settings.image ? (
+                    <div
+                        className="tb-hero-split-image"
+                        style={{
+                            position: 'relative',
+                            borderRadius: 18,
+                            overflow: 'hidden',
+                            boxShadow: '0 18px 40px -16px rgba(15,23,42,0.25)',
+                            background: '#f8fafc',
+                            // Wrap to natural image height — never crop the upload.
+                        }}
+                    >
                         <img
                             src={`/storage/${settings.image}`}
                             alt={settings.headline ?? ''}
                             style={{
-                                position: 'absolute',
-                                inset: 0,
                                 width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
+                                height: 'auto',
                                 display: 'block',
+                                maxWidth: '100%',
                             }}
                         />
-                    ) : (
-                        <div style={{
-                            position: 'absolute',
-                            inset: 0,
+                    </div>
+                ) : (
+                    <div
+                        className="tb-hero-split-image"
+                        style={{
+                            position: 'relative',
+                            aspectRatio: '4 / 3',
+                            borderRadius: 18,
+                            overflow: 'hidden',
+                            background: 'linear-gradient(135deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.02) 100%)',
+                            boxShadow: '0 18px 40px -16px rgba(15,23,42,0.25)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: 'currentColor',
                             opacity: 0.35,
-                        }}>
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5z" />
-                            </svg>
-                        </div>
-                    )}
-                </div>
+                        }}
+                    >
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5z" />
+                        </svg>
+                    </div>
+                )}
             </div>
 
             <style>{`
                 @media (max-width: 760px) {
                     .tb-hero-split {
                         grid-template-columns: 1fr !important;
-                    }
-                    .tb-hero-split-image {
-                        aspect-ratio: 16 / 9 !important;
                     }
                 }
             `}</style>

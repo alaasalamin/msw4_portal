@@ -157,6 +157,12 @@ class SectionRegistry
                 ['key' => 'arrows',    'label' => 'Arrows',    'description' => 'Horizontal flow with chevron arrows pointing between steps.'],
                 ['key' => 'timeline',  'label' => 'Timeline',  'description' => 'Rich vertical timeline with filled circles and a continuous bar.'],
             ],
+            'form' => [
+                ['key' => 'default',  'label' => 'Default',          'description' => 'Heading and paragraph centered above the form.'],
+                ['key' => 'split',    'label' => 'Split',            'description' => 'Heading and paragraph on the left, form on the right.'],
+                ['key' => 'boxed',    'label' => 'Boxed card',       'description' => 'Calm section background with the form in an elevated card.'],
+                ['key' => 'bg_image', 'label' => 'Background image', 'description' => 'Full-bleed photo with a dark overlay; form floats in a card on top.'],
+            ],
             default => [],
         };
     }
@@ -359,6 +365,7 @@ class SectionRegistry
                 'highlightedFg'   => '#ffffff',
             ],
             'form' => [
+                'variant'    => 'default',
                 'heading'    => 'Contact us',
                 'paragraph'  => 'Have a question or want to work together? Fill out the form below and we will get back to you shortly.',
                 'form_id'    => null,
@@ -367,6 +374,9 @@ class SectionRegistry
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
                 'mutedFg'    => '#64748b',
+                // Used by the bg_image variant
+                'image'      => null,
+                'overlay'    => 0.55,
             ],
             'reviews' => [
                 'variant'      => 'cards',
@@ -1129,6 +1139,40 @@ class SectionRegistry
             ],
 
             'form' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'default'  => 'Default — heading above form',
+                                'split'    => 'Split — heading left, form right',
+                                'boxed'    => 'Boxed card — form in elevated card',
+                                'bg_image' => 'Background image — form floats over photo',
+                            ])
+                            ->default('default')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                        FileUpload::make('settings.image')
+                            ->label('Background image')
+                            ->image()
+                            ->disk('public')
+                            ->directory('theme-builder/form')
+                            ->maxSize(4096)
+                            ->imagePreviewHeight('80')
+                            ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'bg_image')
+                            ->helperText('Used by the Background image variant.'),
+                        TextInput::make('settings.overlay')
+                            ->label('Background overlay opacity')
+                            ->helperText('How dark the layer over the photo is, 0–1 (e.g. 0.55).')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(1)
+                            ->step(0.05)
+                            ->default(0.55)
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'bg_image'),
+                    ])->columns(1),
                 Section::make('Content')
                     ->schema([
                         TextInput::make('settings.heading')
