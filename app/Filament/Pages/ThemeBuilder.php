@@ -138,9 +138,11 @@ class ThemeBuilder extends Page
     public function editPageAction(): Action
     {
         return Action::make('editPage')
-            ->label('Rename page')
+            ->label('Edit page')
+            ->iconButton()
             ->icon('heroicon-m-pencil-square')
             ->color('gray')
+            ->tooltip('Edit page')
             ->modalHeading(function (): string {
                 $page = $this->currentPageId ? SitePage::find($this->currentPageId) : null;
                 return $page ? "Edit page — {$page->title}" : 'Edit page';
@@ -202,8 +204,10 @@ class ThemeBuilder extends Page
     {
         return Action::make('deletePage')
             ->label('Delete page')
+            ->iconButton()
             ->icon('heroicon-m-trash')
             ->color('danger')
+            ->tooltip('Delete page')
             ->requiresConfirmation()
             ->modalHeading('Delete this page?')
             ->modalDescription('This permanently removes the page and all its sections. The change is immediate and cannot be undone.')
