@@ -38,7 +38,7 @@
                               ?? '#0f172a';
         @endphp
 
-        <title inertia>%s | {{ $siteName }}</title>
+        <title inertia>%s - {{ $siteName }}</title>
 
         {{-- Core SEO --}}
         @if($seoDesc)

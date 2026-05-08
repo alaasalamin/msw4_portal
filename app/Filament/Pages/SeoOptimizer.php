@@ -143,6 +143,14 @@ class SeoOptimizer extends Page
         $description = trim($description);
         $siteName    = trim($siteName) ?: 'Site';
 
+        // Mirror the app.blade.php "%s - {siteName}" rule so the snippet
+        // matches the actual <title> Google sees. Skip the suffix if the
+        // user has already typed the site name into their title.
+        $hasSiteInTitle = $title !== '' && stripos($title, $siteName) !== false;
+        if ($title !== '' && ! $hasSiteInTitle) {
+            $title .= ' - ' . $siteName;
+        }
+
         // Pretty breadcrumb: host + path (no scheme, no trailing slash).
         $prettyUrl = $url;
         $host = $url;
@@ -245,7 +253,8 @@ HTML;
                         ->label('Meta title')
                         ->maxLength(120)
                         ->placeholder('Your headline as it appears in Google')
-                        ->helperText('Recommended: 30–60 characters.')
+                        ->helperText('Recommended: 30–60 characters. The company name is appended automatically.')
+                        ->suffix($siteName ? ' – ' . $siteName : null)
                         ->live(debounce: 200),
                     Textarea::make('meta_description')
                         ->label('Meta description')
