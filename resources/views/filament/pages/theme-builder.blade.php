@@ -101,6 +101,13 @@
                 @if (! empty($currentPage['slug']))
                     <span style="color:var(--tb-very-muted);">· /{{ $currentPage['slug'] }}</span>
                 @endif
+                @if (! empty($currentPage['id']))
+                    <div style="margin-top:6px; padding:6px 10px; background:var(--tb-tip-bg);
+                                border:1px solid var(--tb-tip-border); border-radius:6px;
+                                color:var(--tb-tip-fg); font-size:10.5px; line-height:1.45;">
+                        Header & footer are inherited from the Homepage — switch to <em>Homepage</em> above to edit them.
+                    </div>
+                @endif
             </div>
 
             {{-- Add Section CTA --}}

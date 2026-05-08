@@ -128,7 +128,7 @@ export default function DynamicFooter({ settings }: { settings: FooterSettings }
     return (
         <footer
             style={{
-                background: settings.bg ?? '#0f172a',
+                background: settings.bg ?? '#111111',
                 color: fg,
                 padding: 'clamp(40px, 6vw, 64px) clamp(16px, 4vw, 32px) clamp(24px, 4vw, 32px)',
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',

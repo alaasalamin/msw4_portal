@@ -78,7 +78,7 @@ export default function DynamicSteps({ settings }: { settings: StepsSettings }) 
 
                 {steps.length === 0 ? (
                     <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>
-                        No steps yet — add some in the Theme Builder.
+                        No steps yet — add some in the Website Builder.
                     </p>
                 ) : layout === 'vertical' ? (
                     <ol style={{ listStyle: 'none', padding: 0, margin: 0, position: 'relative' }}>

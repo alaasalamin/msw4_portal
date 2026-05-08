@@ -61,7 +61,7 @@ export default function DynamicFaq({ settings }: { settings: FaqSettings }) {
 
                 {items.length === 0 ? (
                     <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>
-                        No questions yet — add some in the Theme Builder.
+                        No questions yet — add some in the Website Builder.
                     </p>
                 ) : layout === 'accordion' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

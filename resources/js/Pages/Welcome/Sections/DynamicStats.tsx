@@ -208,7 +208,7 @@ export default function DynamicStats({ settings }: { settings: StatsSettings }) 
                     </div>
                 ) : (
                     <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>
-                        No stats yet — add some in the Theme Builder.
+                        No stats yet — add some in the Website Builder.
                     </p>
                 )}
             </div>

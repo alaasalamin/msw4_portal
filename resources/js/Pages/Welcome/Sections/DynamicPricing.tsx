@@ -212,7 +212,7 @@ export default function DynamicPricing({ settings }: { settings: PricingSettings
                     </div>
                 ) : (
                     <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>
-                        No pricing plans yet — add some in the Theme Builder.
+                        No pricing plans yet — add some in the Website Builder.
                     </p>
                 )}
             </div>

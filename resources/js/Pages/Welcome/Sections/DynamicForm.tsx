@@ -85,7 +85,7 @@ export default function DynamicForm({ settings }: { settings: FormSettings }) {
                         textAlign: 'center',
                         color: mutedFg,
                     }}>
-                        No form selected — pick one in the Theme Builder.
+                        No form selected — pick one in the Website Builder.
                     </div>
                 ) : !settings.form ? (
                     <div style={{

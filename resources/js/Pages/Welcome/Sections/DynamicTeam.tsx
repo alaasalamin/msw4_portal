@@ -172,7 +172,7 @@ export default function DynamicTeam({ settings }: { settings: TeamSettings }) {
                     </div>
                 ) : (
                     <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>
-                        No team members yet — add some in the Theme Builder.
+                        No team members yet — add some in the Website Builder.
                     </p>
                 )}
             </div>

@@ -29,7 +29,7 @@ export default function DynamicHeader({ settings }: { settings: HeaderSettings }
                 position: sticky ? 'sticky' : 'static',
                 top: 0,
                 zIndex: 50,
-                background: settings.bg ?? '#0f172a',
+                background: settings.bg ?? '#111111',
                 color: settings.fg ?? '#ffffff',
                 width: '100%',
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',

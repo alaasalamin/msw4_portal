@@ -19,8 +19,8 @@ class ThemeBuilder extends Page
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-squares-2x2'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Configuration'; }
     public static function getNavigationSort(): ?int                    { return 3; }
-    public static function getNavigationLabel(): string                 { return 'Theme Builder'; }
-    public function getTitle(): string                                  { return 'Theme Builder'; }
+    public static function getNavigationLabel(): string                 { return 'Website Builder'; }
+    public function getTitle(): string                                  { return 'Website Builder'; }
 
     /**
      * Currently-edited page. null = the homepage (stored in `home_sections`
@@ -199,23 +199,20 @@ class ThemeBuilder extends Page
 
     public function addSectionAction(): Action
     {
-        $options = [];
-        foreach (SectionRegistry::types() as $key => $meta) {
-            $options[$key] = $meta['label'] . ' — ' . $meta['desc'];
-        }
-
         return Action::make('addSection')
             ->label('Add section')
             ->icon('heroicon-m-plus')
             ->color('primary')
             ->modalHeading('Add a section')
-            ->modalDescription('Pick a block to drop on the current page. You can edit its content and colors right after.')
+            ->modalDescription(fn () => $this->currentPageId === null
+                ? 'Pick a block to drop on the homepage. Header and Footer set the site-wide chrome — every other page inherits them.'
+                : 'Pick a content block to drop on this page. The header and footer are inherited from the homepage and edited there.')
             ->modalSubmitActionLabel('Add')
             ->modalWidth('lg')
             ->schema([
                 Select::make('type')
                     ->label('Section type')
-                    ->options($options)
+                    ->options(fn () => $this->addableTypeOptions())
                     ->required()
                     ->native(false)
                     ->searchable(),
@@ -223,6 +220,8 @@ class ThemeBuilder extends Page
             ->action(function (array $data) {
                 $type = $data['type'] ?? null;
                 if (! SectionRegistry::exists($type)) return;
+                // Defensive: never let header/footer land on a non-homepage page.
+                if ($this->currentPageId !== null && in_array($type, ['header', 'footer'], true)) return;
 
                 $sections = $this->getPlacedSections();
                 $sections[] = [
@@ -239,6 +238,19 @@ class ThemeBuilder extends Page
 
                 $this->dispatch('theme-builder:section-saved');
             });
+    }
+
+    /** Section types the user can add to the currently-active page. */
+    protected function addableTypeOptions(): array
+    {
+        $options = [];
+        foreach (SectionRegistry::types() as $key => $meta) {
+            // Header and Footer are homepage-only — they wrap every other page
+            // automatically and shouldn't be added per-page.
+            if ($this->currentPageId !== null && in_array($key, ['header', 'footer'], true)) continue;
+            $options[$key] = $meta['label'] . ' — ' . $meta['desc'];
+        }
+        return $options;
     }
 
     // ─────────────────────────────────────────────────────────────────

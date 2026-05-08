@@ -112,7 +112,7 @@ class SectionRegistry
                 'logoHeight' => 48,      // displayed pixel height of the logo image
                 'linksMode'  => 'auto',  // 'auto' = pull from published Site Pages, 'custom' = use links[]
                 'links'      => [],
-                'bg'         => '#0f172a',
+                'bg'         => '#111111',
                 'fg'         => '#ffffff',
                 'linkColor'  => '#cbd5e1',
                 'primary'    => '#ea580c', // site-wide brand accent (drives buttons, badges, links elsewhere)
@@ -336,7 +336,7 @@ class SectionRegistry
                 'showPages'    => true,
                 'showSitemap'  => true,
                 'showSocials'  => true,
-                'bg'           => '#0f172a',
+                'bg'           => '#111111',
                 'fg'           => '#e2e8f0',
                 'mutedFg'      => '#94a3b8',
                 'headingFg'    => '#ffffff',

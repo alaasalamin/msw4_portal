@@ -88,7 +88,11 @@ export default function DynamicPage({ page, homepage }: Props) {
     const headerSection   = themeSections.find((s) => s.type === 'header');
     const footerSection   = themeSections.find((s) => s.type === 'footer');
 
-    const pageThemeSections = page.theme_sections ?? [];
+    // Pages share the homepage's header + footer — strip any inadvertently
+    // added at the page level so they never render duplicated in the middle.
+    const pageThemeSections = (page.theme_sections ?? []).filter(
+        (s) => s.type !== 'header' && s.type !== 'footer',
+    );
     const legacySections    = page.sections ?? [];
 
     return (

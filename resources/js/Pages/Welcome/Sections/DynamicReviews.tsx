@@ -184,7 +184,7 @@ export default function DynamicReviews({ settings }: { settings: ReviewsSettings
                     </div>
                 ) : (
                     <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>
-                        No reviews yet — add some in the Theme Builder.
+                        No reviews yet — add some in the Website Builder.
                     </p>
                 )}
             </div>
