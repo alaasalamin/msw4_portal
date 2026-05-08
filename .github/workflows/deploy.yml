@@ -179,6 +179,14 @@ jobs:
             chown -R www-data:www-data storage bootstrap/cache
             chmod -R 775 storage bootstrap/cache
 
+            # public/sitemap.xml is rewritten at runtime by SitemapService
+            # (the SEO Optimizer's "Regenerate sitemap" button + the
+            # SitePageObserver). Git pull lands it as root, so PHP-FPM
+            # (www-data) gets permission denied without this. Touch + chown
+            # so the file always exists and is writable by the web user.
+            touch public/sitemap.xml
+            chown www-data:www-data public/sitemap.xml
+
             # PHP-FPM upload limits (must match Nginx client_max_body_size)
             sed -i 's/^upload_max_filesize.*/upload_max_filesize = 20M/' /etc/php/8.4/fpm/php.ini
             sed -i 's/^post_max_size.*/post_max_size = 25M/' /etc/php/8.4/fpm/php.ini
