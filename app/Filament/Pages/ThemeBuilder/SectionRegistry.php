@@ -81,6 +81,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-chart-bar',
                 'desc'  => 'Row of big numbers that count up when scrolled into view.',
             ],
+            'steps' => [
+                'label' => 'Steps / Process',
+                'icon'  => 'heroicon-o-list-bullet',
+                'desc'  => 'Numbered process — "How it works" with steps and connector lines.',
+            ],
             'footer' => [
                 'label' => 'Footer',
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
@@ -131,6 +136,24 @@ class SectionRegistry
                 'align'      => 'left',
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
+            ],
+            'steps' => [
+                'heading'        => 'How it works',
+                'subtitle'       => 'A simple, transparent process from start to finish.',
+                'layout'         => 'horizontal',
+                'showConnectors' => true,
+                'autoNumber'     => true,
+                'steps'          => [
+                    ['number' => '01', 'title' => 'Submit your device',  'description' => 'Drop off in-store, or your B2B partner ships the device through our portal.'],
+                    ['number' => '02', 'title' => 'Diagnosis & quote',   'description' => 'Our certified technicians diagnose the issue and send you a transparent repair quote.'],
+                    ['number' => '03', 'title' => 'Repair & return',     'description' => 'Approved repairs are completed with genuine parts and shipped back or ready for collection.'],
+                ],
+                'bg'             => '#ffffff',
+                'fg'             => '#0f172a',
+                'mutedFg'        => '#64748b',
+                'numberBg'       => '#0f172a',
+                'numberFg'       => '#ffffff',
+                'connectorColor' => '#cbd5e1',
             ],
             'stats' => [
                 'heading'    => 'Numbers worth bragging about',
@@ -431,6 +454,70 @@ class SectionRegistry
                     ->schema([
                         ColorPicker::make('settings.bg')->label('Background'),
                         ColorPicker::make('settings.fg')->label('Text color'),
+                    ])->columns(2),
+            ],
+
+            'steps' => [
+                Section::make('Heading')
+                    ->schema([
+                        TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
+                        Textarea::make('settings.subtitle')->label('Subtitle')->rows(2)->maxLength(220),
+                    ])->columns(1),
+
+                Section::make('Steps')
+                    ->schema([
+                        Repeater::make('settings.steps')
+                            ->label('Steps')
+                            ->schema([
+                                TextInput::make('number')
+                                    ->label('Number / label')
+                                    ->maxLength(8)
+                                    ->placeholder('e.g. 01 or A')
+                                    ->helperText('Leave empty to use the auto-number setting.'),
+                                TextInput::make('title')
+                                    ->label('Title')
+                                    ->required()
+                                    ->maxLength(80),
+                                Textarea::make('description')
+                                    ->label('Description')
+                                    ->rows(2)
+                                    ->maxLength(280),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->cloneable()
+                            ->reorderable()
+                            ->addActionLabel('Add step')
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'New step'),
+                    ])->columns(1),
+
+                Section::make('Layout')
+                    ->schema([
+                        Select::make('settings.layout')
+                            ->label('Layout')
+                            ->options([
+                                'horizontal' => 'Horizontal — steps in a row',
+                                'vertical'   => 'Vertical — timeline list',
+                            ])
+                            ->default('horizontal')
+                            ->required(),
+                        \Filament\Forms\Components\Toggle::make('settings.autoNumber')
+                            ->label('Auto-number steps (01, 02, 03…)')
+                            ->default(true)
+                            ->helperText('When on, leave the per-step "Number / label" empty to use this.'),
+                        \Filament\Forms\Components\Toggle::make('settings.showConnectors')
+                            ->label('Show connector lines between steps')
+                            ->default(true),
+                    ])->columns(3),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Title color'),
+                        ColorPicker::make('settings.mutedFg')->label('Description color'),
+                        ColorPicker::make('settings.numberBg')->label('Number circle background'),
+                        ColorPicker::make('settings.numberFg')->label('Number text color'),
+                        ColorPicker::make('settings.connectorColor')->label('Connector line color'),
                     ])->columns(2),
             ],
 
