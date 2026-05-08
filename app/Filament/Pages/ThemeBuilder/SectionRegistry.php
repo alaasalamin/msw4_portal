@@ -137,6 +137,13 @@ class SectionRegistry
                 ['key' => 'tabs',    'label' => 'Tabs',           'description' => 'One plan at a time, switch with tabs at the top.'],
                 ['key' => 'minimal', 'label' => 'Minimal list',   'description' => 'Compact rows: name + price + button, no feature lists.'],
             ],
+            'cta' => [
+                ['key' => 'centered', 'label' => 'Centered',     'description' => 'Big centered heading with the buttons stacked underneath.'],
+                ['key' => 'split',    'label' => 'Split',        'description' => 'Heading on the left, buttons aligned right.'],
+                ['key' => 'gradient', 'label' => 'Gradient',     'description' => 'Vivid gradient background (uses your primary color).'],
+                ['key' => 'boxed',    'label' => 'Boxed card',   'description' => 'Tinted section bg with the CTA inside an elevated card.'],
+                ['key' => 'inset',    'label' => 'Inset',        'description' => 'Small contained card with rounded corners on a calm bg.'],
+            ],
             default => [],
         };
     }
@@ -244,13 +251,14 @@ class SectionRegistry
                 'accent'     => '#0284c7',
             ],
             'cta' => [
+                'variant'         => 'centered',
                 'heading'         => 'Ready to get started?',
                 'subtitle'        => 'Get in touch and we will reply within one business day.',
                 'primaryText'     => 'Get started',
                 'primaryHref'     => '#',
                 'secondaryText'   => 'Talk to sales',
                 'secondaryHref'   => 'mailto:hello@example.com',
-                'align'           => 'center',  // 'center' or 'split'
+                'align'           => 'center',  // legacy — kept for backwards compat with old saved rows
                 'bg'              => '#0f172a',
                 'fg'              => '#ffffff',
                 'mutedFg'         => '#cbd5e1',
@@ -258,6 +266,10 @@ class SectionRegistry
                 'primaryBtnFg'    => '#0f172a',
                 'secondaryBtnBg'  => 'transparent',
                 'secondaryBtnFg'  => '#ffffff',
+                // Gradient variant
+                'gradientFrom'    => '#0ea5e9',
+                'gradientTo'      => '#1e3a8a',
+                'gradientAngle'   => 135,
             ],
             'faq' => [
                 'heading'      => 'Frequently asked questions',
@@ -828,6 +840,22 @@ class SectionRegistry
             ],
 
             'cta' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'centered' => 'Centered',
+                                'split'    => 'Split',
+                                'gradient' => 'Gradient',
+                                'boxed'    => 'Boxed card',
+                                'inset'    => 'Inset',
+                            ])
+                            ->default('centered')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Content')
                     ->schema([
                         TextInput::make('settings.heading')
@@ -838,14 +866,6 @@ class SectionRegistry
                             ->label('Subtitle')
                             ->rows(2)
                             ->maxLength(280),
-                        Select::make('settings.align')
-                            ->label('Layout')
-                            ->options([
-                                'center' => 'Centered — heading + buttons stacked',
-                                'split'  => 'Split — heading on the left, buttons on the right',
-                            ])
-                            ->default('center')
-                            ->required(),
                     ])->columns(1),
 
                 Section::make('Buttons')
@@ -866,6 +886,26 @@ class SectionRegistry
                             ->label('Secondary button URL')
                             ->maxLength(200),
                     ])->columns(2),
+
+                Section::make('Gradient colors')
+                    ->description('Used by the Gradient layout. From → To linearly interpolated at the chosen angle.')
+                    ->schema([
+                        ColorPicker::make('settings.gradientFrom')
+                            ->label('Gradient — from')
+                            ->default('#0ea5e9'),
+                        ColorPicker::make('settings.gradientTo')
+                            ->label('Gradient — to')
+                            ->default('#1e3a8a'),
+                        TextInput::make('settings.gradientAngle')
+                            ->label('Angle (degrees)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(360)
+                            ->default(135)
+                            ->helperText('0 = top → bottom, 90 = left → right, 135 = top-left → bottom-right.'),
+                    ])
+                    ->columns(3)
+                    ->visible(fn (Get $get) => ($get('settings.variant') ?? 'centered') === 'gradient'),
 
                 Section::make('Style')
                     ->schema([
