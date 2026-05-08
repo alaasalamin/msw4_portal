@@ -81,7 +81,7 @@ function CategoriesBar({ settings }: { settings: HeaderSettings }) {
                             style={{ position: 'relative' }}
                         >
                             <a
-                                href={`/blog/${cat.slug}`}
+                                href={`/blog/category/${cat.slug}`}
                                 onClick={(e) => {
                                     if (!isOpen && cat.posts.length > 0) {
                                         e.preventDefault();
@@ -153,7 +153,7 @@ function CategoriesBar({ settings }: { settings: HeaderSettings }) {
                                     ))}
                                     {cat.posts.length > 8 && (
                                         <a
-                                            href={`/blog/${cat.slug}`}
+                                            href={`/blog/category/${cat.slug}`}
                                             role="menuitem"
                                             style={{
                                                 display: 'block',
