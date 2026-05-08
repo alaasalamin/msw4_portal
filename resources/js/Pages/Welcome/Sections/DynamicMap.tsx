@@ -12,12 +12,14 @@ interface Company {
 }
 
 interface MapSettings {
+    variant?: 'split' | 'full' | 'card' | 'bordered';
     heading?: string;
     subtitle?: string;
     addressMode?: 'auto' | 'custom';
     customAddress?: string;
     height?: number | string;
     zoom?: number | string;
+    /** Legacy field — old rows used `layout` for split / full. Falls through to variant. */
     layout?: 'split' | 'full';
     showAddressText?: boolean;
     showDirectionsBtn?: boolean;
@@ -46,7 +48,8 @@ export default function DynamicMap({ settings }: { settings: MapSettings }) {
 
     const height  = Math.max(200, Math.min(900, Number(settings.height) || 420));
     const zoom    = Math.max(1, Math.min(20, Number(settings.zoom) || 15));
-    const layout  = settings.layout ?? 'split';
+    // Back-compat: old saved rows used `layout`.
+    const variant = settings.variant ?? settings.layout ?? 'split';
     const showAddressText   = settings.showAddressText   !== false;
     const showDirectionsBtn = settings.showDirectionsBtn !== false;
 
@@ -54,8 +57,7 @@ export default function DynamicMap({ settings }: { settings: MapSettings }) {
     const mutedFg = settings.mutedFg ?? '#64748b';
 
     const hasAddress = address.length > 0;
-    // Google Maps "embed" URL that doesn't require an API key.
-    const embedSrc     = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&z=${zoom}&output=embed`;
+    const embedSrc       = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&z=${zoom}&output=embed`;
     const directionsHref = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 
     const addressLines = settings.addressMode === 'custom'
@@ -66,15 +68,20 @@ export default function DynamicMap({ settings }: { settings: MapSettings }) {
             company.country,
           ].filter(Boolean) as string[];
 
+    // Choose a section background and an outer wrap based on the variant.
+    const sectionBg = variant === 'card'
+        ? '#f8fafc'                      // calm slate so the inner card pops
+        : (settings.bg ?? '#ffffff');
+
+    const buttonLabel = settings.directionsLabel ?? 'Get directions';
+
     return (
-        <section
-            style={{
-                background: settings.bg ?? '#ffffff',
-                color: fg,
-                padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 32px)',
-                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-            }}
-        >
+        <section style={{
+            background: sectionBg,
+            color: fg,
+            padding: 'clamp(48px, 8vw, 96px) clamp(16px, 4vw, 32px)',
+            fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+        }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                 {(settings.heading || settings.subtitle) && (
                     <div style={{ textAlign: 'center', marginBottom: 'clamp(28px, 4vw, 48px)' }}>
@@ -109,7 +116,7 @@ export default function DynamicMap({ settings }: { settings: MapSettings }) {
                     }}>
                         <p style={{ margin: 0 }}>No address configured. Add one in <code>/admin/company-details</code> or switch to a custom address in the section settings.</p>
                     </div>
-                ) : layout === 'split' && (showAddressText || showDirectionsBtn) ? (
+                ) : variant === 'split' && (showAddressText || showDirectionsBtn) ? (
                     <div
                         className="tb-map-grid"
                         style={{
@@ -119,21 +126,21 @@ export default function DynamicMap({ settings }: { settings: MapSettings }) {
                             alignItems: 'stretch',
                         }}
                     >
-                        <MapFrame src={embedSrc} height={height} />
+                        <MapFrame src={embedSrc} height={height} variant={variant} />
                         <AddressPanel
                             company={company}
                             addressLines={addressLines}
                             directionsHref={directionsHref}
                             showAddress={showAddressText}
                             showButton={showDirectionsBtn}
-                            buttonLabel={settings.directionsLabel ?? 'Get directions'}
+                            buttonLabel={buttonLabel}
                             fg={fg}
                             mutedFg={mutedFg}
                         />
                     </div>
                 ) : (
                     <>
-                        <MapFrame src={embedSrc} height={height} />
+                        <MapFrame src={embedSrc} height={height} variant={variant} />
                         {(showAddressText || showDirectionsBtn) && (
                             <div style={{ marginTop: 24, textAlign: 'center' }}>
                                 {showAddressText && (
@@ -142,7 +149,9 @@ export default function DynamicMap({ settings }: { settings: MapSettings }) {
                                     </address>
                                 )}
                                 {showDirectionsBtn && (
-                                    <DirectionsButton href={directionsHref} label={settings.directionsLabel ?? 'Get directions'} />
+                                    <div style={{ marginTop: 12 }}>
+                                        <DirectionsButton href={directionsHref} label={buttonLabel} />
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -161,16 +170,36 @@ export default function DynamicMap({ settings }: { settings: MapSettings }) {
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-function MapFrame({ src, height }: { src: string; height: number }) {
+function MapFrame({ src, height, variant }: { src: string; height: number; variant: 'split' | 'full' | 'card' | 'bordered' }) {
+    // Variant-specific chrome around the iframe.
+    const styleByVariant: Record<typeof variant, React.CSSProperties> = {
+        split: {
+            borderRadius: 16,
+            boxShadow: '0 1px 2px rgba(15,23,42,.08), 0 8px 24px -12px rgba(15,23,42,.14)',
+        },
+        full: {
+            borderRadius: 16,
+            boxShadow: '0 1px 2px rgba(15,23,42,.08), 0 8px 24px -12px rgba(15,23,42,.14)',
+        },
+        card: {
+            borderRadius: 22,
+            boxShadow: '0 4px 12px -4px rgba(15,23,42,.14), 0 30px 60px -24px rgba(15,23,42,.30)',
+        },
+        bordered: {
+            borderRadius: 18,
+            border: `4px solid var(--primary, #0284c7)`,
+            boxShadow: '0 12px 28px -16px rgba(15,23,42,.20)',
+        },
+    };
+
     return (
         <div style={{
             position: 'relative',
             width: '100%',
             height: `${height}px`,
-            borderRadius: 16,
             overflow: 'hidden',
-            boxShadow: '0 1px 2px rgba(15,23,42,.08), 0 8px 24px -12px rgba(15,23,42,.14)',
             background: '#e2e8f0',
+            ...styleByVariant[variant],
         }}>
             <iframe
                 src={src}

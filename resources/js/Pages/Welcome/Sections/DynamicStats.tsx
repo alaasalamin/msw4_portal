@@ -20,6 +20,10 @@ interface StatsSettings {
     fg?: string;
     mutedFg?: string;
     accent?: string;
+    // Gradient variant
+    gradientFrom?: string;
+    gradientTo?: string;
+    gradientAngle?: number | string;
 }
 
 /** Parses something like "13,810", "98.6" or "24" → number; returns null otherwise. */
@@ -363,13 +367,21 @@ function Gradient({ settings }: { settings: StatsSettings }) {
     const mutedFg = settings.mutedFg && settings.mutedFg !== '#64748b' ? settings.mutedFg : 'rgba(255,255,255,0.85)';
     const accent  = settings.accent && settings.accent !== '#0284c7' ? settings.accent : '#ffffff';
 
+    // Honor user-picked gradient colors when set; otherwise auto-derive from var(--primary).
+    const angle = Math.max(0, Math.min(360, Number(settings.gradientAngle) || 135));
+    const fromColor = settings.gradientFrom?.trim();
+    const toColor   = settings.gradientTo?.trim();
+    const gradient = (fromColor && toColor)
+        ? `linear-gradient(${angle}deg, ${fromColor} 0%, ${toColor} 100%)`
+        : `linear-gradient(${angle}deg, var(--primary, #0284c7) 0%, color-mix(in srgb, var(--primary, #0284c7) 60%, black) 100%)`;
+
     return (
         <section style={{
             position: 'relative',
             color: fg,
             padding: 'clamp(56px, 9vw, 104px) clamp(16px, 4vw, 32px)',
             fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-            background: 'linear-gradient(135deg, var(--primary, #0284c7) 0%, color-mix(in srgb, var(--primary, #0284c7) 60%, black) 100%)',
+            background: gradient,
             overflow: 'hidden',
         }}>
             <div aria-hidden="true" style={{

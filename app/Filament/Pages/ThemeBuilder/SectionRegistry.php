@@ -188,6 +188,12 @@ class SectionRegistry
                 ['key' => 'dividers', 'label' => 'Dividers',  'description' => 'Stats in a row separated by vertical hairlines — editorial.'],
                 ['key' => 'gradient', 'label' => 'Gradient',  'description' => 'Vivid gradient background using your primary color.'],
             ],
+            'map' => [
+                ['key' => 'split',    'label' => 'Split',    'description' => 'Map on the left, address card on the right.'],
+                ['key' => 'full',     'label' => 'Full',     'description' => 'Full-width map with the address centered below.'],
+                ['key' => 'card',     'label' => 'Card',     'description' => 'Map inside a rounded card with a deep shadow on a tinted bg.'],
+                ['key' => 'bordered', 'label' => 'Bordered', 'description' => 'Map framed by a thick colored border using your primary color.'],
+            ],
             default => [],
         };
     }
@@ -284,8 +290,11 @@ class SectionRegistry
                 'connectorColor' => '#cbd5e1',
             ],
             'stats' => [
-                'variant'    => 'row',
-                'heading'    => 'Numbers worth bragging about',
+                'variant'        => 'row',
+                'gradientFrom'   => '#0ea5e9',
+                'gradientTo'     => '#1e3a8a',
+                'gradientAngle'  => 135,
+                'heading'        => 'Numbers worth bragging about',
                 'subtitle'   => '',
                 'columns'    => 4,
                 'align'      => 'center',
@@ -429,13 +438,14 @@ class SectionRegistry
                 'starColor'    => '#facc15',
             ],
             'map' => [
+                'variant'           => 'split',
                 'heading'           => 'Find us',
                 'subtitle'          => 'Drop by — we are easy to reach.',
                 'addressMode'       => 'auto',   // auto = company address, custom = override below
                 'customAddress'     => '',
                 'height'            => 420,
                 'zoom'              => 15,
-                'layout'            => 'split',  // 'split' = map + info side-by-side, 'full' = full-width map
+                'layout'            => 'split',  // legacy — kept for back-compat with old saved rows
                 'showAddressText'   => true,
                 'showDirectionsBtn' => true,
                 'directionsLabel'   => 'Get directions',
@@ -959,6 +969,26 @@ class SectionRegistry
                         ColorPicker::make('settings.mutedFg')->label('Label / description color'),
                         ColorPicker::make('settings.accent')->label('Prefix / suffix accent'),
                     ])->columns(2),
+
+                Section::make('Gradient colors')
+                    ->description('Used by the Gradient layout. From → To linearly interpolated at the chosen angle.')
+                    ->schema([
+                        ColorPicker::make('settings.gradientFrom')
+                            ->label('Gradient — from')
+                            ->default('#0ea5e9'),
+                        ColorPicker::make('settings.gradientTo')
+                            ->label('Gradient — to')
+                            ->default('#1e3a8a'),
+                        TextInput::make('settings.gradientAngle')
+                            ->label('Angle (degrees)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(360)
+                            ->default(135)
+                            ->helperText('0 = top → bottom, 90 = left → right, 135 = top-left → bottom-right.'),
+                    ])
+                    ->columns(3)
+                    ->visible(fn (Get $get) => ($get('settings.variant') ?? 'row') === 'gradient'),
             ],
 
             'cta' => [
@@ -1372,6 +1402,21 @@ class SectionRegistry
             ],
 
             'map' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'split'    => 'Split — map + address card',
+                                'full'     => 'Full — full-width map, address centered below',
+                                'card'     => 'Card — rounded card with deep shadow',
+                                'bordered' => 'Bordered — thick primary-colored frame',
+                            ])
+                            ->default('split')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
@@ -1406,12 +1451,7 @@ class SectionRegistry
                         TextInput::make('settings.zoom')
                             ->label('Zoom level (1–20)')
                             ->numeric()->minValue(1)->maxValue(20)->default(15),
-                        Select::make('settings.layout')
-                            ->label('Layout')
-                            ->options(['split' => 'Split — map + address side by side', 'full' => 'Full-width map'])
-                            ->default('split')
-                            ->required(),
-                    ])->columns(3),
+                    ])->columns(2),
 
                 Section::make('Address panel')
                     ->schema([
