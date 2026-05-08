@@ -3,7 +3,8 @@ import DynamicHeader    from './Welcome/Sections/DynamicHeader';
 import DynamicHero      from './Welcome/Sections/DynamicHero';
 import DynamicTextBlock from './Welcome/Sections/DynamicTextBlock';
 import DynamicTeam      from './Welcome/Sections/DynamicTeam';
-import DynamicBlogPosts from './Welcome/Sections/DynamicBlogPosts';
+import DynamicBlogPosts    from './Welcome/Sections/DynamicBlogPosts';
+import DynamicBlogCarousel from './Welcome/Sections/DynamicBlogCarousel';
 import DynamicMap       from './Welcome/Sections/DynamicMap';
 import DynamicReviews   from './Welcome/Sections/DynamicReviews';
 import DynamicForm      from './Welcome/Sections/DynamicForm';
@@ -18,7 +19,7 @@ import DynamicFooter    from './Welcome/Sections/DynamicFooter';
 
 interface Section {
     id: string;
-    type: 'header' | 'hero' | 'text' | 'team' | 'blog_posts' | 'map' | 'reviews' | 'form' | 'pricing' | 'faq' | 'cta' | 'stats' | 'steps' | 'gallery' | 'table' | 'footer';
+    type: 'header' | 'hero' | 'text' | 'team' | 'blog_posts' | 'blog_carousel' | 'map' | 'reviews' | 'form' | 'pricing' | 'faq' | 'cta' | 'stats' | 'steps' | 'gallery' | 'table' | 'footer';
     settings: Record<string, unknown>;
 }
 
@@ -32,7 +33,8 @@ function renderSection(section: Section) {
         case 'hero':   return <DynamicHero      key={section.id} settings={section.settings as never} />;
         case 'text':   return <DynamicTextBlock key={section.id} settings={section.settings as never} />;
         case 'team':       return <DynamicTeam      key={section.id} settings={section.settings as never} />;
-        case 'blog_posts': return <DynamicBlogPosts key={section.id} settings={section.settings as never} />;
+        case 'blog_posts':    return <DynamicBlogPosts    key={section.id} settings={section.settings as never} />;
+        case 'blog_carousel': return <DynamicBlogCarousel key={section.id} settings={section.settings as never} />;
         case 'map':        return <DynamicMap       key={section.id} settings={section.settings as never} />;
         case 'reviews':    return <DynamicReviews   key={section.id} settings={section.settings as never} />;
         case 'form':       return <DynamicForm      key={section.id} settings={section.settings as never} />;

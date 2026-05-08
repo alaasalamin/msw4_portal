@@ -46,6 +46,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-newspaper',
                 'desc'  => 'Latest published posts from your blog with featured images.',
             ],
+            'blog_carousel' => [
+                'label' => 'Blog Carousel',
+                'icon'  => 'heroicon-o-rectangle-stack',
+                'desc'  => 'Sliding showcase of selected posts — each slide links to the post.',
+            ],
             'map' => [
                 'label' => 'Google Maps',
                 'icon'  => 'heroicon-o-map-pin',
@@ -495,6 +500,28 @@ class SectionRegistry
                 'cardBg'       => '#ffffff',
                 'mutedFg'      => '#64748b',
                 'accent'       => '#0284c7',
+            ],
+            'blog_carousel' => [
+                'heading'        => 'Latest from the blog',
+                'subtitle'       => '',
+                'source'         => 'latest',  // 'latest' = newest N posts, 'category' = newest N from a category, 'manual' = a hand-picked list of slugs
+                'limit'          => 6,
+                'categorySlug'   => null,
+                'manualSlugs'    => [],         // array of post slugs (or fullSlug "category/slug")
+                'aspect'         => '16:9',
+                'showCategory'   => true,
+                'showDate'       => true,
+                'showExcerpt'    => true,
+                'showReadMore'   => true,
+                'readMoreLabel'  => 'Read more',
+                'autoplay'       => true,
+                'autoplayDelay'  => 6,
+                'showArrows'     => true,
+                'showDots'       => true,
+                'bg'             => '#0f172a',
+                'fg'             => '#ffffff',
+                'mutedFg'        => '#cbd5e1',
+                'accent'         => '#0284c7',
             ],
             'team' => [
                 'variant'    => 'cards',
@@ -1602,6 +1629,97 @@ class SectionRegistry
                         ColorPicker::make('settings.cardBg')->label('Card background'),
                         ColorPicker::make('settings.mutedFg')->label('Excerpt / date color'),
                         ColorPicker::make('settings.accent')->label('Category pill / hover accent'),
+                    ])->columns(2),
+            ],
+
+            'blog_carousel' => [
+                Section::make('Heading')
+                    ->schema([
+                        TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
+                        Textarea::make('settings.subtitle')->label('Subtitle')->rows(2)->maxLength(220),
+                    ])->columns(1),
+
+                Section::make('Posts')
+                    ->schema([
+                        Select::make('settings.source')
+                            ->label('Which posts')
+                            ->options([
+                                'latest'   => 'Latest published',
+                                'category' => 'Latest in a category',
+                                'manual'   => 'Hand-picked posts',
+                            ])
+                            ->default('latest')
+                            ->required()
+                            ->live()
+                            ->native(false),
+                        Select::make('settings.categorySlug')
+                            ->label('Category')
+                            ->options(fn () => \App\Models\PostCategory::orderBy('name')->pluck('name', 'slug')->toArray())
+                            ->searchable()
+                            ->native(false)
+                            ->visible(fn (Get $get) => $get('settings.source') === 'category'),
+                        TextInput::make('settings.limit')
+                            ->label('How many posts')
+                            ->numeric()->minValue(1)->maxValue(20)->default(6)
+                            ->visible(fn (Get $get) => in_array($get('settings.source'), ['latest', 'category'], true)),
+                        Select::make('settings.manualSlugs')
+                            ->label('Pick posts')
+                            ->multiple()
+                            ->options(fn () => \App\Models\Post::published()
+                                ->orderBy('published_at', 'desc')
+                                ->limit(200)
+                                ->get()
+                                ->mapWithKeys(fn ($p) => [$p->slug => $p->title])
+                                ->toArray())
+                            ->searchable()
+                            ->native(false)
+                            ->helperText('Drag to reorder. The carousel renders posts in this order.')
+                            ->visible(fn (Get $get) => $get('settings.source') === 'manual'),
+                    ])->columns(1),
+
+                Section::make('Slide content')
+                    ->schema([
+                        Select::make('settings.aspect')
+                            ->label('Slide aspect ratio')
+                            ->options([
+                                '16:9'   => 'Wide (16:9)',
+                                '4:3'    => 'Landscape (4:3)',
+                                '21:9'   => 'Cinematic (21:9)',
+                                '3:2'    => 'Photographic (3:2)',
+                            ])
+                            ->default('16:9')
+                            ->required(),
+                        \Filament\Forms\Components\Toggle::make('settings.showCategory')->label('Show category pill')->default(true),
+                        \Filament\Forms\Components\Toggle::make('settings.showDate')->label('Show published date')->default(true),
+                        \Filament\Forms\Components\Toggle::make('settings.showExcerpt')->label('Show excerpt')->default(true),
+                        \Filament\Forms\Components\Toggle::make('settings.showReadMore')->label('Show "Read more" button')->default(true),
+                        TextInput::make('settings.readMoreLabel')
+                            ->label('"Read more" button label')
+                            ->default('Read more')
+                            ->maxLength(40)
+                            ->visible(fn (Get $get) => (bool) $get('settings.showReadMore')),
+                    ])->columns(2),
+
+                Section::make('Carousel options')
+                    ->schema([
+                        \Filament\Forms\Components\Toggle::make('settings.autoplay')
+                            ->label('Autoplay')
+                            ->default(true)
+                            ->helperText('Auto-advance slides on a timer. Pauses while the cursor is over the carousel.'),
+                        TextInput::make('settings.autoplayDelay')
+                            ->label('Slide duration (seconds)')
+                            ->numeric()->minValue(1)->maxValue(30)->default(6)
+                            ->visible(fn (Get $get) => (bool) $get('settings.autoplay')),
+                        \Filament\Forms\Components\Toggle::make('settings.showArrows')->label('Show prev / next arrows')->default(true),
+                        \Filament\Forms\Components\Toggle::make('settings.showDots')->label('Show pagination dots')->default(true),
+                    ])->columns(2),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Title color'),
+                        ColorPicker::make('settings.mutedFg')->label('Date / excerpt color'),
+                        ColorPicker::make('settings.accent')->label('Pill / button accent'),
                     ])->columns(2),
             ],
 

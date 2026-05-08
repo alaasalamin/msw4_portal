@@ -42,6 +42,7 @@ class HomepageController extends Controller
                 ->limit(30)
                 ->get()
                 ->map(fn (Post $p) => [
+                    'slug'          => $p->slug,
                     'title'         => $p->title,
                     'excerpt'       => $p->excerpt,
                     'href'          => '/blog/' . $p->fullSlug(),
