@@ -86,11 +86,11 @@
         <aside style="background:var(--tb-bg); border:1px solid var(--tb-border); border-radius:12px; padding:16px;
                       box-shadow:var(--tb-shadow); position:sticky; top:16px;">
 
-            {{-- Page picker + New page --}}
-            <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
+            {{-- Page picker + page-level actions, all in one row --}}
+            <div style="display:flex; gap:8px; margin-bottom:12px; align-items:center;">
                 <select
                     wire:change="selectPage($event.target.value)"
-                    style="flex:1; height:36px; padding:0 10px; border-radius:8px;
+                    style="flex:1; min-width:0; height:36px; padding:0 10px; border-radius:8px;
                            border:1px solid var(--tb-border); background:var(--tb-btn-bg);
                            color:var(--tb-fg); font-size:13px; font-weight:500; cursor:pointer;"
                 >
@@ -101,16 +101,23 @@
                         >{{ $p['title'] }}</option>
                     @endforeach
                 </select>
-                <div>{{ $this->createPageAction }}</div>
+                @if (! empty($currentPage['id']))
+                    {{-- Inline icon actions, only when a Site Page is selected --}}
+                    <div class="tb-page-actions" style="display:inline-flex; align-items:center; gap:4px;">
+                        {{ $this->editPageAction }}
+                        {{ $this->deletePageAction }}
+                    </div>
+                @endif
+                <div style="display:inline-flex; align-items:center;">{{ $this->createPageAction }}</div>
             </div>
-
-            {{-- Per-page actions: only when a Site Page (not the Homepage) is selected --}}
-            @if (! empty($currentPage['id']))
-                <div style="display:flex; gap:6px; margin-bottom:12px;">
-                    <div>{{ $this->editPageAction }}</div>
-                    <div>{{ $this->deletePageAction }}</div>
-                </div>
-            @endif
+            <style>
+                /* Tighten Filament's default icon-button sizing so the inline row
+                   feels balanced against the 36px page picker. */
+                .tb-page-actions .fi-icon-btn {
+                    width: 36px !important;
+                    height: 36px !important;
+                }
+            </style>
             <div style="font-size:11px; color:var(--tb-muted); margin-bottom:14px; padding-bottom:14px;
                         border-bottom:1px solid var(--tb-border-soft);">
                 Editing
