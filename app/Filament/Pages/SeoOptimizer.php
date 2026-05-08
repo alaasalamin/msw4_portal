@@ -7,14 +7,17 @@ use App\Models\Setting;
 use App\Models\SitePage;
 use App\Services\SitemapService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 
 class SeoOptimizer extends Page
 {
@@ -129,6 +132,65 @@ class SeoOptimizer extends Page
     }
 
     /**
+     * Builds the Google-style search-result snippet HTML used inside the
+     * editMeta modal. Mirrors the live Alpine preview on the page itself,
+     * but rendered server-side (because Filament Placeholders re-render via
+     * Livewire — the live(debounce:200) on the inputs drives the refresh).
+     */
+    protected function renderSnippetHtml(string $title, string $description, string $url, string $siteName): string
+    {
+        $title       = trim($title);
+        $description = trim($description);
+        $siteName    = trim($siteName) ?: 'Site';
+
+        // Pretty breadcrumb: host + path (no scheme, no trailing slash).
+        $prettyUrl = $url;
+        $host = $url;
+        $parsed = @parse_url($url);
+        if (is_array($parsed) && ! empty($parsed['host'])) {
+            $host = $parsed['host'];
+            $path = isset($parsed['path']) && $parsed['path'] !== '/' ? $parsed['path'] : '';
+            $prettyUrl = $host . $path;
+        }
+
+        $initial = strtoupper(mb_substr($siteName, 0, 1, 'UTF-8'));
+        $t = e($title);
+        $d = e($description);
+        $sn = e($siteName);
+        $pu = e($prettyUrl);
+        $hh = e($host);
+        $i = e($initial);
+
+        return <<<HTML
+<div style="background:#ffffff; border:1px solid #e5e7eb; border-radius:14px;
+            padding:16px 18px; display:flex; flex-direction:column; gap:6px;
+            box-shadow:0 1px 2px rgba(15,23,42,.04);
+            font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <div style="width:18px; height:18px; border-radius:9999px; background:#e8eaed;
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:9px; font-weight:700; color:#5f6368; text-transform:uppercase;">
+            {$i}
+        </div>
+        <div style="display:flex; flex-direction:column; line-height:1.2;">
+            <span style="font-size:12px; color:#202124; font-weight:500;">{$sn}</span>
+            <span style="font-size:11px; color:#5f6368;">{$pu}</span>
+        </div>
+    </div>
+    <a href="#" onclick="return false;" style="
+        font-size:18px; line-height:1.3; color:#1a0dab; font-weight:400;
+        text-decoration:none; cursor:pointer;">{$t}</a>
+    <p style="margin:0; font-size:13.5px; line-height:1.55; color:#4d5156; word-wrap:break-word;">
+        {$d}
+    </p>
+    <div style="margin-top:4px; font-size:11px; color:#5f6368;">
+        <span style="opacity:.7;">⓵</span> A live preview — actual rendering varies by query, device and Google.
+    </div>
+</div>
+HTML;
+    }
+
+    /**
      * Resolves an audit row's record (Page or Post) by its passed type+id.
      * Used by the per-row edit action.
      */
@@ -147,7 +209,7 @@ class SeoOptimizer extends Page
         return Action::make('editMeta')
             ->label('Edit meta')
             ->icon('heroicon-m-pencil-square')
-            ->modalWidth('lg')
+            ->modalWidth('2xl')
             ->modalHeading(function (array $arguments): string {
                 $rec = $this->resolveRecord($arguments['type'] ?? null, $arguments['id'] ?? null);
                 return $rec ? "Edit meta — {$rec->title}" : 'Edit meta';
@@ -161,22 +223,46 @@ class SeoOptimizer extends Page
                     'meta_description' => $rec->meta_description,
                 ] : [];
             })
-            ->schema([
-                TextInput::make('meta_title')
-                    ->label('Meta title')
-                    ->maxLength(120)
-                    ->placeholder('Your headline as it appears in Google')
-                    ->helperText('Recommended: 30–60 characters.')
-                    ->live(debounce: 200)
-                    ->afterStateUpdated(fn () => null),
-                Textarea::make('meta_description')
-                    ->label('Meta description')
-                    ->rows(4)
-                    ->maxLength(280)
-                    ->placeholder('A 70–160 character summary that invites the click')
-                    ->helperText('Recommended: 70–160 characters.')
-                    ->live(debounce: 200),
-            ])
+            ->schema(function (array $arguments) {
+                $rec = $this->resolveRecord($arguments['type'] ?? null, $arguments['id'] ?? null);
+
+                // Resolve the canonical URL for this record so the preview's
+                // breadcrumb is the page Google would actually show.
+                $url = url('/');
+                if ($rec instanceof SitePage) {
+                    $url = url('/' . $rec->slug);
+                } elseif ($rec instanceof Post) {
+                    $url = url('/blog/' . $rec->fullSlug());
+                }
+                $siteName = Setting::get('company_name')
+                    ?: Setting::get('site_name', config('app.name', 'MSW4'));
+                $fallbackTitle = $rec?->title ?? '';
+                $fallbackDesc  = '';
+
+                return [
+                    TextInput::make('meta_title')
+                        ->label('Meta title')
+                        ->maxLength(120)
+                        ->placeholder('Your headline as it appears in Google')
+                        ->helperText('Recommended: 30–60 characters.')
+                        ->live(debounce: 200),
+                    Textarea::make('meta_description')
+                        ->label('Meta description')
+                        ->rows(4)
+                        ->maxLength(280)
+                        ->placeholder('A 70–160 character summary that invites the click')
+                        ->helperText('Recommended: 70–160 characters.')
+                        ->live(debounce: 200),
+                    Placeholder::make('preview')
+                        ->label('Live Google preview')
+                        ->content(fn (Get $get) => new HtmlString($this->renderSnippetHtml(
+                            (string) ($get('meta_title') ?: $fallbackTitle ?: 'Untitled — your meta title goes here'),
+                            (string) ($get('meta_description') ?: $fallbackDesc ?: 'Your meta description shows here. Aim for 70–160 characters that summarize the page and invite the click.'),
+                            $url,
+                            $siteName,
+                        ))),
+                ];
+            })
             ->action(function (array $arguments, array $data) {
                 $rec = $this->resolveRecord($arguments['type'] ?? null, $arguments['id'] ?? null);
                 if (! $rec) {
