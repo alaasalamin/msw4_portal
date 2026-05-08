@@ -105,6 +105,27 @@ class SectionRegistry
     }
 
     /**
+     * Visual layout variants per section type. Each variant entry is
+     * { key, label, description }. Types not listed here have a single
+     * implicit variant and the icon-design picker stays hidden for them.
+     */
+    public static function variants(string $type): array
+    {
+        return match ($type) {
+            'hero' => [
+                ['key' => 'centered', 'label' => 'Centered',     'description' => 'Eyebrow, headline, subtitle and button stacked in the middle.'],
+                ['key' => 'split',    'label' => 'Split image',  'description' => 'Heading and button on the left, image on the right.'],
+            ],
+            default => [],
+        };
+    }
+
+    public static function hasVariants(string $type): bool
+    {
+        return count(static::variants($type)) > 1;
+    }
+
+    /**
      * Default settings for a freshly-added section. Keep them tasteful so
      * dropping a section produces something usable without further config.
      */
@@ -124,6 +145,8 @@ class SectionRegistry
                 'sticky'     => true,
             ],
             'hero' => [
+                'variant'    => 'centered',
+                'image'      => null,    // used by the 'split' variant
                 'eyebrow'    => 'Welcome',
                 'headline'   => 'A great big headline goes here',
                 'subtitle'   => 'A short paragraph that explains what your product does and why people should care.',
@@ -437,6 +460,26 @@ class SectionRegistry
             ],
 
             'hero' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options(['centered' => 'Centered', 'split' => 'Split image'])
+                            ->default('centered')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                        FileUpload::make('settings.image')
+                            ->label('Right-side image')
+                            ->image()
+                            ->disk('public')
+                            ->directory('theme-builder/hero')
+                            ->maxSize(4096)
+                            ->imagePreviewHeight('80')
+                            ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'split')
+                            ->helperText('Used by the Split image variant.'),
+                    ])->columns(1),
                 Section::make('Content')
                     ->schema([
                         TextInput::make('settings.eyebrow')->label('Eyebrow (small text above headline)')->maxLength(80),
@@ -445,7 +488,7 @@ class SectionRegistry
                         TextInput::make('settings.buttonText')->label('Button label')->maxLength(40),
                         TextInput::make('settings.buttonHref')->label('Button URL')->maxLength(200)->default('#'),
                         Select::make('settings.align')
-                            ->label('Alignment')
+                            ->label('Alignment (centered variant only)')
                             ->options(['left' => 'Left', 'center' => 'Center', 'right' => 'Right'])
                             ->default('center'),
                     ])->columns(2),

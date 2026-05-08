@@ -39,6 +39,15 @@
             --tb-status-ok:    #10b981;
             --tb-link-fg:      #0284c7;
         }
+        .tb-design-btn:hover {
+            border-color: #0284c7 !important;
+            transform: translateY(-1px);
+        }
+        .tb-design-btn:active { transform: translateY(0); }
+        .tb-design-btn:focus-visible {
+            outline: 2px solid #0284c7;
+            outline-offset: 2px;
+        }
         .dark .tb-panel,
         html.dark .tb-panel {
             --tb-bg:           #18181b;  /* zinc-900 */
@@ -166,12 +175,38 @@
                             $first = $i === 0;
                             $last  = $i === $count - 1;
                         @endphp
+                        @php $hasVariants = $this->typeHasVariants($type ?? ''); @endphp
                         <li style="display:flex; align-items:center; gap:10px; padding:10px;
                                    background:var(--tb-card-bg); border:1px solid var(--tb-border); border-radius:10px;">
-                            <div style="flex:0 0 36px; height:36px; display:flex; align-items:center; justify-content:center;
-                                        background:var(--tb-icon-bg); border:1px solid var(--tb-border); border-radius:8px; color:#0284c7;">
-                                <x-filament::icon :icon="$meta['icon']" style="width:16px; height:16px;" />
-                            </div>
+                            @if ($hasVariants)
+                                <button
+                                    type="button"
+                                    wire:click="mountAction('chooseDesign', { id: '{{ $sid }}' })"
+                                    title="Choose design — pick a visual variant for this section"
+                                    aria-label="Choose design"
+                                    class="tb-design-btn"
+                                    style="flex:0 0 36px; height:36px; display:flex; align-items:center; justify-content:center;
+                                           background:var(--tb-icon-bg); border:1px solid var(--tb-border); border-radius:8px; color:#0284c7;
+                                           cursor:pointer; padding:0; position:relative; transition:border-color .12s ease, transform .08s ease;"
+                                >
+                                    <x-filament::icon :icon="$meta['icon']" style="width:16px; height:16px;" />
+                                    {{-- Tiny "swatch" indicator badge in the corner --}}
+                                    <span aria-hidden="true" style="position:absolute; bottom:-4px; right:-4px;
+                                                                    width:14px; height:14px; border-radius:9999px;
+                                                                    background:#0284c7; color:#fff;
+                                                                    display:inline-flex; align-items:center; justify-content:center;
+                                                                    border:2px solid var(--tb-card-bg);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:8px; height:8px;">
+                                            <path d="M12 2.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 15.77l-5.2 2.73.99-5.78-4.21-4.1 5.82-.85L12 2.5z" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            @else
+                                <div style="flex:0 0 36px; height:36px; display:flex; align-items:center; justify-content:center;
+                                            background:var(--tb-icon-bg); border:1px solid var(--tb-border); border-radius:8px; color:#0284c7;">
+                                    <x-filament::icon :icon="$meta['icon']" style="width:16px; height:16px;" />
+                                </div>
+                            @endif
                             <div style="min-width:0; flex:1;">
                                 <div style="display:flex; align-items:center; gap:6px;">
                                     <span style="font-size:13px; font-weight:600; color:var(--tb-fg); line-height:1.2;">{{ $meta['label'] }}</span>
