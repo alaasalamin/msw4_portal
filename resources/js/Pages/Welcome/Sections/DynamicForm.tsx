@@ -165,10 +165,10 @@ function Split({ settings }: { settings: FormSettings }) {
                 margin: '0 auto',
                 display: 'grid',
                 gridTemplateColumns: '1fr 1.2fr',
-                alignItems: 'start',
+                alignItems: 'center',
                 gap: 'clamp(28px, 5vw, 56px)',
             }}>
-                <div style={{ position: 'sticky', top: 24 }}>
+                <div>
                     {settings.heading && <Heading text={settings.heading} color={fg} />}
                     {settings.paragraph && <Paragraph text={settings.paragraph} color={mutedFg} align="left" />}
                 </div>
@@ -179,7 +179,6 @@ function Split({ settings }: { settings: FormSettings }) {
             <style>{`
                 @media (max-width: 760px) {
                     .tb-form-split { grid-template-columns: 1fr !important; }
-                    .tb-form-split > div:first-child { position: static !important; }
                 }
             `}</style>
         </section>
