@@ -191,28 +191,16 @@
                                 titleClass === 'warn' ? 'color:#d97706' : 'color:#dc2626'
                             "><span x-text="titleLen"></span> / 60</span>
                         </span>
-                        <div style="display:flex; align-items:stretch; border:1px solid var(--tb-border); border-radius:8px; overflow:hidden; background:var(--tb-card-bg);"
-                             x-data="{}"
-                             x-on:focusin="$el.style.borderColor='#0284c7'"
-                             x-on:focusout="$el.style.borderColor=''"
-                        >
-                            <input
-                                type="text"
-                                x-model="title"
-                                maxlength="120"
-                                placeholder="Your headline as it appears in Google"
-                                style="flex:1; padding:9px 12px; border:0; background:transparent;
-                                       font-size:13px; color:var(--tb-fg); outline:none; min-width:0;"
-                            />
-                            <span
-                                style="display:inline-flex; align-items:center; padding:0 12px;
-                                       border-left:1px solid var(--tb-border);
-                                       background:var(--tb-bg); color:var(--tb-muted);
-                                       font-size:13px; font-weight:500; white-space:nowrap;"
-                                x-text="'– ' + (siteName || 'Site')"
-                                title="The company name is appended automatically"
-                            ></span>
-                        </div>
+                        <input
+                            type="text"
+                            x-model="title"
+                            maxlength="120"
+                            placeholder="Your headline as it appears in Google"
+                            style="padding:9px 12px; border:1px solid var(--tb-border); border-radius:8px;
+                                   font-size:13px; background:var(--tb-card-bg); color:var(--tb-fg); outline:none;"
+                            x-on:focus="$event.target.style.borderColor='#0284c7'"
+                            x-on:blur="$event.target.style.borderColor=''"
+                        />
                     </label>
 
                     <label style="display:flex; flex-direction:column; gap:6px;">
