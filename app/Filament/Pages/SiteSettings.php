@@ -5,7 +5,6 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Page;
@@ -30,7 +29,6 @@ class SiteSettings extends Page
         $this->form->fill([
             'site_name'        => Setting::get('site_name', config('app.name')),
             'site_description' => Setting::get('site_description'),
-            'logo'             => Setting::get('logo'),
             'social_facebook'  => Setting::get('social_facebook'),
             'social_instagram' => Setting::get('social_instagram'),
             'social_twitter'   => Setting::get('social_twitter'),
@@ -55,15 +53,6 @@ class SiteSettings extends Page
                         ->label('Site Description')
                         ->rows(2)
                         ->maxLength(300),
-                ])->columns(1),
-
-                Section::make('Branding')->schema([
-                    FileUpload::make('logo')
-                        ->label('Site Logo')
-                        ->image()
-                        ->disk('public')
-                        ->directory('settings')
-                        ->helperText('Used in the header and email templates'),
                 ])->columns(1),
 
                 Section::make('Social Media')->schema([

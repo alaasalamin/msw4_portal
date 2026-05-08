@@ -38,6 +38,7 @@ class SeoOptimizer extends Page
         $this->form->fill([
             'google_site_verification' => Setting::get('google_site_verification'),
             'default_robots'           => Setting::get('default_robots', 'index, follow'),
+            'google_analytics'         => Setting::get('google_analytics'),
         ]);
     }
 
@@ -177,6 +178,15 @@ class SeoOptimizer extends Page
                             ->default('index, follow'),
                     ])->columns(1),
 
+                Section::make('Analytics')
+                    ->description('Google Analytics ID is injected into the <head> on every public page.')
+                    ->schema([
+                        TextInput::make('google_analytics')
+                            ->label('Google Analytics ID')
+                            ->helperText('e.g. G-XXXXXXXXXX')
+                            ->maxLength(50)
+                            ->placeholder('G-XXXXXXXXXX'),
+                    ])->columns(1),
             ]);
     }
 
@@ -185,6 +195,7 @@ class SeoOptimizer extends Page
         $data = $this->form->getState();
         Setting::set('google_site_verification', $data['google_site_verification'] ?? '');
         Setting::set('default_robots',           $data['default_robots']           ?? 'index, follow');
+        Setting::set('google_analytics',         $data['google_analytics']         ?? '');
 
         Notification::make()->title('SEO settings saved')->success()->send();
     }
