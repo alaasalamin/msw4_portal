@@ -8,45 +8,121 @@
     }
 @endphp
 
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+{{-- Scoped styles. The admin shell does not pull in the project's Tailwind
+     build (no Filament custom theme is configured), so we ship the picker
+     styling inline and key everything off Filament's existing CSS variables
+     (--color-primary-*, --color-gray-*) so it tracks the active brand /
+     dark-mode state. --}}
+<style>
+    .tb-section-picker {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+    @media (min-width: 640px) {
+        .tb-section-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    .tb-section-picker__card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        text-align: left;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--color-gray-200, #e5e7eb);
+        background: #ffffff;
+        cursor: pointer;
+        transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+        font-family: inherit;
+    }
+    .tb-section-picker__card:hover {
+        border-color: var(--color-primary-500, #0284c7);
+        background: var(--color-primary-50, #f0f9ff);
+        transform: translateY(-1px);
+    }
+    .tb-section-picker__card:focus-visible {
+        outline: 2px solid var(--color-primary-500, #0284c7);
+        outline-offset: 2px;
+    }
+    .tb-section-picker__card[disabled] {
+        opacity: 0.6;
+        cursor: progress;
+    }
+
+    .tb-section-picker__chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.625rem;
+        background: var(--color-primary-50, #f0f9ff);
+        color: var(--color-primary-600, #0284c7);
+        transition: background-color 150ms ease;
+    }
+    .tb-section-picker__card:hover .tb-section-picker__chip {
+        background: var(--color-primary-100, #e0f2fe);
+    }
+    .tb-section-picker__chip svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .tb-section-picker__label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-gray-950, #030712);
+        line-height: 1.25;
+    }
+    .tb-section-picker__desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-top: 0.125rem;
+        font-size: 0.75rem;
+        line-height: 1.35;
+        color: var(--color-gray-500, #6b7280);
+    }
+
+    /* Dark mode (Filament toggles `.dark` on <html>) */
+    .dark .tb-section-picker__card {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .dark .tb-section-picker__card:hover {
+        border-color: var(--color-primary-400, #38bdf8);
+        background: rgba(2, 132, 199, 0.10);
+    }
+    .dark .tb-section-picker__chip {
+        background: rgba(2, 132, 199, 0.15);
+        color: var(--color-primary-400, #38bdf8);
+    }
+    .dark .tb-section-picker__card:hover .tb-section-picker__chip {
+        background: rgba(2, 132, 199, 0.25);
+    }
+    .dark .tb-section-picker__label { color: #ffffff; }
+    .dark .tb-section-picker__desc  { color: var(--color-gray-400, #9ca3af); }
+</style>
+
+<div class="tb-section-picker">
     @foreach ($types as $key => $meta)
         <button
             type="button"
             wire:click="addSectionOfType(@js($key))"
             wire:loading.attr="disabled"
-            class="
-                group relative flex flex-col items-start gap-2 text-left
-                rounded-xl border border-gray-200 dark:border-white/10
-                bg-white dark:bg-white/5
-                px-4 py-4
-                hover:border-primary-500 hover:bg-primary-50/40
-                dark:hover:bg-primary-500/10
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500
-                transition-colors duration-150
-                cursor-pointer
-            "
+            class="tb-section-picker__card"
         >
-            <span class="
-                inline-flex items-center justify-center
-                h-11 w-11 rounded-lg
-                bg-primary-50 text-primary-600
-                dark:bg-primary-500/15 dark:text-primary-400
-                group-hover:bg-primary-100 dark:group-hover:bg-primary-500/25
-                transition-colors duration-150
-            ">
-                <x-filament::icon
-                    :icon="$meta['icon']"
-                    class="h-6 w-6"
-                />
+            <span class="tb-section-picker__chip">
+                <x-filament::icon :icon="$meta['icon']" />
             </span>
-
-            <span class="block w-full">
-                <span class="block font-semibold text-sm text-gray-950 dark:text-white">
-                    {{ $meta['label'] }}
-                </span>
-                <span class="block mt-0.5 text-xs leading-snug text-gray-500 dark:text-gray-400 line-clamp-2">
-                    {{ $meta['desc'] }}
-                </span>
+            <span style="display: block; width: 100%;">
+                <span class="tb-section-picker__label">{{ $meta['label'] }}</span>
+                <span class="tb-section-picker__desc">{{ $meta['desc'] }}</span>
             </span>
         </button>
     @endforeach
