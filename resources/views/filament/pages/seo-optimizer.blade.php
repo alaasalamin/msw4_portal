@@ -115,10 +115,14 @@
                     if (this.titleLen < 30 || this.titleLen > 60) return 'warn';
                     return 'good';
                 },
-                get displayedTitle() {
+                /**
+                 * Combine the user's title with " - {siteName}" — same rule the
+                 * blade emits in <title>%s - {siteName}</title>. Skip the
+                 * suffix if the user already typed the site name in.
+                 */
+                combinedTitle(fallback) {
                     const t = (this.title || '').trim();
-                    if (!t) return '';
-                    // Append the site name unless the user already typed it in.
+                    if (!t) return fallback || '';
                     const sn = (this.siteName || '').trim();
                     if (!sn) return t;
                     return t.toLowerCase().includes(sn.toLowerCase()) ? t : `${t} - ${sn}`;
@@ -272,7 +276,7 @@
                         cursor:pointer;
                         font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;
                     ">
-                        <span x-text="displayedTitle || 'Untitled — your meta title goes here'"></span>
+                        <span x-text="combinedTitle('Untitled — your meta title goes here')"></span>
                     </a>
                     <p style="
                         margin:0;
@@ -327,7 +331,7 @@
                             <div style="font-size:11px; color:#65676b; text-transform:uppercase; letter-spacing:.04em;" x-text="breadcrumbHost || 'example.com'"></div>
                             <div style="font-size:15px; color:#1c1e21; font-weight:600; line-height:1.3; margin-top:2px;
                                         display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"
-                                 x-text="title || 'Your title here'">
+                                 x-text="combinedTitle('Your title here')">
                             </div>
                             <div style="font-size:13px; color:#65676b; line-height:1.4; margin-top:3px;
                                         display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"
@@ -362,7 +366,7 @@
                             <div style="font-size:11px; color:#536471; line-height:1.4;" x-text="breadcrumbHost || 'example.com'"></div>
                             <div style="font-size:14px; color:#0f1419; font-weight:600; line-height:1.3; margin-top:2px;
                                         display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;"
-                                 x-text="title || 'Your title here'">
+                                 x-text="combinedTitle('Your title here')">
                             </div>
                             <div style="font-size:13px; color:#536471; line-height:1.4; margin-top:2px;
                                         display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"
