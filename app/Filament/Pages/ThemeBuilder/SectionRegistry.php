@@ -175,6 +175,13 @@ class SectionRegistry
                 ['key' => 'carousel', 'label' => 'Carousel', 'description' => 'Horizontal scrolling row with prev/next controls.'],
                 ['key' => 'collage',  'label' => 'Collage',  'description' => 'Asymmetric mosaic — the first image is bigger, the rest fill around.'],
             ],
+            'faq' => [
+                ['key' => 'accordion','label' => 'Accordion',  'description' => 'Collapsible rows — click to expand the answer.'],
+                ['key' => 'open',     'label' => 'Always open','description' => 'Single column with every Q&A always visible.'],
+                ['key' => 'two-col',  'label' => 'Two columns','description' => 'Two-column grid, every Q&A always visible.'],
+                ['key' => 'cards',    'label' => 'Cards',      'description' => 'Each Q&A in its own elevated card, always open.'],
+                ['key' => 'bordered', 'label' => 'Bordered',   'description' => 'Boxed accordion items with a colored left accent bar.'],
+            ],
             default => [],
         };
     }
@@ -309,6 +316,7 @@ class SectionRegistry
                 'gradientAngle'   => 135,
             ],
             'faq' => [
+                'variant'      => 'accordion',
                 'heading'      => 'Frequently asked questions',
                 'subtitle'     => 'Quick answers to questions you may have.',
                 'items'        => [
@@ -317,7 +325,7 @@ class SectionRegistry
                     ['question' => 'Can I track my repair status?',     'answer' => 'Absolutely. Once your device is checked in, you can follow progress in real time from your portal account.'],
                     ['question' => 'What payment methods do you accept?', 'answer' => 'Card, bank transfer, and (for B2B accounts) consolidated monthly invoicing.'],
                 ],
-                'layout'       => 'accordion',
+                'layout'       => 'accordion',  // legacy — still read by old saved rows
                 'expandFirst'  => true,
                 'columns'      => 1,
                 'bg'           => '#ffffff',
@@ -1041,22 +1049,25 @@ class SectionRegistry
                             ->itemLabel(fn (array $state): ?string => $state['question'] ?? 'New question'),
                     ])->columns(1),
 
-                Section::make('Layout')
+                Section::make('Design')
                     ->schema([
-                        Select::make('settings.layout')
-                            ->label('Display style')
+                        Select::make('settings.variant')
+                            ->label('Layout')
                             ->options([
-                                'accordion' => 'Accordion (collapsible, click to expand)',
-                                'open'      => 'Always open',
-                                'two-col'   => 'Two-column grid (always open)',
+                                'accordion' => 'Accordion — click to expand',
+                                'open'      => 'Always open — single column',
+                                'two-col'   => 'Two columns — always open',
+                                'cards'     => 'Cards — each Q&A in an elevated card',
+                                'bordered'  => 'Bordered — accordion with colored left bar',
                             ])
                             ->default('accordion')
                             ->required()
-                            ->live(),
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
                         \Filament\Forms\Components\Toggle::make('settings.expandFirst')
                             ->label('Expand first item by default')
                             ->default(true)
-                            ->visible(fn (Get $get) => $get('settings.layout') === 'accordion'),
+                            ->visible(fn (Get $get) => in_array($get('settings.variant') ?? 'accordion', ['accordion', 'bordered'], true)),
                     ])->columns(2),
 
                 Section::make('Style')
