@@ -115,11 +115,9 @@
                     if (this.titleLen < 30 || this.titleLen > 60) return 'warn';
                     return 'good';
                 },
-                /**
-                 * Combine the user's title with " - {siteName}" — same rule the
-                 * blade emits in <title>%s - {siteName}</title>. Skip the
-                 * suffix if the user already typed the site name in.
-                 */
+                // Combine the user title with the site-name suffix (same rule
+                // the blade emits in the page title tag). Skip the suffix if
+                // the user already typed the site name in.
                 combinedTitle(fallback) {
                     const t = (this.title || '').trim();
                     if (!t) return fallback || '';
