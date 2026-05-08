@@ -30,6 +30,8 @@ interface FormSettings {
     bg?: string;
     fg?: string;
     mutedFg?: string;
+    submitBtnBg?: string;
+    submitBtnFg?: string;
     image?: string | null;
     overlay?: number | string;
 }
@@ -85,6 +87,8 @@ function FormBody({ settings, theme }: { settings: FormSettings; theme?: FormSet
             form={settings.form}
             theme={theme ?? settings.theme ?? 'light'}
             page_slug="home"
+            submitBtnBg={settings.submitBtnBg || undefined}
+            submitBtnFg={settings.submitBtnFg || undefined}
         />
     );
 }

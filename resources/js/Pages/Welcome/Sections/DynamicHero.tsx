@@ -109,28 +109,18 @@ function SplitHero({ settings }: { settings: HeroSettings }) {
                 </div>
 
                 {settings.image ? (
-                    <div
+                    <img
                         className="tb-hero-split-image"
+                        src={`/storage/${settings.image}`}
+                        alt={settings.headline ?? ''}
                         style={{
-                            position: 'relative',
-                            borderRadius: 18,
-                            overflow: 'hidden',
-                            boxShadow: '0 18px 40px -16px rgba(15,23,42,0.25)',
-                            background: '#f8fafc',
-                            // Wrap to natural image height — never crop the upload.
+                            width: '100%',
+                            height: 'auto',
+                            display: 'block',
+                            maxWidth: '100%',
+                            // No card chrome — image sits directly on the section background.
                         }}
-                    >
-                        <img
-                            src={`/storage/${settings.image}`}
-                            alt={settings.headline ?? ''}
-                            style={{
-                                width: '100%',
-                                height: 'auto',
-                                display: 'block',
-                                maxWidth: '100%',
-                            }}
-                        />
-                    </div>
+                    />
                 ) : (
                     <div
                         className="tb-hero-split-image"

@@ -26,6 +26,9 @@ interface Props {
         fields: FormField[];
     };
     page_slug?: string;
+    /** Optional submit button colors. Empty / undefined falls back to the site primary. */
+    submitBtnBg?: string;
+    submitBtnFg?: string;
 }
 
 const THEMES = {
@@ -41,6 +44,8 @@ export default function FormSection({
     theme = 'light',
     form,
     page_slug = '',
+    submitBtnBg,
+    submitBtnFg,
 }: Props) {
     const [values, setValues] = useState<Record<string, string>>({});
     const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -200,7 +205,19 @@ export default function FormSection({
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="col-span-2 w-full rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600 disabled:opacity-60"
+                            // Use plain inline styles when the section provides explicit
+                            // colors, so the global orange→primary remap doesn't override
+                            // the user's pick. Otherwise keep the bg-orange-500 class which
+                            // already remaps to var(--primary) site-wide.
+                            className={
+                                submitBtnBg
+                                    ? 'col-span-2 w-full rounded-lg px-6 py-3 text-sm font-bold transition disabled:opacity-60'
+                                    : 'col-span-2 w-full rounded-lg bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600 disabled:opacity-60'
+                            }
+                            style={submitBtnBg ? {
+                                background: submitBtnBg,
+                                color: submitBtnFg ?? '#ffffff',
+                            } : undefined}
                         >
                             {submitting ? 'Sending…' : 'Send'}
                         </button>

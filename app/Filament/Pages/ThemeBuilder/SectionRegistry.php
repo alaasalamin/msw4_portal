@@ -365,18 +365,20 @@ class SectionRegistry
                 'highlightedFg'   => '#ffffff',
             ],
             'form' => [
-                'variant'    => 'default',
-                'heading'    => 'Contact us',
-                'paragraph'  => 'Have a question or want to work together? Fill out the form below and we will get back to you shortly.',
-                'form_id'    => null,
-                'theme'      => 'light',
-                'align'      => 'center',
-                'bg'         => '#ffffff',
-                'fg'         => '#0f172a',
-                'mutedFg'    => '#64748b',
+                'variant'        => 'default',
+                'heading'        => 'Contact us',
+                'paragraph'      => 'Have a question or want to work together? Fill out the form below and we will get back to you shortly.',
+                'form_id'        => null,
+                'theme'          => 'light',
+                'align'          => 'center',
+                'bg'             => '#ffffff',
+                'fg'             => '#0f172a',
+                'mutedFg'        => '#64748b',
+                'submitBtnBg'    => '',  // empty = inherit from site primary
+                'submitBtnFg'    => '#ffffff',
                 // Used by the bg_image variant
-                'image'      => null,
-                'overlay'    => 0.55,
+                'image'          => null,
+                'overlay'        => 0.55,
             ],
             'reviews' => [
                 'variant'      => 'cards',
@@ -1216,6 +1218,12 @@ class SectionRegistry
                         ColorPicker::make('settings.bg')->label('Section background'),
                         ColorPicker::make('settings.fg')->label('Heading color'),
                         ColorPicker::make('settings.mutedFg')->label('Paragraph color'),
+                        ColorPicker::make('settings.submitBtnBg')
+                            ->label('Submit button background')
+                            ->helperText('Leave empty to use the site primary color.'),
+                        ColorPicker::make('settings.submitBtnFg')
+                            ->label('Submit button text')
+                            ->default('#ffffff'),
                     ])->columns(3),
             ],
 
