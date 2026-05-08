@@ -135,6 +135,90 @@ class ThemeBuilder extends Page
     // Create new page
     // ─────────────────────────────────────────────────────────────────
 
+    public function editPageAction(): Action
+    {
+        return Action::make('editPage')
+            ->label('Rename page')
+            ->icon('heroicon-m-pencil-square')
+            ->color('gray')
+            ->modalHeading(function (): string {
+                $page = $this->currentPageId ? SitePage::find($this->currentPageId) : null;
+                return $page ? "Edit page — {$page->title}" : 'Edit page';
+            })
+            ->modalSubmitActionLabel('Save')
+            ->modalWidth('md')
+            ->fillForm(function () {
+                $page = $this->currentPageId ? SitePage::find($this->currentPageId) : null;
+                if (! $page) return [];
+                return [
+                    'title'  => $page->title,
+                    'slug'   => $page->slug,
+                    'status' => $page->status,
+                ];
+            })
+            ->schema([
+                TextInput::make('title')
+                    ->label('Page title')
+                    ->required()
+                    ->maxLength(120),
+                TextInput::make('slug')
+                    ->label('URL slug')
+                    ->required()
+                    ->maxLength(120)
+                    ->rule('alpha_dash')
+                    ->helperText('Reachable at /{slug}.'),
+                Select::make('status')
+                    ->label('Status')
+                    ->options(['draft' => 'Draft', 'published' => 'Published'])
+                    ->default('published')
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                $page = $this->currentPageId ? SitePage::find($this->currentPageId) : null;
+                if (! $page) {
+                    Notification::make()->title('Page not found')->danger()->send();
+                    return;
+                }
+                $newSlug = $data['slug'] ?? $page->slug;
+                if ($newSlug !== $page->slug && SitePage::where('slug', $newSlug)->where('id', '!=', $page->id)->exists()) {
+                    $newSlug = SitePage::uniqueSlug($data['title'] ?? $page->title);
+                }
+                $page->title  = $data['title']  ?? $page->title;
+                $page->slug   = $newSlug;
+                $page->status = $data['status'] ?? $page->status;
+                $page->save();
+
+                Notification::make()
+                    ->title('Page updated')
+                    ->body($page->title)
+                    ->success()
+                    ->send();
+
+                $this->dispatch('theme-builder:section-saved');
+            });
+    }
+
+    public function deletePageAction(): Action
+    {
+        return Action::make('deletePage')
+            ->label('Delete page')
+            ->icon('heroicon-m-trash')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Delete this page?')
+            ->modalDescription('This permanently removes the page and all its sections. The change is immediate and cannot be undone.')
+            ->modalSubmitActionLabel('Delete')
+            ->action(function () {
+                $page = $this->currentPageId ? SitePage::find($this->currentPageId) : null;
+                if (! $page) return;
+                $title = $page->title;
+                $page->delete();
+                $this->currentPageId = null;
+                Notification::make()->title("Deleted: {$title}")->success()->send();
+                $this->dispatch('theme-builder:section-saved');
+            });
+    }
+
     public function createPageAction(): Action
     {
         return Action::make('createPage')

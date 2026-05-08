@@ -87,7 +87,7 @@
                       box-shadow:var(--tb-shadow); position:sticky; top:16px;">
 
             {{-- Page picker + New page --}}
-            <div style="display:flex; gap:8px; margin-bottom:12px; align-items:center;">
+            <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
                 <select
                     wire:change="selectPage($event.target.value)"
                     style="flex:1; height:36px; padding:0 10px; border-radius:8px;
@@ -103,6 +103,14 @@
                 </select>
                 <div>{{ $this->createPageAction }}</div>
             </div>
+
+            {{-- Per-page actions: only when a Site Page (not the Homepage) is selected --}}
+            @if (! empty($currentPage['id']))
+                <div style="display:flex; gap:6px; margin-bottom:12px;">
+                    <div>{{ $this->editPageAction }}</div>
+                    <div>{{ $this->deletePageAction }}</div>
+                </div>
+            @endif
             <div style="font-size:11px; color:var(--tb-muted); margin-bottom:14px; padding-bottom:14px;
                         border-bottom:1px solid var(--tb-border-soft);">
                 Editing
