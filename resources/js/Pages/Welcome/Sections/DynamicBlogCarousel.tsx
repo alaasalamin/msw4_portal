@@ -209,6 +209,7 @@ export default function DynamicBlogCarousel({ settings }: { settings: BlogCarous
                                         type="button"
                                         aria-label="Previous post"
                                         onClick={prev}
+                                        className="tb-bc-arrow"
                                         style={{ ...arrowBtnStyle, left: 16 }}
                                     >
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -219,12 +220,23 @@ export default function DynamicBlogCarousel({ settings }: { settings: BlogCarous
                                         type="button"
                                         aria-label="Next post"
                                         onClick={next}
+                                        className="tb-bc-arrow"
                                         style={{ ...arrowBtnStyle, right: 16 }}
                                     >
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                                         </svg>
                                     </button>
+                                    {/* On phones the arrows sit on top of the
+                                        slide content; swipe + dots already
+                                        cover navigation, so hide them under
+                                        720px to free the full frame for the
+                                        post copy. */}
+                                    <style>{`
+                                        @media (max-width: 720px) {
+                                            .tb-bc-arrow { display: none !important; }
+                                        }
+                                    `}</style>
                                 </>
                             )}
                         </div>
