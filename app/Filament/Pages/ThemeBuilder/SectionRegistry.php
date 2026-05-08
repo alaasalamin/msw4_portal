@@ -96,6 +96,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
                 'desc'  => 'Bottom bar with tagline and small print.',
             ],
+            'table' => [
+                'label' => 'Table',
+                'icon'  => 'heroicon-o-table-cells',
+                'desc'  => 'Comparison or pricing-style data table with columns and rows.',
+            ],
         ];
     }
 
@@ -204,6 +209,11 @@ class SectionRegistry
                 ['key' => 'columns',  'label' => 'Columns',  'description' => 'Rich multi-column footer with brand, address, pages and blog sitemap.'],
                 ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Single thin row — brand on the left, socials on the right, copyright bar below.'],
                 ['key' => 'centered', 'label' => 'Centered', 'description' => 'Everything stacked centered — name, tagline, socials, then page links.'],
+            ],
+            'table' => [
+                ['key' => 'striped',  'label' => 'Striped',  'description' => 'Alternating row backgrounds, no vertical borders.'],
+                ['key' => 'bordered', 'label' => 'Bordered', 'description' => 'Full grid lines around every cell.'],
+                ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Only horizontal hairlines between rows — no row backgrounds.'],
             ],
             default => [],
         };
@@ -494,6 +504,31 @@ class SectionRegistry
                 'fg'         => '#0f172a',
                 'cardBg'     => '#f8fafc',
                 'mutedFg'    => '#64748b',
+            ],
+            'table' => [
+                'variant'           => 'striped',
+                'heading'           => 'Compare',
+                'subtitle'          => '',
+                'columns'           => [
+                    ['label' => 'Feature',  'align' => 'left'],
+                    ['label' => 'Starter',  'align' => 'center'],
+                    ['label' => 'Pro',      'align' => 'center'],
+                    ['label' => 'Business', 'align' => 'center'],
+                ],
+                'rows'              => [
+                    ['cells' => "Projects\n1\n10\nUnlimited"],
+                    ['cells' => "Support\nCommunity\nEmail\nPriority"],
+                    ['cells' => "Analytics\nBasic\nAdvanced\nAdvanced"],
+                    ['cells' => "Integrations\n—\n3\nUnlimited"],
+                ],
+                'firstColEmphasis'  => true,
+                'bg'                => '#ffffff',
+                'fg'                => '#0f172a',
+                'mutedFg'           => '#64748b',
+                'headerBg'          => '#0f172a',
+                'headerFg'          => '#ffffff',
+                'altRowBg'          => '#f8fafc',
+                'borderColor'       => '#e5e7eb',
             ],
             'footer' => [
                 'variant'      => 'columns',
@@ -1608,6 +1643,86 @@ class SectionRegistry
                         ColorPicker::make('settings.fg')->label('Heading / name color'),
                         ColorPicker::make('settings.cardBg')->label('Card background'),
                         ColorPicker::make('settings.mutedFg')->label('Job title / bio color'),
+                    ])->columns(2),
+            ],
+
+            'table' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'striped'  => 'Striped — alternating row backgrounds',
+                                'bordered' => 'Bordered — full grid lines',
+                                'minimal'  => 'Minimal — only horizontal lines between rows',
+                            ])
+                            ->default('striped')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
+
+                Section::make('Heading')
+                    ->schema([
+                        TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
+                        Textarea::make('settings.subtitle')->label('Subtitle')->rows(2)->maxLength(220),
+                    ])->columns(1),
+
+                Section::make('Columns')
+                    ->description('Each column has a label (shown in the table header) and a text alignment.')
+                    ->schema([
+                        Repeater::make('settings.columns')
+                            ->label('Columns')
+                            ->schema([
+                                TextInput::make('label')->label('Header label')->required()->maxLength(60),
+                                Select::make('align')
+                                    ->label('Alignment')
+                                    ->options(['left' => 'Left', 'center' => 'Center', 'right' => 'Right'])
+                                    ->default('left')
+                                    ->required(),
+                            ])
+                            ->columns(2)
+                            ->minItems(2)
+                            ->maxItems(8)
+                            ->collapsible()
+                            ->reorderable()
+                            ->addActionLabel('Add column')
+                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? 'New column'),
+                    ])->columns(1),
+
+                Section::make('Rows')
+                    ->description('Each row\'s cells go in the textarea below — one cell per line, in column order.')
+                    ->schema([
+                        Repeater::make('settings.rows')
+                            ->label('Rows')
+                            ->schema([
+                                Textarea::make('cells')
+                                    ->label('Cells (one per line)')
+                                    ->required()
+                                    ->rows(4)
+                                    ->placeholder("First column\nSecond column\nThird column")
+                                    ->helperText('Lines beyond the column count are ignored. Empty lines render as a blank cell.'),
+                            ])
+                            ->collapsible()
+                            ->cloneable()
+                            ->reorderable()
+                            ->addActionLabel('Add row')
+                            ->itemLabel(fn (array $state): ?string => trim(strtok($state['cells'] ?? '', "\n") ?: '') ?: 'New row'),
+                    ])->columns(1),
+
+                Section::make('Style')
+                    ->schema([
+                        \Filament\Forms\Components\Toggle::make('settings.firstColEmphasis')
+                            ->label('Bold first column')
+                            ->default(true),
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Cell text color'),
+                        ColorPicker::make('settings.mutedFg')->label('Subtitle color'),
+                        ColorPicker::make('settings.headerBg')->label('Header row background'),
+                        ColorPicker::make('settings.headerFg')->label('Header row text'),
+                        ColorPicker::make('settings.altRowBg')->label('Alternate row background')
+                            ->visible(fn (Get $get) => ($get('settings.variant') ?? 'striped') === 'striped'),
+                        ColorPicker::make('settings.borderColor')->label('Border / divider color'),
                     ])->columns(2),
             ],
 

@@ -16,6 +16,7 @@ import DynamicCta       from './Welcome/Sections/DynamicCta';
 import DynamicStats     from './Welcome/Sections/DynamicStats';
 import DynamicSteps     from './Welcome/Sections/DynamicSteps';
 import DynamicGallery   from './Welcome/Sections/DynamicGallery';
+import DynamicTable     from './Welcome/Sections/DynamicTable';
 import DynamicFooter    from './Welcome/Sections/DynamicFooter';
 
 // Legacy block-editor components (kept for older Site Pages that still use
@@ -80,6 +81,7 @@ function renderTheme(section: ThemeSection) {
         case 'stats':      return <DynamicStats     key={section.id} settings={section.settings as never} />;
         case 'steps':      return <DynamicSteps     key={section.id} settings={section.settings as never} />;
         case 'gallery':    return <DynamicGallery   key={section.id} settings={section.settings as never} />;
+        case 'table':      return <DynamicTable     key={section.id} settings={section.settings as never} />;
         case 'footer':     return <DynamicFooter    key={section.id} settings={section.settings as never} />;
         default:           return null;
     }
