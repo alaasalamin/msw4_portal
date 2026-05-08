@@ -30,12 +30,6 @@ class SiteSettings extends Page
         $this->form->fill([
             'site_name'        => Setting::get('site_name', config('app.name')),
             'site_description' => Setting::get('site_description'),
-            'seo_title'        => Setting::get('seo_title'),
-            'seo_description'  => Setting::get('seo_description'),
-            'seo_keywords'     => Setting::get('seo_keywords'),
-            'og_title'         => Setting::get('og_title'),
-            'og_description'   => Setting::get('og_description'),
-            'og_image'         => Setting::get('og_image'),
             'logo'             => Setting::get('logo'),
             'favicon'          => Setting::get('favicon'),
             'google_analytics' => Setting::get('google_analytics'),
@@ -63,39 +57,6 @@ class SiteSettings extends Page
                         ->label('Site Description')
                         ->rows(2)
                         ->maxLength(300),
-                ])->columns(1),
-
-                Section::make('SEO')->schema([
-                    TextInput::make('seo_title')
-                        ->label('Meta Title')
-                        ->helperText('Shown in browser tab and Google results. Keep under 60 chars.')
-                        ->maxLength(60),
-                    Textarea::make('seo_description')
-                        ->label('Meta Description')
-                        ->helperText('Shown under the link in Google results. Keep under 160 chars.')
-                        ->rows(3)
-                        ->maxLength(160),
-                    TextInput::make('seo_keywords')
-                        ->label('Keywords')
-                        ->helperText('Comma-separated. e.g. repair, phone, laptop')
-                        ->maxLength(255),
-                ])->columns(1),
-
-                Section::make('Open Graph (Social Sharing)')->schema([
-                    TextInput::make('og_title')
-                        ->label('OG Title')
-                        ->helperText('Title shown when sharing on Facebook, WhatsApp, etc.')
-                        ->maxLength(100),
-                    Textarea::make('og_description')
-                        ->label('OG Description')
-                        ->rows(2)
-                        ->maxLength(200),
-                    FileUpload::make('og_image')
-                        ->label('OG Image')
-                        ->image()
-                        ->disk('public')
-                        ->directory('settings')
-                        ->helperText('Recommended: 1200×630px'),
                 ])->columns(1),
 
                 Section::make('Branding')->schema([
