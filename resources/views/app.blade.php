@@ -139,6 +139,11 @@
             .focus-visible\:ring-orange-400:focus-visible { --tw-ring-color: var(--primary-400) !important; }
         </style>
 
+        {{-- Make the live Site Name available to the Inertia title callback
+             in resources/js/app.tsx so the browser tab matches "{Site Name}
+             - {Page}" without needing a rebuild when the setting changes. --}}
+        <script>window.__siteName = @json($siteName);</script>
+
         <!-- Scripts -->
         @routes
         @viteReactRefresh
