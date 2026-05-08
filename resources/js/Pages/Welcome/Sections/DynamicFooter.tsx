@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 
 interface FooterSettings {
+    variant?: 'columns' | 'minimal' | 'centered';
     tagline?: string;
     small?: string;
     showAddress?: boolean;
@@ -75,216 +76,315 @@ function buildAddressLines(c: Company): string[] {
     return lines;
 }
 
-/** Replace {{company}} and {{year}} in user-provided strings. */
 function interpolate(text: string | undefined, vars: Record<string, string>): string {
     if (!text) return '';
     return text.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, key) => vars[key] ?? '');
 }
 
-export default function DynamicFooter({ settings }: { settings: FooterSettings }) {
-    const { footer_pages = [], footer_categories = [], site, company = {} } = usePage<SharedProps>().props;
+interface Resolved {
+    settings: FooterSettings;
+    pages: FooterPage[];
+    categories: FooterCategory[];
+    socials: [string, string][];
+    company: Company;
+    tagline: string;
+    small: string;
+    fg: string;
+    mutedFg: string;
+    headingFg: string;
+    showSocials: boolean;
+}
 
-    const showSocials = settings.showSocials !== false;
+function useResolved(settings: FooterSettings): Resolved {
+    const { footer_pages = [], footer_categories = [], site, company = {} } = usePage<SharedProps>().props;
+    const socials = (site?.socials ?? {}) as Socials;
+    const socialEntries = Object.entries(socials).filter(([, url]) => !!url) as [string, string][];
+
+    const tplVars = { company: company.name ?? '', year: String(new Date().getFullYear()) };
+    const tagline = interpolate(settings.tagline, tplVars);
+    const small = 'bizo.technology';
+
+    return {
+        settings,
+        pages: footer_pages,
+        categories: footer_categories,
+        socials: socialEntries,
+        company,
+        tagline,
+        small,
+        fg:        settings.fg        ?? '#e2e8f0',
+        mutedFg:   settings.mutedFg   ?? '#94a3b8',
+        headingFg: settings.headingFg ?? '#ffffff',
+        showSocials: settings.showSocials !== false,
+    };
+}
+
+function FooterShell({ settings, paddingY = 'clamp(40px, 6vw, 64px)', children }: {
+    settings: FooterSettings;
+    paddingY?: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <footer style={{
+            background: settings.bg ?? '#111111',
+            color: settings.fg ?? '#e2e8f0',
+            padding: `${paddingY} clamp(16px, 4vw, 32px) clamp(24px, 4vw, 32px)`,
+            fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+            fontSize: '0.9375rem',
+            lineHeight: 1.55,
+        }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>{children}</div>
+        </footer>
+    );
+}
+
+function SocialsRow({ entries, color, size = 36 }: { entries: [string, string][]; color: string; size?: number }) {
+    if (entries.length === 0) return null;
+    return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {entries.map(([platform, url]) => (
+                <a
+                    key={platform}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={platform}
+                    style={{
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        width: size, height: size, borderRadius: 8,
+                        border: '1px solid rgba(255,255,255,0.10)',
+                        color,
+                        transition: 'color .12s ease, border-color .12s ease, background .12s ease',
+                    }}
+                >
+                    <SocialIcon platform={platform} />
+                </a>
+            ))}
+        </div>
+    );
+}
+
+// ── Dispatcher ──────────────────────────────────────────────────────────────
+
+export default function DynamicFooter({ settings }: { settings: FooterSettings }) {
+    switch (settings.variant) {
+        case 'minimal':  return <Minimal  settings={settings} />;
+        case 'centered': return <Centered settings={settings} />;
+        case 'columns':
+        default:         return <Columns  settings={settings} />;
+    }
+}
+
+// ── Variant: columns (existing rich multi-column) ──────────────────────────
+
+function Columns({ settings }: { settings: FooterSettings }) {
+    const r = useResolved(settings);
+
     const showAddress = settings.showAddress !== false;
     const showPages   = settings.showPages   !== false;
     const showSitemap = settings.showSitemap !== false;
-
-    const socials       = (site?.socials ?? {}) as Socials;
-    const socialEntries = Object.entries(socials).filter(([, url]) => !!url) as [string, string][];
-
-    const addressLines = buildAddressLines(company);
-    const tplVars = {
-        company: company.name ?? '',
-        year:    String(new Date().getFullYear()),
-    };
-    const tagline = interpolate(settings.tagline, tplVars);
-    // Bottom-bar small print is fixed site-wide — not user-editable.
-    const small   = 'bizo.technology';
-    const hasAddress   = !!(company.name || addressLines.length || company.email || company.phone);
-    const hasPages     = footer_pages.length > 0;
-    const hasSitemap   = footer_categories.length > 0;
-
+    const addressLines = buildAddressLines(r.company);
+    const hasAddress   = !!(r.company.name || addressLines.length || r.company.email || r.company.phone);
+    const hasPages     = r.pages.length > 0;
+    const hasSitemap   = r.categories.length > 0;
     const renderAddress = showAddress && hasAddress;
     const renderPages   = showPages   && hasPages;
     const renderSitemap = showSitemap && hasSitemap;
-
     const gridCols = 1 + (renderAddress ? 1 : 0) + (renderPages ? 1 : 0) + (renderSitemap ? 1 : 0);
 
-    const fg        = settings.fg ?? '#e2e8f0';
-    const mutedFg   = settings.mutedFg ?? '#94a3b8';
-    const headingFg = settings.headingFg ?? '#ffffff';
-
-    const linkStyle: React.CSSProperties = {
-        color: fg,
-        textDecoration: 'none',
-        transition: 'opacity .12s ease',
-    };
-    const mutedLinkStyle: React.CSSProperties = {
-        color: mutedFg,
-        textDecoration: 'none',
-        transition: 'opacity .12s ease',
-    };
+    const linkStyle: React.CSSProperties = { color: r.fg, textDecoration: 'none', transition: 'opacity .12s ease' };
+    const mutedLinkStyle: React.CSSProperties = { color: r.mutedFg, textDecoration: 'none', transition: 'opacity .12s ease' };
 
     return (
-        <footer
-            style={{
-                background: settings.bg ?? '#111111',
-                color: fg,
-                padding: 'clamp(40px, 6vw, 64px) clamp(16px, 4vw, 32px) clamp(24px, 4vw, 32px)',
-                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-                fontSize: '0.9375rem',
-                lineHeight: 1.55,
-            }}
-        >
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                <div
-                    className="tb-footer-grid"
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
-                        gap: 'clamp(24px, 3vw, 40px)',
-                    }}
-                >
-                    {/* Brand + tagline + socials */}
+        <FooterShell settings={settings}>
+            <div className="tb-footer-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
+                gap: 'clamp(24px, 3vw, 40px)',
+            }}>
+                <div>
+                    {r.company.name && (
+                        <div style={{ color: r.headingFg, fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em', marginBottom: 8 }}>
+                            {r.company.name}
+                        </div>
+                    )}
+                    {r.tagline && (
+                        <p style={{ margin: 0, color: r.mutedFg, lineHeight: 1.6, maxWidth: '36ch' }}>{r.tagline}</p>
+                    )}
+                    {r.showSocials && (
+                        <div style={{ marginTop: 16 }}>
+                            <SocialsRow entries={r.socials} color={r.mutedFg} />
+                        </div>
+                    )}
+                </div>
+
+                {renderAddress && (
                     <div>
-                        {company.name && (
-                            <div style={{ color: headingFg, fontWeight: 700, fontSize: '1.125rem', letterSpacing: '-0.01em', marginBottom: 8 }}>
-                                {company.name}
-                            </div>
-                        )}
-                        {tagline && (
-                            <p style={{ margin: 0, color: mutedFg, lineHeight: 1.6, maxWidth: '36ch' }}>
-                                {tagline}
-                            </p>
-                        )}
-                        {showSocials && socialEntries.length > 0 && (
-                            <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                {socialEntries.map(([platform, url]) => (
-                                    <a
-                                        key={platform}
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={platform}
-                                        style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: 36,
-                                            height: 36,
-                                            borderRadius: 8,
-                                            border: '1px solid rgba(255,255,255,0.10)',
-                                            color: mutedFg,
-                                            transition: 'color .12s ease, border-color .12s ease, background .12s ease',
-                                        }}
-                                    >
-                                        <SocialIcon platform={platform} />
-                                    </a>
-                                ))}
-                            </div>
-                        )}
+                        <h3 style={columnHeadingStyle(r.headingFg)}>Contact</h3>
+                        <address style={{ fontStyle: 'normal', color: r.mutedFg, lineHeight: 1.7 }}>
+                            {addressLines.map((line, i) => <div key={i}>{line}</div>)}
+                            {(r.company.email || r.company.phone) && <div style={{ height: 8 }} />}
+                            {r.company.email && (
+                                <div><a href={`mailto:${r.company.email}`} style={mutedLinkStyle}>{r.company.email}</a></div>
+                            )}
+                            {r.company.phone && (
+                                <div><a href={`tel:${r.company.phone.replace(/\s+/g, '')}`} style={mutedLinkStyle}>{r.company.phone}</a></div>
+                            )}
+                        </address>
                     </div>
+                )}
 
-                    {/* Address */}
-                    {renderAddress && (
-                        <div>
-                            <h3 style={{ color: headingFg, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 14px' }}>
-                                Contact
-                            </h3>
-                            <address style={{ fontStyle: 'normal', color: mutedFg, lineHeight: 1.7 }}>
-                                {addressLines.map((line, i) => (
-                                    <div key={i}>{line}</div>
-                                ))}
-                                {(company.email || company.phone) && <div style={{ height: 8 }} />}
-                                {company.email && (
-                                    <div>
-                                        <a href={`mailto:${company.email}`} style={mutedLinkStyle}>{company.email}</a>
-                                    </div>
-                                )}
-                                {company.phone && (
-                                    <div>
-                                        <a href={`tel:${company.phone.replace(/\s+/g, '')}`} style={mutedLinkStyle}>{company.phone}</a>
-                                    </div>
-                                )}
-                            </address>
+                {renderPages && (
+                    <div>
+                        <h3 style={columnHeadingStyle(r.headingFg)}>Pages</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {r.pages.map((p) => <li key={p.href}><a href={p.href} style={mutedLinkStyle}>{p.title}</a></li>)}
+                        </ul>
+                    </div>
+                )}
+
+                {renderSitemap && (
+                    <div>
+                        <h3 style={columnHeadingStyle(r.headingFg)}>Blog</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                            {r.categories.map((cat) => (
+                                <div key={cat.slug}>
+                                    <a href={`/blog/category/${cat.slug}`} style={{ ...linkStyle, fontWeight: 600, fontSize: '0.875rem', display: 'block', marginBottom: 6 }}>{cat.name}</a>
+                                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                        {cat.posts.map((post) => (
+                                            <li key={post.href} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                                                <span style={{ width: 4, height: 4, borderRadius: 9999, background: r.mutedFg, marginTop: 9, flexShrink: 0, opacity: 0.6 }} />
+                                                <a href={post.href} style={{ ...mutedLinkStyle, fontSize: '0.8125rem', lineHeight: 1.5 }}>{post.title}</a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
                         </div>
-                    )}
-
-                    {/* Site pages */}
-                    {renderPages && (
-                        <div>
-                            <h3 style={{ color: headingFg, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 14px' }}>
-                                Pages
-                            </h3>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                {footer_pages.map((p) => (
-                                    <li key={p.href}>
-                                        <a href={p.href} style={mutedLinkStyle}>{p.title}</a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {/* Blog sitemap (categories + posts) */}
-                    {renderSitemap && (
-                        <div>
-                            <h3 style={{ color: headingFg, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 14px' }}>
-                                Blog
-                            </h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                {footer_categories.map((cat) => (
-                                    <div key={cat.slug}>
-                                        <a href={`/blog/category/${cat.slug}`} style={{ ...linkStyle, fontWeight: 600, fontSize: '0.875rem', display: 'block', marginBottom: 6 }}>
-                                            {cat.name}
-                                        </a>
-                                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                            {cat.posts.map((post) => (
-                                                <li key={post.href} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                                                    <span style={{ width: 4, height: 4, borderRadius: '9999px', background: mutedFg, marginTop: 9, flexShrink: 0, opacity: 0.6 }} />
-                                                    <a href={post.href} style={{ ...mutedLinkStyle, fontSize: '0.8125rem', lineHeight: 1.5 }}>{post.title}</a>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Bottom bar */}
-                <div
-                    style={{
-                        marginTop: 'clamp(28px, 4vw, 48px)',
-                        paddingTop: 'clamp(20px, 2.5vw, 28px)',
-                        borderTop: '1px solid rgba(255,255,255,0.08)',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 12,
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        color: mutedFg,
-                        fontSize: '0.8125rem',
-                    }}
-                >
-                    <p style={{ margin: 0 }}>{tagline || `© ${new Date().getFullYear()}`}</p>
-                    {small && <p style={{ margin: 0, opacity: 0.8 }}>{small}</p>}
-                </div>
+                    </div>
+                )}
             </div>
 
+            <BottomBar tagline={r.tagline} small={r.small} mutedFg={r.mutedFg} />
+
             <style>{`
-                @media (max-width: 900px) {
-                    .tb-footer-grid {
-                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                    }
-                }
-                @media (max-width: 560px) {
-                    .tb-footer-grid {
-                        grid-template-columns: 1fr !important;
-                    }
-                }
+                @media (max-width: 900px) { .tb-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+                @media (max-width: 560px) { .tb-footer-grid { grid-template-columns: 1fr !important; } }
             `}</style>
-        </footer>
+        </FooterShell>
+    );
+}
+
+// ── Variant: minimal (single thin row) ─────────────────────────────────────
+
+function Minimal({ settings }: { settings: FooterSettings }) {
+    const r = useResolved(settings);
+
+    return (
+        <FooterShell settings={settings} paddingY="clamp(28px, 3.5vw, 44px)">
+            <div className="tb-footer-min" style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+            }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {r.company.name && (
+                        <div style={{ color: r.headingFg, fontWeight: 700, fontSize: '1.0625rem', letterSpacing: '-0.005em' }}>
+                            {r.company.name}
+                        </div>
+                    )}
+                    {r.tagline && (
+                        <p style={{ margin: 0, color: r.mutedFg, fontSize: '0.875rem', lineHeight: 1.5, maxWidth: '60ch' }}>{r.tagline}</p>
+                    )}
+                </div>
+                {r.showSocials && <SocialsRow entries={r.socials} color={r.mutedFg} />}
+            </div>
+            <BottomBar tagline={r.tagline} small={r.small} mutedFg={r.mutedFg} marginTop="clamp(20px, 2.5vw, 28px)" />
+        </FooterShell>
+    );
+}
+
+// ── Variant: centered (everything stacked centered) ────────────────────────
+
+function Centered({ settings }: { settings: FooterSettings }) {
+    const r = useResolved(settings);
+    const showPages = settings.showPages !== false && r.pages.length > 0;
+
+    return (
+        <FooterShell settings={settings}>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 16,
+                textAlign: 'center',
+            }}>
+                {r.company.name && (
+                    <div style={{ color: r.headingFg, fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.01em' }}>
+                        {r.company.name}
+                    </div>
+                )}
+                {r.tagline && (
+                    <p style={{ margin: 0, color: r.mutedFg, lineHeight: 1.6, maxWidth: '52ch' }}>{r.tagline}</p>
+                )}
+                {showPages && (
+                    <nav style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(12px, 2vw, 24px)', marginTop: 4 }}>
+                        {r.pages.map((p) => (
+                            <a key={p.href} href={p.href} style={{
+                                color: r.mutedFg,
+                                textDecoration: 'none',
+                                fontSize: '0.9375rem',
+                                fontWeight: 500,
+                                transition: 'color .12s ease',
+                            }}>
+                                {p.title}
+                            </a>
+                        ))}
+                    </nav>
+                )}
+                {r.showSocials && <div style={{ marginTop: 4 }}><SocialsRow entries={r.socials} color={r.mutedFg} /></div>}
+            </div>
+            <BottomBar tagline={r.tagline} small={r.small} mutedFg={r.mutedFg} centered />
+        </FooterShell>
+    );
+}
+
+// ── Shared bits ────────────────────────────────────────────────────────────
+
+const columnHeadingStyle = (color: string): React.CSSProperties => ({
+    color,
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.12em',
+    margin: '0 0 14px',
+});
+
+function BottomBar({ tagline, small, mutedFg, centered = false, marginTop = 'clamp(28px, 4vw, 48px)' }: {
+    tagline: string;
+    small: string;
+    mutedFg: string;
+    centered?: boolean;
+    marginTop?: string;
+}) {
+    return (
+        <div style={{
+            marginTop,
+            paddingTop: 'clamp(20px, 2.5vw, 28px)',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 12,
+            justifyContent: centered ? 'center' : 'space-between',
+            alignItems: 'center',
+            color: mutedFg,
+            fontSize: '0.8125rem',
+            textAlign: centered ? 'center' : 'start',
+        }}>
+            <p style={{ margin: 0 }}>{tagline || `© ${new Date().getFullYear()}`}</p>
+            {small && <p style={{ margin: 0, opacity: 0.8 }}>{small}</p>}
+        </div>
     );
 }

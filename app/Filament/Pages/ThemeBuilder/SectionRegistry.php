@@ -200,6 +200,11 @@ class SectionRegistry
                 ['key' => 'featured', 'label' => 'Featured', 'description' => 'The first post is a big spotlight; the rest sit in a smaller grid.'],
                 ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Text-only archive list with date and category — no images.'],
             ],
+            'footer' => [
+                ['key' => 'columns',  'label' => 'Columns',  'description' => 'Rich multi-column footer with brand, address, pages and blog sitemap.'],
+                ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Single thin row — brand on the left, socials on the right, copyright bar below.'],
+                ['key' => 'centered', 'label' => 'Centered', 'description' => 'Everything stacked centered — name, tagline, socials, then page links.'],
+            ],
             default => [],
         };
     }
@@ -491,6 +496,7 @@ class SectionRegistry
                 'mutedFg'    => '#64748b',
             ],
             'footer' => [
+                'variant'      => 'columns',
                 'tagline'      => '© {{year}} {{company}}. All rights reserved.',
                 'small'        => 'Built with care.',
                 'showAddress'  => true,
@@ -1606,6 +1612,20 @@ class SectionRegistry
             ],
 
             'footer' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'columns'  => 'Columns — full multi-column footer',
+                                'minimal'  => 'Minimal — single thin row',
+                                'centered' => 'Centered — stacked, centered content',
+                            ])
+                            ->default('columns')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Content')
                     ->schema([
                         Textarea::make('settings.tagline')
