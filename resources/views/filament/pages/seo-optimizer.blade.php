@@ -436,15 +436,15 @@
                         <pre style="margin:8px 0 0; padding:10px 12px; border-radius:6px;
                                     background:rgba(15,23,42,.05); color:var(--tb-fg);
                                     font-size:11px; font-family:ui-monospace, Menlo, monospace;
-                                    overflow-x:auto; line-height:1.55;">&lt;script type="application/ld+json"&gt;
+                                    overflow-x:auto; line-height:1.55;">@verbatim&lt;script type="application/ld+json"&gt;
 {
   "@context": "https://schema.org",
   "@type":    "Organization",
-  "name":     "{{ $snippet['orgName'] ?: 'Your name' }}",
-  "url":      "{{ $snippet['orgUrl'] ?: 'https://example.com' }}",
-  "logo":     "{{ $snippet['orgLogo'] ? '...' : '(no logo)' }}"
+  "name":     "@endverbatim{{ $snippet['orgName'] ?: 'Your name' }}@verbatim",
+  "url":      "@endverbatim{{ $snippet['orgUrl'] ?: 'https://example.com' }}@verbatim",
+  "logo":     "@endverbatim{{ $snippet['orgLogo'] ? '...' : '(no logo)' }}@verbatim"
 }
-&lt;/script&gt;</pre>
+&lt;/script&gt;@endverbatim</pre>
                     </div>
                     <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px;">
                         <li style="display:flex; gap:8px;"><span>✅</span><span>Helps Google show your brand correctly when people search you by name.</span></li>
