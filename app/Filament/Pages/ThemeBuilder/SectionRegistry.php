@@ -131,6 +131,12 @@ class SectionRegistry
                 ['key' => 'bubbles',        'label' => 'Bubbles',         'description' => 'Chat-bubble style cards with a small tail under each one.'],
                 ['key' => 'list',           'label' => 'List',            'description' => 'Vertical list, hairline dividers, no card backgrounds.'],
             ],
+            'pricing' => [
+                ['key' => 'cards',   'label' => 'Cards',          'description' => 'Side-by-side plan cards with feature lists.'],
+                ['key' => 'table',   'label' => 'Comparison table','description' => 'Plans as columns of a table with name, price, features and CTA rows.'],
+                ['key' => 'tabs',    'label' => 'Tabs',           'description' => 'One plan at a time, switch with tabs at the top.'],
+                ['key' => 'minimal', 'label' => 'Minimal list',   'description' => 'Compact rows: name + price + button, no feature lists.'],
+            ],
             default => [],
         };
     }
@@ -272,6 +278,7 @@ class SectionRegistry
                 'borderColor'  => '#e5e7eb',
             ],
             'pricing' => [
+                'variant'         => 'cards',
                 'heading'         => 'Simple, transparent pricing',
                 'subtitle'        => 'Pick a plan that fits where you are today. Upgrade any time.',
                 'columns'         => 3,
@@ -931,6 +938,22 @@ class SectionRegistry
             ],
 
             'pricing' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'cards'   => 'Cards',
+                                'table'   => 'Comparison table',
+                                'tabs'    => 'Tabs',
+                                'minimal' => 'Minimal list',
+                            ])
+                            ->default('cards')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
+
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
