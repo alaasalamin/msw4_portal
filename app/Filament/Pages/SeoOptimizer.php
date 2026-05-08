@@ -53,6 +53,11 @@ class SeoOptimizer extends Page
         $companyName = Setting::get('company_name') ?: Setting::get('site_name', config('app.name', 'MSW4'));
         $faviconPath = Setting::get('favicon');
         $ogPath      = Setting::get('og_image');
+        $orgLogoRaw  = Setting::get('seo_org_logo', Setting::get('logo'));
+        $orgLogoUrl  = null;
+        if ($orgLogoRaw) {
+            $orgLogoUrl = str_starts_with($orgLogoRaw, 'http') ? $orgLogoRaw : asset('storage/' . $orgLogoRaw);
+        }
         return [
             'title'       => Setting::get('seo_title') ?: ($companyName . ' — Home'),
             'description' => Setting::get('seo_description', Setting::get('site_description', '')),
@@ -60,6 +65,9 @@ class SeoOptimizer extends Page
             'siteName'    => $companyName,
             'favicon'     => $faviconPath ? asset('storage/' . $faviconPath) : null,
             'ogImage'     => $ogPath ? asset('storage/' . $ogPath) : null,
+            'orgName'     => Setting::get('seo_org_name', $companyName),
+            'orgUrl'      => Setting::get('seo_org_url', rtrim(config('app.url') ?: url('/'), '/')),
+            'orgLogo'     => $orgLogoUrl,
         ];
     }
 
