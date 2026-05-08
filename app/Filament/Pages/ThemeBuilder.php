@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\View as SchemaView;
 use Illuminate\Support\Str;
 
 class ThemeBuilder extends Page
@@ -296,50 +297,44 @@ class ThemeBuilder extends Page
             ->modalDescription(fn () => $this->currentPageId === null
                 ? 'Pick a block to drop on the homepage. Header and Footer set the site-wide chrome — every other page inherits them.'
                 : 'Pick a content block to drop on this page. The header and footer are inherited from the homepage and edited there.')
-            ->modalSubmitActionLabel('Add')
-            ->modalWidth('lg')
+            // No submit/cancel — clicking a card directly creates the
+            // section and closes the modal via addSectionOfType().
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Close')
+            ->modalWidth('3xl')
             ->schema([
-                Select::make('type')
-                    ->label('Section type')
-                    ->options(fn () => $this->addableTypeOptions())
-                    ->required()
-                    ->native(false)
-                    ->searchable(),
-            ])
-            ->action(function (array $data) {
-                $type = $data['type'] ?? null;
-                if (! SectionRegistry::exists($type)) return;
-                // Defensive: never let header/footer land on a non-homepage page.
-                if ($this->currentPageId !== null && in_array($type, ['header', 'footer'], true)) return;
-
-                $sections = $this->getPlacedSections();
-                $sections[] = [
-                    'id'       => (string) Str::uuid(),
-                    'type'     => $type,
-                    'settings' => SectionRegistry::defaultSettings($type),
-                ];
-                $this->persistSections($sections);
-
-                Notification::make()
-                    ->title(SectionRegistry::types()[$type]['label'] . ' section added')
-                    ->success()
-                    ->send();
-
-                $this->dispatch('theme-builder:section-saved');
-            });
+                SchemaView::make('filament.pages.theme-builder.section-type-picker'),
+            ]);
     }
 
-    /** Section types the user can add to the currently-active page. */
-    protected function addableTypeOptions(): array
+    /**
+     * Direct add — invoked by the icon-grid cards in the picker modal.
+     * Creates the section and unmounts the open action so the modal closes
+     * without requiring a separate "Add" submit click.
+     */
+    public function addSectionOfType(string $type): void
     {
-        $options = [];
-        foreach (SectionRegistry::types() as $key => $meta) {
-            // Header and Footer are homepage-only — they wrap every other page
-            // automatically and shouldn't be added per-page.
-            if ($this->currentPageId !== null && in_array($key, ['header', 'footer'], true)) continue;
-            $options[$key] = $meta['label'] . ' — ' . $meta['desc'];
-        }
-        return $options;
+        if (! SectionRegistry::exists($type)) return;
+        // Defensive: never let header/footer land on a non-homepage page.
+        if ($this->currentPageId !== null && in_array($type, ['header', 'footer'], true)) return;
+
+        $sections = $this->getPlacedSections();
+        $sections[] = [
+            'id'       => (string) Str::uuid(),
+            'type'     => $type,
+            'settings' => SectionRegistry::defaultSettings($type),
+        ];
+        $this->persistSections($sections);
+
+        Notification::make()
+            ->title(SectionRegistry::types()[$type]['label'] . ' section added')
+            ->success()
+            ->send();
+
+        $this->dispatch('theme-builder:section-saved');
+
+        // Close the picker modal that the click came from.
+        $this->unmountAction();
     }
 
     // ─────────────────────────────────────────────────────────────────
