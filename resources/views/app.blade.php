@@ -6,8 +6,8 @@
 
         @php
             use App\Models\Setting;
-            $siteName    = Setting::get('company_name')
-                            ?: Setting::get('site_name', config('app.name', 'MSW4'));
+            $siteName    = Setting::get('site_name')
+                            ?: Setting::get('company_name', config('app.name', 'MSW4'));
             $seoTitle    = Setting::get('seo_title', $siteName);
             $seoDesc     = Setting::get('seo_description', Setting::get('site_description'));
             $seoKeywords = Setting::get('seo_keywords');
@@ -32,7 +32,7 @@
                               ?? '#0f172a';
         @endphp
 
-        <title inertia>%s - {{ $siteName }}</title>
+        <title inertia>{{ $siteName }} - %s</title>
 
         {{-- Core SEO --}}
         @if($seoDesc)
