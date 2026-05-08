@@ -55,16 +55,35 @@ export default function Welcome({ homepage }: WelcomeProps) {
                     style={{
                         minHeight: '100vh',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        gap: 8,
+                        padding: '0 16px',
                         background: '#ffffff',
                         color: '#000000',
                         fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                        textAlign: 'center',
                     }}
                 >
-                    <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 5rem)', fontWeight: 600, letterSpacing: '-0.03em', margin: 0 }}>
+                    <h1 style={{
+                        fontSize: 'clamp(2.5rem, 8vw, 5rem)',
+                        fontWeight: 600,
+                        letterSpacing: '-0.03em',
+                        margin: 0,
+                        lineHeight: 1.1,
+                    }}>
                         Hello World!
                     </h1>
+                    <p style={{
+                        margin: 0,
+                        fontSize: 'clamp(0.9375rem, 1.4vw, 1.0625rem)',
+                        color: '#71717a',
+                        fontWeight: 500,
+                        letterSpacing: '0.01em',
+                    }}>
+                        bizo
+                    </p>
                 </main>
             </>
         );

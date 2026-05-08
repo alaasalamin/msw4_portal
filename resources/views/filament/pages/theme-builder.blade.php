@@ -1,8 +1,11 @@
 <x-filament-panels::page>
     @php
-        $sections = $this->getPlacedSections();
-        $types    = $this->getSectionTypes();
-        $count    = count($sections);
+        $sections    = $this->getPlacedSections();
+        $types       = $this->getSectionTypes();
+        $count       = count($sections);
+        $pages       = $this->getPages();
+        $currentPage = $this->getCurrentPage();
+        $previewUrl  = $this->getPreviewUrl();
     @endphp
 
     {{--
@@ -73,6 +76,32 @@
         {{-- ── Section list (left) ─────────────────────────────────── --}}
         <aside style="background:var(--tb-bg); border:1px solid var(--tb-border); border-radius:12px; padding:16px;
                       box-shadow:var(--tb-shadow); position:sticky; top:16px;">
+
+            {{-- Page picker + New page --}}
+            <div style="display:flex; gap:8px; margin-bottom:12px; align-items:center;">
+                <select
+                    wire:change="selectPage($event.target.value)"
+                    style="flex:1; height:36px; padding:0 10px; border-radius:8px;
+                           border:1px solid var(--tb-border); background:var(--tb-btn-bg);
+                           color:var(--tb-fg); font-size:13px; font-weight:500; cursor:pointer;"
+                >
+                    @foreach ($pages as $p)
+                        <option
+                            value="{{ $p['id'] ?? 'home' }}"
+                            @selected((string) ($p['id'] ?? '') === (string) ($currentPage['id'] ?? ''))
+                        >{{ $p['title'] }}</option>
+                    @endforeach
+                </select>
+                <div>{{ $this->createPageAction }}</div>
+            </div>
+            <div style="font-size:11px; color:var(--tb-muted); margin-bottom:14px; padding-bottom:14px;
+                        border-bottom:1px solid var(--tb-border-soft);">
+                Editing
+                <strong style="color:var(--tb-fg);">{{ $currentPage['title'] }}</strong>
+                @if (! empty($currentPage['slug']))
+                    <span style="color:var(--tb-very-muted);">· /{{ $currentPage['slug'] }}</span>
+                @endif
+            </div>
 
             {{-- Add Section CTA --}}
             <div style="margin-bottom:14px;">
@@ -226,10 +255,10 @@
             <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px 8px;">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="display:inline-block; width:8px; height:8px; border-radius:9999px; background:var(--tb-status-ok);"></span>
-                    <span style="font-size:11px; font-weight:500; color:var(--tb-fg-soft);">Live preview · /</span>
+                    <span style="font-size:11px; font-weight:500; color:var(--tb-fg-soft);">Live preview · {{ $previewUrl }}</span>
                 </div>
                 <a
-                    href="/"
+                    href="{{ $previewUrl }}"
                     target="_blank"
                     rel="noopener"
                     style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:500;
@@ -245,9 +274,9 @@
                         border:1px solid var(--tb-border); border-radius:8px; background:#ffffff;">
                 <iframe
                     x-ref="preview"
-                    src="/"
+                    src="{{ $previewUrl }}"
                     style="width:100%; height:100%; border:0; display:block; background:#ffffff;"
-                    title="Homepage preview"
+                    title="Page preview"
                 ></iframe>
             </div>
         </section>
@@ -261,7 +290,12 @@
                 reloadPreview() {
                     const iframe = this.$refs.preview;
                     if (!iframe) return;
-                    iframe.src = '/?t=' + Date.now();
+                    // Use the server-rendered preview URL (this attribute reflects
+                    // the currently-selected page) and add a cache-buster.
+                    const base = iframe.getAttribute('src') || '/';
+                    const url  = new URL(base, window.location.origin);
+                    url.searchParams.set('t', Date.now());
+                    iframe.src = url.pathname + url.search;
                 },
             };
         }

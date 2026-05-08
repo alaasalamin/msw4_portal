@@ -9,10 +9,11 @@ class SitePage extends Model
 {
     protected $table = 'site_pages';
 
-    protected $fillable = ['title', 'slug', 'meta_title', 'meta_description', 'status', 'sections'];
+    protected $fillable = ['title', 'slug', 'meta_title', 'meta_description', 'status', 'sections', 'theme_sections'];
 
     protected $casts = [
-        'sections' => 'array',
+        'sections'       => 'array',
+        'theme_sections' => 'array',
     ];
 
     public static function uniqueSlug(string $title): string

@@ -4,8 +4,10 @@ namespace App\Filament\Pages;
 
 use App\Filament\Pages\ThemeBuilder\SectionRegistry;
 use App\Models\Setting;
+use App\Models\SitePage;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Str;
@@ -20,20 +22,97 @@ class ThemeBuilder extends Page
     public static function getNavigationLabel(): string                 { return 'Theme Builder'; }
     public function getTitle(): string                                  { return 'Theme Builder'; }
 
+    /**
+     * Currently-edited page. null = the homepage (stored in `home_sections`
+     * Setting). A numeric value = SitePage id (stored in
+     * `site_pages.theme_sections`).
+     */
+    public ?string $currentPageId = null;
+
+    public function mount(): void
+    {
+        // Allow ?page=xxx to deep-link a specific page.
+        $requested = request()->query('page');
+        if ($requested === 'home' || $requested === null) {
+            $this->currentPageId = null;
+        } else {
+            // Validate the page exists.
+            if (SitePage::whereKey($requested)->exists()) {
+                $this->currentPageId = (string) $requested;
+            }
+        }
+    }
+
+    public function selectPage(?string $id): void
+    {
+        $this->currentPageId = ($id === null || $id === '' || $id === 'home') ? null : $id;
+        $this->dispatch('theme-builder:section-saved');
+    }
+
     // ─────────────────────────────────────────────────────────────────
-    // Storage helpers
+    // Page list / lookup
     // ─────────────────────────────────────────────────────────────────
 
-    /** Returns the current ordered list of placed sections. */
+    /** Pages available for editing in the picker (Homepage + every SitePage). */
+    public function getPages(): array
+    {
+        $rows = [
+            ['id' => null, 'title' => 'Homepage', 'slug' => '', 'previewUrl' => '/'],
+        ];
+        foreach (SitePage::orderBy('title')->get(['id', 'title', 'slug', 'status']) as $p) {
+            $rows[] = [
+                'id'         => (string) $p->id,
+                'title'      => $p->title . ($p->status === 'published' ? '' : ' (draft)'),
+                'slug'       => $p->slug,
+                'previewUrl' => '/' . $p->slug,
+            ];
+        }
+        return $rows;
+    }
+
+    public function getCurrentPage(): array
+    {
+        foreach ($this->getPages() as $p) {
+            if ((string) ($p['id'] ?? '') === (string) ($this->currentPageId ?? '')) {
+                return $p;
+            }
+        }
+        return $this->getPages()[0];
+    }
+
+    public function getPreviewUrl(): string
+    {
+        return $this->getCurrentPage()['previewUrl'] ?? '/';
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Active section storage (homepage Setting OR SitePage column)
+    // ─────────────────────────────────────────────────────────────────
+
+    /** Returns the current page's ordered list of placed sections. */
     public function getPlacedSections(): array
     {
-        $rows = json_decode(Setting::get('home_sections') ?? '', true);
+        if ($this->currentPageId === null) {
+            $rows = json_decode(Setting::get('home_sections') ?? '', true);
+            return is_array($rows) ? array_values($rows) : [];
+        }
+        $page = SitePage::find($this->currentPageId);
+        $rows = $page?->theme_sections;
         return is_array($rows) ? array_values($rows) : [];
     }
 
     protected function persistSections(array $sections): void
     {
-        Setting::set('home_sections', json_encode(array_values($sections)));
+        $sections = array_values($sections);
+        if ($this->currentPageId === null) {
+            Setting::set('home_sections', json_encode($sections));
+            return;
+        }
+        $page = SitePage::find($this->currentPageId);
+        if ($page) {
+            $page->theme_sections = $sections;
+            $page->save();
+        }
     }
 
     protected function findSectionIndex(array $sections, ?string $id): ?int
@@ -52,7 +131,70 @@ class ThemeBuilder extends Page
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // Add Section (modal with type picker)
+    // Create new page
+    // ─────────────────────────────────────────────────────────────────
+
+    public function createPageAction(): Action
+    {
+        return Action::make('createPage')
+            ->label('New page')
+            ->icon('heroicon-m-plus')
+            ->color('gray')
+            ->modalHeading('New page')
+            ->modalDescription('Create a new public page. You can drop sections on it as soon as it exists.')
+            ->modalSubmitActionLabel('Create')
+            ->modalWidth('md')
+            ->schema([
+                TextInput::make('title')
+                    ->label('Page title')
+                    ->required()
+                    ->maxLength(120)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        if (empty($get('slug'))) {
+                            $set('slug', Str::slug((string) $state));
+                        }
+                    }),
+                TextInput::make('slug')
+                    ->label('URL slug')
+                    ->required()
+                    ->maxLength(120)
+                    ->helperText('Will be reachable at /{slug}.')
+                    ->rule('alpha_dash'),
+                Select::make('status')
+                    ->label('Status')
+                    ->options(['draft' => 'Draft', 'published' => 'Published'])
+                    ->default('published')
+                    ->required(),
+            ])
+            ->action(function (array $data) {
+                // Avoid slug collisions.
+                $slug = SitePage::where('slug', $data['slug'])->exists()
+                    ? SitePage::uniqueSlug($data['title'])
+                    : $data['slug'];
+
+                $page = SitePage::create([
+                    'title'          => $data['title'],
+                    'slug'           => $slug,
+                    'status'         => $data['status'],
+                    'sections'       => [],
+                    'theme_sections' => [],
+                ]);
+
+                $this->currentPageId = (string) $page->id;
+
+                Notification::make()
+                    ->title('Page created')
+                    ->body('Now editing: ' . $page->title)
+                    ->success()
+                    ->send();
+
+                $this->dispatch('theme-builder:section-saved');
+            });
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Add section (modal with type picker)
     // ─────────────────────────────────────────────────────────────────
 
     public function addSectionAction(): Action
@@ -67,7 +209,7 @@ class ThemeBuilder extends Page
             ->icon('heroicon-m-plus')
             ->color('primary')
             ->modalHeading('Add a section')
-            ->modalDescription('Pick a block to drop on your homepage. You can edit its content and colors right after.')
+            ->modalDescription('Pick a block to drop on the current page. You can edit its content and colors right after.')
             ->modalSubmitActionLabel('Add')
             ->modalWidth('lg')
             ->schema([
@@ -193,7 +335,7 @@ class ThemeBuilder extends Page
             Action::make('preview')
                 ->label('Open in new tab')
                 ->icon('heroicon-o-arrow-top-right-on-square')
-                ->url('/')
+                ->url(fn () => $this->getPreviewUrl())
                 ->openUrlInNewTab()
                 ->color('gray'),
         ];
