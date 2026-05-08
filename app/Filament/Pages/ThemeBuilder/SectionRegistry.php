@@ -182,6 +182,12 @@ class SectionRegistry
                 ['key' => 'cards',    'label' => 'Cards',      'description' => 'Each Q&A in its own elevated card, always open.'],
                 ['key' => 'bordered', 'label' => 'Bordered',   'description' => 'Boxed accordion items with a colored left accent bar.'],
             ],
+            'stats' => [
+                ['key' => 'row',      'label' => 'Row',       'description' => 'Big numbers in a clean grid — the default look.'],
+                ['key' => 'cards',    'label' => 'Cards',     'description' => 'Each stat in its own elevated rounded card.'],
+                ['key' => 'dividers', 'label' => 'Dividers',  'description' => 'Stats in a row separated by vertical hairlines — editorial.'],
+                ['key' => 'gradient', 'label' => 'Gradient',  'description' => 'Vivid gradient background using your primary color.'],
+            ],
             default => [],
         };
     }
@@ -278,6 +284,7 @@ class SectionRegistry
                 'connectorColor' => '#cbd5e1',
             ],
             'stats' => [
+                'variant'    => 'row',
                 'heading'    => 'Numbers worth bragging about',
                 'subtitle'   => '',
                 'columns'    => 4,
@@ -872,6 +879,21 @@ class SectionRegistry
             ],
 
             'stats' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'row'      => 'Row — clean grid',
+                                'cards'    => 'Cards — each stat in an elevated card',
+                                'dividers' => 'Dividers — vertical hairlines between stats',
+                                'gradient' => 'Gradient — vivid bg using primary color',
+                            ])
+                            ->default('row')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
