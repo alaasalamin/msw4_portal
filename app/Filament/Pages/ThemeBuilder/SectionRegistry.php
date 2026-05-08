@@ -247,6 +247,11 @@ class SectionRegistry
                 // Used by the 'split' variant
                 'ctaText'    => '',
                 'ctaHref'    => '#',
+                // Optional second row under the header — lists blog categories,
+                // each one a hover dropdown that reveals its published posts.
+                'showCategoriesBar' => false,
+                'categoriesBarBg'   => '#1f2937', // slightly lighter than default headerBg
+                'categoriesBarFg'   => '#e5e7eb',
             ],
             'hero' => [
                 'variant'    => 'centered',
@@ -644,6 +649,22 @@ class SectionRegistry
                             ->options(['1' => 'Sticky (always visible on scroll)', '0' => 'Static (scrolls away)'])
                             ->default('1')
                             ->dehydrateStateUsing(fn ($state) => (bool) $state),
+                    ])->columns(2),
+                Section::make('Categories Bar')
+                    ->description('Optional second row under the header that lists your blog categories. Hovering a category opens a dropdown with the most recent published posts in it.')
+                    ->schema([
+                        Select::make('settings.showCategoriesBar')
+                            ->label('Show categories bar')
+                            ->options(['1' => 'Yes — show under the header', '0' => 'No'])
+                            ->default('0')
+                            ->dehydrateStateUsing(fn ($state) => (bool) $state)
+                            ->live(),
+                        ColorPicker::make('settings.categoriesBarBg')
+                            ->label('Bar background')
+                            ->visible(fn (Get $get) => (bool) $get('settings.showCategoriesBar')),
+                        ColorPicker::make('settings.categoriesBarFg')
+                            ->label('Bar text color')
+                            ->visible(fn (Get $get) => (bool) $get('settings.showCategoriesBar')),
                     ])->columns(2),
             ],
 

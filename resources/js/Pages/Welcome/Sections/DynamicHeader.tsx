@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { usePage } from '@inertiajs/react';
 
 interface NavLink { label: string; href: string }
 interface Brand   { prefix: string; suffix: string }
+interface NavCategory { name: string; slug: string; posts: { title: string; href: string }[] }
 
 interface HeaderSettings {
     variant?: 'classic' | 'centered' | 'split' | 'minimal';
@@ -17,17 +18,178 @@ interface HeaderSettings {
     sticky?: boolean | string | number;
     ctaText?: string;
     ctaHref?: string;
+    showCategoriesBar?: boolean | string | number;
+    categoriesBarBg?: string;
+    categoriesBarFg?: string;
 }
 
 export default function DynamicHeader({ settings }: { settings: HeaderSettings }) {
     const variant = settings.variant ?? 'classic';
+    const showBar = settings.showCategoriesBar === true || settings.showCategoriesBar === '1' || settings.showCategoriesBar === 1;
+    let inner: ReactElement;
     switch (variant) {
-        case 'centered': return <CenteredHeader settings={settings} />;
-        case 'split':    return <SplitHeader    settings={settings} />;
-        case 'minimal':  return <MinimalHeader  settings={settings} />;
+        case 'centered': inner = <CenteredHeader settings={settings} />; break;
+        case 'split':    inner = <SplitHeader    settings={settings} />; break;
+        case 'minimal':  inner = <MinimalHeader  settings={settings} />; break;
         case 'classic':
-        default:         return <ClassicHeader  settings={settings} />;
+        default:         inner = <ClassicHeader  settings={settings} />;
     }
+    if (!showBar) return inner;
+    return (
+        <>
+            {inner}
+            <CategoriesBar settings={settings} />
+        </>
+    );
+}
+
+// ── Categories bar with per-category hover dropdowns ────────────────────────
+
+function CategoriesBar({ settings }: { settings: HeaderSettings }) {
+    const { nav_categories = [] } = usePage<{ nav_categories: NavCategory[] }>().props;
+    const [openSlug, setOpenSlug] = useState<string | null>(null);
+    if (!nav_categories.length) return null;
+
+    const bg = settings.categoriesBarBg ?? '#1f2937';
+    const fg = settings.categoriesBarFg ?? '#e5e7eb';
+    const sticky = settings.sticky === true || settings.sticky === '1' || settings.sticky === 1;
+
+    return (
+        <div
+            style={{
+                background: bg,
+                color: fg,
+                borderTop: '1px solid rgba(255,255,255,.06)',
+                position: sticky ? 'sticky' : 'static',
+                top: sticky ? 64 : undefined, // sit just below the main header when both are sticky
+                zIndex: 49,
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+            }}
+        >
+            <div
+                className="tb-cat-bar"
+                style={{
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                    padding: '0 clamp(16px, 4vw, 32px)',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'stretch',
+                    gap: 0,
+                }}
+            >
+                {nav_categories.map((cat) => {
+                    const isOpen = openSlug === cat.slug;
+                    return (
+                        <div
+                            key={cat.slug}
+                            onMouseEnter={() => setOpenSlug(cat.slug)}
+                            onMouseLeave={() => setOpenSlug((s) => (s === cat.slug ? null : s))}
+                            style={{ position: 'relative' }}
+                        >
+                            <a
+                                href={`/blog/${cat.slug}`}
+                                onClick={(e) => {
+                                    if (!isOpen && cat.posts.length > 0) {
+                                        e.preventDefault();
+                                        setOpenSlug(cat.slug);
+                                    }
+                                }}
+                                aria-haspopup={cat.posts.length > 0 ? 'menu' : undefined}
+                                aria-expanded={cat.posts.length > 0 ? isOpen : undefined}
+                                style={{
+                                    color: fg,
+                                    textDecoration: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    padding: '12px 16px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 6,
+                                    background: isOpen ? 'rgba(255,255,255,.06)' : 'transparent',
+                                    transition: 'background 120ms ease',
+                                }}
+                            >
+                                {cat.name}
+                                {cat.posts.length > 0 && (
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ opacity: 0.7 }}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+                                    </svg>
+                                )}
+                            </a>
+
+                            {isOpen && cat.posts.length > 0 && (
+                                <div
+                                    role="menu"
+                                    style={{
+                                        position: 'absolute',
+                                        top: '100%',
+                                        left: 0,
+                                        minWidth: 280,
+                                        background: '#ffffff',
+                                        color: '#0f172a',
+                                        boxShadow: '0 10px 32px rgba(0,0,0,.18)',
+                                        borderRadius: 8,
+                                        padding: '8px 0',
+                                        marginTop: 0,
+                                        zIndex: 60,
+                                    }}
+                                >
+                                    {cat.posts.slice(0, 8).map((p, i) => (
+                                        <a
+                                            key={i}
+                                            href={p.href}
+                                            role="menuitem"
+                                            style={{
+                                                display: 'block',
+                                                padding: '8px 16px',
+                                                color: '#0f172a',
+                                                textDecoration: 'none',
+                                                fontSize: '0.875rem',
+                                                lineHeight: 1.4,
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                maxWidth: 360,
+                                            }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.background = '#f1f5f9')}
+                                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                        >
+                                            {p.title}
+                                        </a>
+                                    ))}
+                                    {cat.posts.length > 8 && (
+                                        <a
+                                            href={`/blog/${cat.slug}`}
+                                            role="menuitem"
+                                            style={{
+                                                display: 'block',
+                                                padding: '8px 16px',
+                                                color: 'var(--primary, #0284c7)',
+                                                textDecoration: 'none',
+                                                fontSize: '0.8125rem',
+                                                fontWeight: 600,
+                                                borderTop: '1px solid #e2e8f0',
+                                                marginTop: 4,
+                                            }}
+                                        >
+                                            View all in {cat.name} →
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+            <style>{`
+                @media (max-width: 720px) {
+                    .tb-cat-bar { overflow-x: auto; flex-wrap: nowrap !important; }
+                    .tb-cat-bar > div > a { white-space: nowrap; }
+                }
+            `}</style>
+        </div>
+    );
 }
 
 // ── Shared helpers ──────────────────────────────────────────────────────────

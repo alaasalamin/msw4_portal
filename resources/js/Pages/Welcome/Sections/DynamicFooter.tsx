@@ -38,7 +38,7 @@ interface Company {
 }
 interface SharedProps {
     footer_pages: FooterPage[];
-    footer_categories: FooterCategory[];
+    nav_categories: FooterCategory[];
     site: { socials?: Socials };
     company?: Company;
 }
@@ -96,7 +96,7 @@ interface Resolved {
 }
 
 function useResolved(settings: FooterSettings): Resolved {
-    const { footer_pages = [], footer_categories = [], site, company = {} } = usePage<SharedProps>().props;
+    const { footer_pages = [], nav_categories = [], site, company = {} } = usePage<SharedProps>().props;
     const socials = (site?.socials ?? {}) as Socials;
     const socialEntries = Object.entries(socials).filter(([, url]) => !!url) as [string, string][];
 
@@ -107,7 +107,7 @@ function useResolved(settings: FooterSettings): Resolved {
     return {
         settings,
         pages: footer_pages,
-        categories: footer_categories,
+        categories: nav_categories,
         socials: socialEntries,
         company,
         tagline,

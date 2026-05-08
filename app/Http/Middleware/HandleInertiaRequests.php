@@ -66,7 +66,7 @@ class HandleInertiaRequests extends Middleware
                 ->map(fn ($p) => ['title' => $p->title, 'href' => '/' . $p->slug])
                 ->all(),
 
-            'footer_categories' => PostCategory::with([
+            'nav_categories' => PostCategory::with([
                     'posts' => fn ($q) => $q->published()
                         ->orderBy('published_at', 'desc')
                         ->select(['id', 'category_id', 'title', 'slug']),
