@@ -99,6 +99,7 @@
                 url:         @js($snippet['url']),
                 siteName:    @js($snippet['siteName']),
                 favicon:     @js($snippet['favicon']),
+                ogImage:     @js($snippet['ogImage']),
                 saving:      false,
                 get titleLen() { return (this.title || '').length; },
                 get descLen()  { return (this.description || '').length; },
@@ -289,10 +290,95 @@
                 </div>
             </div>
 
+            {{-- ── Social card preview (Facebook / X / LinkedIn) ───────── --}}
+            <div style="margin-top:20px; padding-top:18px; border-top:1px solid var(--tb-border-soft);">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                    <div>
+                        <h3 style="font-size:13px; font-weight:600; color:var(--tb-fg); margin:0 0 2px;">Social card preview</h3>
+                        <p style="font-size:11px; color:var(--tb-muted); margin:0;">How the page renders when shared on Facebook, X, LinkedIn, WhatsApp and Slack.</p>
+                    </div>
+                    <div>{{ $this->uploadOgImageAction }}</div>
+                </div>
+
+                <div class="seo-social-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+                    {{-- Facebook / OpenGraph card --}}
+                    <div style="background:#ffffff; border:1px solid #dddfe2; border-radius:8px; overflow:hidden;
+                                font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; box-shadow:0 1px 2px rgba(0,0,0,.04);">
+                        <button
+                            type="button"
+                            wire:click="mountAction('uploadOgImage')"
+                            title="Click to change OG image"
+                            style="position:relative; width:100%; aspect-ratio:1.91/1; background:#e4e6eb;
+                                   border:0; padding:0; cursor:pointer; display:block; overflow:hidden;"
+                        >
+                            <template x-if="ogImage">
+                                <img x-bind:src="ogImage" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;" />
+                            </template>
+                            <template x-if="!ogImage">
+                                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#65676b;">
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5z" />
+                                    </svg>
+                                    <span style="font-size:12px; font-weight:500;">Click to upload OG image — 1200×630</span>
+                                </div>
+                            </template>
+                        </button>
+                        <div style="padding:10px 14px; background:#f0f2f5; border-top:1px solid #dddfe2;">
+                            <div style="font-size:11px; color:#65676b; text-transform:uppercase; letter-spacing:.04em;" x-text="breadcrumbHost || 'example.com'"></div>
+                            <div style="font-size:15px; color:#1c1e21; font-weight:600; line-height:1.3; margin-top:2px;
+                                        display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"
+                                 x-text="title || 'Your title here'">
+                            </div>
+                            <div style="font-size:13px; color:#65676b; line-height:1.4; margin-top:3px;
+                                        display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"
+                                 x-text="description || 'Your description here.'">
+                            </div>
+                        </div>
+                        <div style="padding:6px 14px 10px; font-size:10.5px; color:#8a8d91;">Facebook</div>
+                    </div>
+
+                    {{-- X / Twitter summary_large_image card --}}
+                    <div style="background:#ffffff; border:1px solid #cfd9de; border-radius:16px; overflow:hidden;
+                                font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                                box-shadow:0 1px 2px rgba(0,0,0,.04);">
+                        <div style="position:relative; width:100%; aspect-ratio:1.91/1; background:#e4e6eb; overflow:hidden;">
+                            <template x-if="ogImage">
+                                <img x-bind:src="ogImage" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;" />
+                            </template>
+                            <template x-if="!ogImage">
+                                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#536471;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5z" />
+                                    </svg>
+                                </div>
+                            </template>
+                            <div style="position:absolute; left:10px; bottom:10px; background:rgba(0,0,0,.6); color:#fff;
+                                        padding:2px 8px; border-radius:4px; font-size:11px; font-weight:500;
+                                        backdrop-filter:blur(4px);"
+                                 x-text="breadcrumbHost || 'example.com'">
+                            </div>
+                        </div>
+                        <div style="padding:8px 14px 12px;">
+                            <div style="font-size:11px; color:#536471; line-height:1.4;" x-text="breadcrumbHost || 'example.com'"></div>
+                            <div style="font-size:14px; color:#0f1419; font-weight:600; line-height:1.3; margin-top:2px;
+                                        display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;"
+                                 x-text="title || 'Your title here'">
+                            </div>
+                            <div style="font-size:13px; color:#536471; line-height:1.4; margin-top:2px;
+                                        display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"
+                                 x-text="description || 'Your description here.'">
+                            </div>
+                        </div>
+                        <div style="padding:0 14px 10px; font-size:10.5px; color:#8a8d91;">X / Twitter</div>
+                    </div>
+                </div>
+            </div>
+
             <style>
                 @keyframes spin { to { transform: rotate(360deg); } }
                 @media (max-width: 880px) {
                     .seo-snippet-grid { grid-template-columns: 1fr !important; }
+                    .seo-social-grid  { grid-template-columns: 1fr !important; }
                 }
             </style>
         </div>

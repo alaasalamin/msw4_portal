@@ -52,13 +52,49 @@ class SeoOptimizer extends Page
     {
         $companyName = Setting::get('company_name') ?: Setting::get('site_name', config('app.name', 'MSW4'));
         $faviconPath = Setting::get('favicon');
+        $ogPath      = Setting::get('og_image');
         return [
             'title'       => Setting::get('seo_title') ?: ($companyName . ' — Home'),
             'description' => Setting::get('seo_description', Setting::get('site_description', '')),
             'url'         => rtrim(config('app.url') ?: url('/'), '/'),
             'siteName'    => $companyName,
             'favicon'     => $faviconPath ? asset('storage/' . $faviconPath) : null,
+            'ogImage'     => $ogPath ? asset('storage/' . $ogPath) : null,
         ];
+    }
+
+    public function uploadOgImageAction(): Action
+    {
+        return Action::make('uploadOgImage')
+            ->label('Change OG image')
+            ->icon('heroicon-m-photo')
+            ->color('gray')
+            ->modalHeading('Upload Open Graph image')
+            ->modalDescription('Recommended size 1200×630 px (1.91:1). Used by Facebook, X, LinkedIn, WhatsApp and other platforms when your pages are shared.')
+            ->modalSubmitActionLabel('Save')
+            ->fillForm(fn () => ['og_image' => Setting::get('og_image')])
+            ->schema([
+                FileUpload::make('og_image')
+                    ->label('Open Graph image')
+                    ->image()
+                    ->disk('public')
+                    ->directory('settings')
+                    ->maxSize(4096)
+                    ->imagePreviewHeight('120')
+                    ->imageCropAspectRatio('1.91:1')
+                    ->imageResizeTargetWidth('1200')
+                    ->imageResizeTargetHeight('630')
+                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
+                    ->helperText('Saving an empty value clears the image.'),
+            ])
+            ->action(function (array $data) {
+                Setting::set('og_image', $data['og_image'] ?? '');
+                Notification::make()
+                    ->title('OG image updated')
+                    ->body('Social platforms will pick this up next time the page is shared.')
+                    ->success()
+                    ->send();
+            });
     }
 
     public function uploadFaviconAction(): Action
