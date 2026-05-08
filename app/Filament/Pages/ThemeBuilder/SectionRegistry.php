@@ -86,6 +86,11 @@ class SectionRegistry
                 'icon'  => 'heroicon-o-list-bullet',
                 'desc'  => 'Numbered process — "How it works" with steps and connector lines.',
             ],
+            'gallery' => [
+                'label' => 'Gallery',
+                'icon'  => 'heroicon-o-photo',
+                'desc'  => 'Image grid with optional captions and a click-to-open lightbox.',
+            ],
             'footer' => [
                 'label' => 'Footer',
                 'icon'  => 'heroicon-o-bars-3-bottom-left',
@@ -136,6 +141,19 @@ class SectionRegistry
                 'align'      => 'left',
                 'bg'         => '#ffffff',
                 'fg'         => '#0f172a',
+            ],
+            'gallery' => [
+                'heading'        => 'Gallery',
+                'subtitle'       => '',
+                'images'         => [],
+                'columns'        => 3,
+                'aspect'         => 'square',
+                'gap'            => 12,
+                'showCaptions'   => true,
+                'enableLightbox' => true,
+                'bg'             => '#ffffff',
+                'fg'             => '#0f172a',
+                'mutedFg'        => '#64748b',
             ],
             'steps' => [
                 'heading'        => 'How it works',
@@ -455,6 +473,83 @@ class SectionRegistry
                         ColorPicker::make('settings.bg')->label('Background'),
                         ColorPicker::make('settings.fg')->label('Text color'),
                     ])->columns(2),
+            ],
+
+            'gallery' => [
+                Section::make('Heading')
+                    ->schema([
+                        TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
+                        Textarea::make('settings.subtitle')->label('Subtitle')->rows(2)->maxLength(220),
+                    ])->columns(1),
+
+                Section::make('Images')
+                    ->schema([
+                        Repeater::make('settings.images')
+                            ->label('Images')
+                            ->schema([
+                                FileUpload::make('image')
+                                    ->label('Image')
+                                    ->required()
+                                    ->image()
+                                    ->disk('public')
+                                    ->directory('theme-builder/gallery')
+                                    ->maxSize(5120)
+                                    ->imagePreviewHeight('80')
+                                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state),
+                                TextInput::make('caption')
+                                    ->label('Caption (optional)')
+                                    ->maxLength(140),
+                                TextInput::make('alt')
+                                    ->label('Alt text (for accessibility)')
+                                    ->maxLength(140),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->cloneable()
+                            ->reorderable()
+                            ->addActionLabel('Add image')
+                            ->itemLabel(fn (array $state): ?string => $state['caption'] ?? $state['alt'] ?? 'New image'),
+                    ])->columns(1),
+
+                Section::make('Layout')
+                    ->schema([
+                        Select::make('settings.columns')
+                            ->label('Columns (desktop)')
+                            ->options([2 => '2', 3 => '3', 4 => '4', 5 => '5'])
+                            ->default(3)
+                            ->required()
+                            ->dehydrateStateUsing(fn ($state) => (int) $state),
+                        Select::make('settings.aspect')
+                            ->label('Aspect ratio')
+                            ->options([
+                                'square' => 'Square (1:1)',
+                                '4:3'    => 'Landscape (4:3)',
+                                '16:9'   => 'Wide (16:9)',
+                                '3:4'    => 'Portrait (3:4)',
+                                'auto'   => 'Original / mixed',
+                            ])
+                            ->default('square')
+                            ->required(),
+                        TextInput::make('settings.gap')
+                            ->label('Gap (px)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(64)
+                            ->default(12),
+                        \Filament\Forms\Components\Toggle::make('settings.showCaptions')
+                            ->label('Show captions under each image')
+                            ->default(true),
+                        \Filament\Forms\Components\Toggle::make('settings.enableLightbox')
+                            ->label('Click to open larger (lightbox)')
+                            ->default(true),
+                    ])->columns(3),
+
+                Section::make('Style')
+                    ->schema([
+                        ColorPicker::make('settings.bg')->label('Section background'),
+                        ColorPicker::make('settings.fg')->label('Heading color'),
+                        ColorPicker::make('settings.mutedFg')->label('Caption color'),
+                    ])->columns(3),
             ],
 
             'steps' => [

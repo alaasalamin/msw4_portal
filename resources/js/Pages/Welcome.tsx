@@ -12,11 +12,12 @@ import DynamicFaq       from './Welcome/Sections/DynamicFaq';
 import DynamicCta       from './Welcome/Sections/DynamicCta';
 import DynamicStats     from './Welcome/Sections/DynamicStats';
 import DynamicSteps     from './Welcome/Sections/DynamicSteps';
+import DynamicGallery   from './Welcome/Sections/DynamicGallery';
 import DynamicFooter    from './Welcome/Sections/DynamicFooter';
 
 interface Section {
     id: string;
-    type: 'header' | 'hero' | 'text' | 'team' | 'blog_posts' | 'map' | 'reviews' | 'form' | 'pricing' | 'faq' | 'cta' | 'stats' | 'steps' | 'footer';
+    type: 'header' | 'hero' | 'text' | 'team' | 'blog_posts' | 'map' | 'reviews' | 'form' | 'pricing' | 'faq' | 'cta' | 'stats' | 'steps' | 'gallery' | 'footer';
     settings: Record<string, unknown>;
 }
 
@@ -39,6 +40,7 @@ function renderSection(section: Section) {
         case 'cta':        return <DynamicCta       key={section.id} settings={section.settings as never} />;
         case 'stats':      return <DynamicStats     key={section.id} settings={section.settings as never} />;
         case 'steps':      return <DynamicSteps     key={section.id} settings={section.settings as never} />;
+        case 'gallery':    return <DynamicGallery   key={section.id} settings={section.settings as never} />;
         case 'footer':     return <DynamicFooter    key={section.id} settings={section.settings as never} />;
         default:       return null;
     }
