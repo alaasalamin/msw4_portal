@@ -55,7 +55,18 @@ class BlogController extends Controller
         $post = Post::published()
             ->with(['author:id,name', 'category:id,name,slug'])
             ->where('slug', $slug)
-            ->firstOrFail();
+            ->first();
+
+        if (! $post) {
+            // Fall back: /blog/{slug} where {slug} is actually a category
+            // (e.g. someone shared the short URL or the category bar in
+            // an older build pointed here). Redirect to the canonical
+            // category index instead of 404'ing.
+            if (PostCategory::where('slug', $slug)->exists()) {
+                return redirect()->route('blog.category', $slug, 301);
+            }
+            abort(404);
+        }
 
         // Redirect to canonical URL if post has a category
         if ($post->category) {
