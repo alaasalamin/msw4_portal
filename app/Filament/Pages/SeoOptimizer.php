@@ -38,9 +38,6 @@ class SeoOptimizer extends Page
         $this->form->fill([
             'google_site_verification' => Setting::get('google_site_verification'),
             'default_robots'           => Setting::get('default_robots', 'index, follow'),
-            'org_name'                 => Setting::get('seo_org_name', Setting::get('company_name')),
-            'org_url'                  => Setting::get('seo_org_url'),
-            'org_logo'                 => Setting::get('seo_org_logo', Setting::get('logo')),
         ]);
     }
 
@@ -53,11 +50,6 @@ class SeoOptimizer extends Page
         $companyName = Setting::get('company_name') ?: Setting::get('site_name', config('app.name', 'MSW4'));
         $faviconPath = Setting::get('favicon');
         $ogPath      = Setting::get('og_image');
-        $orgLogoRaw  = Setting::get('seo_org_logo', Setting::get('logo'));
-        $orgLogoUrl  = null;
-        if ($orgLogoRaw) {
-            $orgLogoUrl = str_starts_with($orgLogoRaw, 'http') ? $orgLogoRaw : asset('storage/' . $orgLogoRaw);
-        }
         return [
             'title'       => Setting::get('seo_title') ?: ($companyName . ' — Home'),
             'description' => Setting::get('seo_description', Setting::get('site_description', '')),
@@ -65,9 +57,6 @@ class SeoOptimizer extends Page
             'siteName'    => $companyName,
             'favicon'     => $faviconPath ? asset('storage/' . $faviconPath) : null,
             'ogImage'     => $ogPath ? asset('storage/' . $ogPath) : null,
-            'orgName'     => Setting::get('seo_org_name', $companyName),
-            'orgUrl'      => Setting::get('seo_org_url', rtrim(config('app.url') ?: url('/'), '/')),
-            'orgLogo'     => $orgLogoUrl,
         ];
     }
 
@@ -188,13 +177,6 @@ class SeoOptimizer extends Page
                             ->default('index, follow'),
                     ])->columns(1),
 
-                Section::make('Structured data — organization')
-                    ->description('Powers the JSON-LD organization snippet emitted in <head>. Helps Google show your brand correctly.')
-                    ->schema([
-                        TextInput::make('org_name')->label('Organization name')->maxLength(120),
-                        TextInput::make('org_url')->label('Organization URL')->url()->maxLength(200)->placeholder('https://example.com'),
-                        Textarea::make('org_logo')->label('Logo path or URL')->rows(2)->maxLength(200)->helperText('Optional. Defaults to the site logo.'),
-                    ])->columns(1),
             ]);
     }
 
@@ -203,9 +185,6 @@ class SeoOptimizer extends Page
         $data = $this->form->getState();
         Setting::set('google_site_verification', $data['google_site_verification'] ?? '');
         Setting::set('default_robots',           $data['default_robots']           ?? 'index, follow');
-        Setting::set('seo_org_name',             $data['org_name']                 ?? '');
-        Setting::set('seo_org_url',              $data['org_url']                  ?? '');
-        Setting::set('seo_org_logo',             $data['org_logo']                 ?? '');
 
         Notification::make()->title('SEO settings saved')->success()->send();
     }

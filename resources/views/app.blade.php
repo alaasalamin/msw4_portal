@@ -20,12 +20,6 @@
             // SEO Optimizer settings
             $googleVerify = Setting::get('google_site_verification');
             $robotsPolicy = Setting::get('default_robots', 'index, follow');
-            $orgName      = Setting::get('seo_org_name', Setting::get('company_name'));
-            $orgUrl       = Setting::get('seo_org_url');
-            $orgLogo      = Setting::get('seo_org_logo', Setting::get('logo'));
-            $orgLogoUrl   = $orgLogo
-                ? (str_starts_with($orgLogo, 'http') ? $orgLogo : asset('storage/' . $orgLogo))
-                : null;
 
             // ── Theme primary color: pulled from the Theme Builder header section.
             // If the user explicitly set "Primary brand color" we use it; otherwise
@@ -150,20 +144,6 @@
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
         @inertiaHead
-
-        @if($orgName)
-        @php
-            $orgJsonLd = json_encode(array_filter([
-                '@context' => 'https://schema.org',
-                '@type'    => 'Organization',
-                'name'     => $orgName,
-                'url'      => $orgUrl ?: url('/'),
-                'logo'     => $orgLogoUrl,
-            ]), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        @endphp
-        {{-- Organization structured data — managed in /admin/seo-optimizer --}}
-        <script type="application/ld+json">{!! $orgJsonLd !!}</script>
-        @endif
     </head>
     <body class="font-sans antialiased">
         @inertia
