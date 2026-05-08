@@ -169,6 +169,12 @@ class SectionRegistry
                 ['key' => 'photo_focus', 'label' => 'Photo focus', 'description' => 'Square portraits; name/role overlay slides in on hover.'],
                 ['key' => 'compact',     'label' => 'Compact',     'description' => 'Small round avatars with just name and role — many per row.'],
             ],
+            'gallery' => [
+                ['key' => 'grid',     'label' => 'Grid',     'description' => 'Uniform grid with configurable columns and aspect ratio.'],
+                ['key' => 'masonry',  'label' => 'Masonry',  'description' => 'Pinterest-style packed layout, images keep their natural heights.'],
+                ['key' => 'carousel', 'label' => 'Carousel', 'description' => 'Horizontal scrolling row with prev/next controls.'],
+                ['key' => 'collage',  'label' => 'Collage',  'description' => 'Asymmetric mosaic — the first image is bigger, the rest fill around.'],
+            ],
             default => [],
         };
     }
@@ -232,6 +238,7 @@ class SectionRegistry
                 'fg'           => '#0f172a',
             ],
             'gallery' => [
+                'variant'        => 'grid',
                 'heading'        => 'Gallery',
                 'subtitle'       => '',
                 'images'         => [],
@@ -694,6 +701,21 @@ class SectionRegistry
             ],
 
             'gallery' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'grid'     => 'Grid',
+                                'masonry'  => 'Masonry',
+                                'carousel' => 'Carousel',
+                                'collage'  => 'Collage',
+                            ])
+                            ->default('grid')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
