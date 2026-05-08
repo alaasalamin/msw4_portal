@@ -210,6 +210,12 @@ class SectionRegistry
                 ['key' => 'featured', 'label' => 'Featured', 'description' => 'The first post is a big spotlight; the rest sit in a smaller grid.'],
                 ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Text-only archive list with date and category — no images.'],
             ],
+            'blog_carousel' => [
+                ['key' => 'cinematic', 'label' => 'Cinematic', 'description' => 'Full-bleed image with copy overlaid at the bottom.'],
+                ['key' => 'split',     'label' => 'Split',     'description' => 'Image on one side, headline and excerpt on the other.'],
+                ['key' => 'card',      'label' => 'Card',      'description' => 'Image on top, content in a clean card panel below.'],
+                ['key' => 'editorial', 'label' => 'Editorial', 'description' => 'Big serif headline, small thumbnail, magazine-style margins.'],
+            ],
             'footer' => [
                 ['key' => 'columns',  'label' => 'Columns',  'description' => 'Rich multi-column footer with brand, address, pages and blog sitemap.'],
                 ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Single thin row — brand on the left, socials on the right, copyright bar below.'],
@@ -502,6 +508,7 @@ class SectionRegistry
                 'accent'       => '#0284c7',
             ],
             'blog_carousel' => [
+                'variant'        => 'cinematic',
                 'heading'        => 'Latest from the blog',
                 'subtitle'       => '',
                 'source'         => 'latest',  // 'latest' = newest N posts, 'category' = newest N from a category, 'manual' = a hand-picked list of slugs
@@ -1633,6 +1640,21 @@ class SectionRegistry
             ],
 
             'blog_carousel' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'cinematic' => 'Cinematic — full-bleed image, copy overlaid',
+                                'split'     => 'Split — image on one side, copy on the other',
+                                'card'      => 'Card — image on top, copy in a panel below',
+                                'editorial' => 'Editorial — big serif headline, small thumbnail',
+                            ])
+                            ->default('cinematic')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
