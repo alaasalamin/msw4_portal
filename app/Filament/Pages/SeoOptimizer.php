@@ -39,6 +39,43 @@ class SeoOptimizer extends Page
         ]);
     }
 
+    /**
+     * Initial state for the live snippet preview block in the blade.
+     * Alpine reads these and lets the user edit them in place.
+     */
+    public function getSnippetState(): array
+    {
+        $companyName = Setting::get('company_name') ?: Setting::get('site_name', config('app.name', 'MSW4'));
+        return [
+            'title'       => Setting::get('seo_title') ?: ($companyName . ' — Home'),
+            'description' => Setting::get('seo_description', Setting::get('site_description', '')),
+            'url'         => rtrim(config('app.url') ?: url('/'), '/'),
+            'siteName'    => $companyName,
+        ];
+    }
+
+    /**
+     * Persist the snippet edits. Called from the blade via $wire.call.
+     * Updates the same settings keys app.blade.php already emits.
+     */
+    public function saveSnippet(string $title, string $description): void
+    {
+        $title = trim($title);
+        $description = trim($description);
+
+        Setting::set('seo_title',       $title);
+        Setting::set('seo_description', $description);
+        // Keep the OG variants in sync when the user hasn't customized them separately.
+        if (! Setting::get('og_title'))       Setting::set('og_title', $title);
+        if (! Setting::get('og_description')) Setting::set('og_description', $description);
+
+        Notification::make()
+            ->title('Snippet saved')
+            ->body('Google will pick this up next time it crawls.')
+            ->success()
+            ->send();
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema

@@ -2,6 +2,7 @@
     @php
         $audit   = $this->getAudit();
         $summary = $this->getAuditSummary($audit);
+        $snippet = $this->getSnippetState();
     @endphp
 
     {{-- Light + dark theme variables — same approach as the Theme Builder. --}}
@@ -88,6 +89,179 @@
                     @endif
                 </div>
             </div>
+        </div>
+
+        {{-- Live Google search snippet preview --}}
+        <div
+            x-data="{
+                title:       @js($snippet['title']),
+                description: @js($snippet['description']),
+                url:         @js($snippet['url']),
+                siteName:    @js($snippet['siteName']),
+                saving:      false,
+                get titleLen() { return (this.title || '').length; },
+                get descLen()  { return (this.description || '').length; },
+                get prettyUrl() {
+                    try { const u = new URL(this.url); return u.host + (u.pathname === '/' ? '' : u.pathname); }
+                    catch (e) { return this.url; }
+                },
+                get breadcrumbHost() {
+                    try { return new URL(this.url).host; } catch (e) { return this.url; }
+                },
+                get titleClass() {
+                    if (this.titleLen === 0) return 'bad';
+                    if (this.titleLen < 30 || this.titleLen > 60) return 'warn';
+                    return 'good';
+                },
+                get descClass() {
+                    if (this.descLen === 0) return 'bad';
+                    if (this.descLen < 70 || this.descLen > 160) return 'warn';
+                    return 'good';
+                },
+                async saveSnippet() {
+                    this.saving = true;
+                    try { await this.$wire.call('saveSnippet', this.title, this.description); }
+                    finally { this.saving = false; }
+                },
+            }"
+            style="background:var(--tb-bg); border:1px solid var(--tb-border); border-radius:12px; padding:18px;"
+        >
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px;">
+                <div>
+                    <h2 style="font-size:14px; font-weight:600; color:var(--tb-fg); margin:0 0 2px;">Search snippet preview</h2>
+                    <p style="font-size:11px; color:var(--tb-muted); margin:0;">Edit on the left, watch the Google result render in real time on the right.</p>
+                </div>
+                <button
+                    type="button"
+                    x-bind:disabled="saving"
+                    x-on:click="saveSnippet"
+                    style="display:inline-flex; align-items:center; gap:6px;
+                           background:#0284c7; color:#fff;
+                           border:1px solid #0369a1; border-radius:8px;
+                           padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer;
+                           box-shadow:0 1px 2px rgba(2,132,199,.3), inset 0 1px 0 rgba(255,255,255,.18);"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" x-show="!saving"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" x-show="saving" x-cloak style="animation:spin 1s linear infinite;">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/>
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" opacity=".95"/>
+                    </svg>
+                    <span x-text="saving ? 'Saving…' : 'Save snippet'"></span>
+                </button>
+            </div>
+
+            <div class="seo-snippet-grid" style="display:grid; grid-template-columns:1fr 1.1fr; gap:18px;">
+                {{-- Left: editor --}}
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                    <label style="display:flex; flex-direction:column; gap:6px;">
+                        <span style="display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:600; color:var(--tb-muted); text-transform:uppercase; letter-spacing:.06em;">
+                            <span>Page URL</span>
+                        </span>
+                        <input
+                            type="text"
+                            x-model="url"
+                            placeholder="https://example.com/page"
+                            style="padding:9px 12px; border:1px solid var(--tb-border); border-radius:8px;
+                                   font-size:13px; background:var(--tb-card-bg); color:var(--tb-fg); outline:none;"
+                            x-on:focus="$event.target.style.borderColor='#0284c7'"
+                            x-on:blur="$event.target.style.borderColor=''"
+                        />
+                    </label>
+
+                    <label style="display:flex; flex-direction:column; gap:6px;">
+                        <span style="display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:600; color:var(--tb-muted); text-transform:uppercase; letter-spacing:.06em;">
+                            <span>Meta title</span>
+                            <span x-bind:style="
+                                titleClass === 'good' ? 'color:#16a34a' :
+                                titleClass === 'warn' ? 'color:#d97706' : 'color:#dc2626'
+                            "><span x-text="titleLen"></span> / 60</span>
+                        </span>
+                        <input
+                            type="text"
+                            x-model="title"
+                            maxlength="120"
+                            placeholder="Your headline as it appears in Google"
+                            style="padding:9px 12px; border:1px solid var(--tb-border); border-radius:8px;
+                                   font-size:13px; background:var(--tb-card-bg); color:var(--tb-fg); outline:none;"
+                            x-on:focus="$event.target.style.borderColor='#0284c7'"
+                            x-on:blur="$event.target.style.borderColor=''"
+                        />
+                    </label>
+
+                    <label style="display:flex; flex-direction:column; gap:6px;">
+                        <span style="display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:600; color:var(--tb-muted); text-transform:uppercase; letter-spacing:.06em;">
+                            <span>Meta description</span>
+                            <span x-bind:style="
+                                descClass === 'good' ? 'color:#16a34a' :
+                                descClass === 'warn' ? 'color:#d97706' : 'color:#dc2626'
+                            "><span x-text="descLen"></span> / 160</span>
+                        </span>
+                        <textarea
+                            x-model="description"
+                            rows="4"
+                            maxlength="280"
+                            placeholder="A 70–160 character summary of the page"
+                            style="padding:9px 12px; border:1px solid var(--tb-border); border-radius:8px;
+                                   font-size:13px; background:var(--tb-card-bg); color:var(--tb-fg); outline:none; resize:vertical; font-family:inherit;"
+                            x-on:focus="$event.target.style.borderColor='#0284c7'"
+                            x-on:blur="$event.target.style.borderColor=''"
+                        ></textarea>
+                    </label>
+
+                    <div style="font-size:11px; color:var(--tb-muted); line-height:1.5;">
+                        Google typically truncates titles past <strong>~60 chars</strong> and descriptions past <strong>~160 chars</strong> in desktop search results.
+                    </div>
+                </div>
+
+                {{-- Right: Google search result mockup --}}
+                <div style="background:#ffffff; border:1px solid var(--tb-border); border-radius:14px;
+                            padding:18px 20px; display:flex; flex-direction:column; gap:6px;
+                            box-shadow:0 1px 2px rgba(15,23,42,.04);">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <div style="width:18px; height:18px; border-radius:9999px; background:#e8eaed;
+                                    display:flex; align-items:center; justify-content:center;
+                                    font-size:9px; font-weight:700; color:#5f6368;
+                                    text-transform:uppercase;"
+                             x-text="(siteName || 'S').charAt(0)">
+                        </div>
+                        <div style="display:flex; flex-direction:column; line-height:1.2;">
+                            <span style="font-size:12px; color:#202124; font-weight:500;" x-text="siteName"></span>
+                            <span style="font-size:11px; color:#5f6368;" x-text="prettyUrl"></span>
+                        </div>
+                    </div>
+                    <a href="#" onclick="return false;" style="
+                        font-size:18px;
+                        line-height:1.3;
+                        color:#1a0dab;
+                        font-weight:400;
+                        text-decoration:none;
+                        cursor:pointer;
+                        font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;
+                    ">
+                        <span x-text="title || 'Untitled — your meta title goes here'"></span>
+                    </a>
+                    <p style="
+                        margin:0;
+                        font-size:13.5px;
+                        line-height:1.55;
+                        color:#4d5156;
+                        font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif;
+                        word-wrap:break-word;
+                    ">
+                        <span x-text="description || 'Your meta description shows here. Aim for 70–160 characters that summarize the page and invite the click.'"></span>
+                    </p>
+                    <div style="margin-top:6px; font-size:11px; color:#5f6368; font-family:Arial, sans-serif;">
+                        <span style="opacity:.7;">⓵</span> A live preview — actual rendering varies by query, device and Google.
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @media (max-width: 880px) {
+                    .seo-snippet-grid { grid-template-columns: 1fr !important; }
+                }
+            </style>
         </div>
 
         {{-- Settings form --}}
