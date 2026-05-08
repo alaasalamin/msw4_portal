@@ -211,6 +211,7 @@ class SectionRegistry
                 ['key' => 'centered', 'label' => 'Centered', 'description' => 'Everything stacked centered — name, tagline, socials, then page links.'],
             ],
             'table' => [
+                ['key' => 'simple',   'label' => 'Simple',   'description' => 'Classic Bootstrap-style table — light header, hairlines, hover tint.'],
                 ['key' => 'striped',  'label' => 'Striped',  'description' => 'Alternating row backgrounds, no vertical borders.'],
                 ['key' => 'bordered', 'label' => 'Bordered', 'description' => 'Full grid lines around every cell.'],
                 ['key' => 'minimal',  'label' => 'Minimal',  'description' => 'Only horizontal hairlines between rows — no row backgrounds.'],
@@ -1652,11 +1653,12 @@ class SectionRegistry
                         Select::make('settings.variant')
                             ->label('Layout')
                             ->options([
+                                'simple'   => 'Simple — classic Bootstrap-style with hover',
                                 'striped'  => 'Striped — alternating row backgrounds',
                                 'bordered' => 'Bordered — full grid lines',
                                 'minimal'  => 'Minimal — only horizontal lines between rows',
                             ])
-                            ->default('striped')
+                            ->default('simple')
                             ->required()
                             ->live()
                             ->helperText('Use the small icon on the section card to switch designs visually.'),

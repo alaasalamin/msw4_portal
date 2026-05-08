@@ -8,7 +8,7 @@ interface TableRow {
 }
 
 interface TableSettings {
-    variant?: 'striped' | 'bordered' | 'minimal';
+    variant?: 'simple' | 'striped' | 'bordered' | 'minimal';
     heading?: string;
     subtitle?: string;
     columns?: TableColumn[];
@@ -29,15 +29,17 @@ function parseCells(text?: string): string[] {
 }
 
 export default function DynamicTable({ settings }: { settings: TableSettings }) {
-    const variant = settings.variant ?? 'striped';
+    const variant = settings.variant ?? 'simple';
     const columns = (settings.columns ?? []).filter((c) => c.label?.trim().length);
     const rawRows = settings.rows ?? [];
     const colCount = columns.length || 1;
 
     const fg          = settings.fg          ?? '#0f172a';
     const mutedFg     = settings.mutedFg     ?? '#64748b';
-    const headerBg    = settings.headerBg    ?? '#0f172a';
-    const headerFg    = settings.headerFg    ?? '#ffffff';
+    // 'simple' variant uses a light header by default; the others keep the dark header.
+    const isSimple    = variant === 'simple';
+    const headerBg    = settings.headerBg    ?? (isSimple ? '#f8fafc' : '#0f172a');
+    const headerFg    = settings.headerFg    ?? (isSimple ? '#0f172a' : '#ffffff');
     const altRowBg    = settings.altRowBg    ?? '#f8fafc';
     const borderColor = settings.borderColor ?? '#e5e7eb';
     const emphasizeFirstCol = settings.firstColEmphasis !== false;
@@ -53,8 +55,15 @@ export default function DynamicTable({ settings }: { settings: TableSettings }) 
 
     // ── Variant-specific cell border + bg helpers ──────────────────────────
     const cellBorderRight = variant === 'bordered' ? `1px solid ${borderColor}` : 'none';
-    const cellBorderBottom = (variant === 'bordered' || variant === 'minimal') ? `1px solid ${borderColor}` : 'none';
-    const headerBorderRight = variant === 'bordered' ? '1px solid rgba(255,255,255,0.10)' : 'none';
+    // Hairline below every row except the last (bordered/minimal/simple all use it).
+    const cellBorderBottom = (variant !== 'striped') ? `1px solid ${borderColor}` : 'none';
+    // The header bottom-border is heavier on the Simple variant — Bootstrap-feel.
+    const headerBorderBottom = isSimple
+        ? `2px solid ${borderColor}`
+        : (variant === 'bordered' ? `1px solid ${borderColor}` : 'none');
+    const headerBorderRight = variant === 'bordered'
+        ? (isSimple ? `1px solid ${borderColor}` : '1px solid rgba(255,255,255,0.10)')
+        : 'none';
     const rowBg = (i: number) => variant === 'striped' && i % 2 === 1 ? altRowBg : 'transparent';
 
     return (
@@ -99,7 +108,7 @@ export default function DynamicTable({ settings }: { settings: TableSettings }) 
                         borderRadius: 12,
                         border: variant === 'bordered' ? `1px solid ${borderColor}` : 'none',
                     }}>
-                        <table style={{
+                        <table className="tb-table" style={{
                             width: '100%',
                             borderCollapse: 'collapse',
                             minWidth: `${colCount * 140}px`,
@@ -119,6 +128,7 @@ export default function DynamicTable({ settings }: { settings: TableSettings }) 
                                             textTransform: 'uppercase',
                                             letterSpacing: '0.06em',
                                             borderRight: i === columns.length - 1 ? 'none' : headerBorderRight,
+                                            borderBottom: headerBorderBottom,
                                         }}>
                                             {col.label}
                                         </th>
@@ -127,7 +137,7 @@ export default function DynamicTable({ settings }: { settings: TableSettings }) 
                             </thead>
                             <tbody>
                                 {rows.map((row, ri) => (
-                                    <tr key={ri} style={{ background: rowBg(ri) }}>
+                                    <tr key={ri} className="tb-table-row" style={{ background: rowBg(ri), transition: 'background-color .12s ease' }}>
                                         {row.map((cell, ci) => {
                                             const align = columns[ci]?.align ?? 'left';
                                             const bold = emphasizeFirstCol && ci === 0;
@@ -137,7 +147,7 @@ export default function DynamicTable({ settings }: { settings: TableSettings }) 
                                                     textAlign: align,
                                                     verticalAlign: 'middle',
                                                     fontWeight: bold ? 600 : 400,
-                                                    color: bold ? fg : (variant === 'minimal' ? fg : fg),
+                                                    color: fg,
                                                     borderRight: ci === row.length - 1 ? 'none' : cellBorderRight,
                                                     borderBottom: ri === rows.length - 1 ? 'none' : cellBorderBottom,
                                                 }}>
@@ -149,6 +159,11 @@ export default function DynamicTable({ settings }: { settings: TableSettings }) 
                                 ))}
                             </tbody>
                         </table>
+                        <style>{`
+                            .tb-table .tb-table-row:hover {
+                                background: color-mix(in srgb, var(--primary, #0284c7) 6%, transparent) !important;
+                            }
+                        `}</style>
                     </div>
                 )}
             </div>
