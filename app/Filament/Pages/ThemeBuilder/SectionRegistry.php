@@ -163,6 +163,12 @@ class SectionRegistry
                 ['key' => 'boxed',    'label' => 'Boxed card',       'description' => 'Calm section background with the form in an elevated card.'],
                 ['key' => 'bg_image', 'label' => 'Background image', 'description' => 'Full-bleed photo with a dark overlay; form floats in a card on top.'],
             ],
+            'team' => [
+                ['key' => 'cards',       'label' => 'Cards',       'description' => 'Grid of cards with circular photo, name, role, and bio.'],
+                ['key' => 'list',        'label' => 'List',        'description' => 'Vertical list — photo on the left, name/role/bio on the right.'],
+                ['key' => 'photo_focus', 'label' => 'Photo focus', 'description' => 'Square portraits; name/role overlay slides in on hover.'],
+                ['key' => 'compact',     'label' => 'Compact',     'description' => 'Small round avatars with just name and role — many per row.'],
+            ],
             default => [],
         };
     }
@@ -431,6 +437,7 @@ class SectionRegistry
                 'accent'       => '#0284c7',
             ],
             'team' => [
+                'variant'    => 'cards',
                 'heading'    => 'Meet the team',
                 'subtitle'   => 'The people behind the work.',
                 'columns'    => 3,
@@ -1419,6 +1426,21 @@ class SectionRegistry
             ],
 
             'team' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'cards'       => 'Cards',
+                                'list'        => 'List',
+                                'photo_focus' => 'Photo focus',
+                                'compact'     => 'Compact',
+                            ])
+                            ->default('cards')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Heading')
                     ->schema([
                         TextInput::make('settings.heading')->label('Section heading')->maxLength(120),
