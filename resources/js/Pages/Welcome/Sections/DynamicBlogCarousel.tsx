@@ -123,6 +123,7 @@ export default function DynamicBlogCarousel({ settings }: { settings: BlogCarous
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
             }}
         >
+            <style>{ARROW_CSS}</style>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                 {(settings.heading || settings.subtitle) && (
                     <div style={{ textAlign: 'center', marginBottom: 'clamp(28px, 4vw, 48px)' }}>
@@ -153,54 +154,63 @@ export default function DynamicBlogCarousel({ settings }: { settings: BlogCarous
                     </p>
                 ) : (
                     <>
+                        {/* Outer relative wrapper — lets the glass arrows sit
+                            OUTSIDE the carousel's overflow:hidden viewport
+                            without getting clipped. Hover/focus pause moves
+                            here too so brushing past an arrow still pauses
+                            autoplay. */}
                         <div
                             onMouseEnter={() => setPaused(true)}
                             onMouseLeave={() => setPaused(false)}
                             onFocus={() => setPaused(true)}
                             onBlur={() => setPaused(false)}
-                            onTouchStart={onTouchStart}
-                            onTouchEnd={onTouchEnd}
-                            style={{
-                                position: 'relative',
-                                overflow: 'hidden',
-                                borderRadius: 16,
-                                aspectRatio: aspect,
-                                // Cinematic frames the slide darkly; the other
-                                // variants paint their own slide bgs and use
-                                // the section bg as the surrounding canvas.
-                                background: variant === 'cinematic' ? '#0b1220' : 'transparent',
-                            }}
-                            aria-roledescription="carousel"
-                            aria-label={settings.heading || 'Blog carousel'}
+                            style={{ position: 'relative' }}
                         >
                             <div
+                                onTouchStart={onTouchStart}
+                                onTouchEnd={onTouchEnd}
                                 style={{
-                                    display: 'flex',
-                                    height: '100%',
-                                    transform: `translate3d(-${index * 100}%, 0, 0)`,
-                                    transition: 'transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1)',
-                                    willChange: 'transform',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    borderRadius: 16,
+                                    aspectRatio: aspect,
+                                    // Cinematic frames the slide darkly; the other
+                                    // variants paint their own slide bgs and use
+                                    // the section bg as the surrounding canvas.
+                                    background: variant === 'cinematic' ? '#0b1220' : 'transparent',
                                 }}
+                                aria-roledescription="carousel"
+                                aria-label={settings.heading || 'Blog carousel'}
                             >
-                                {posts.map((p, i) => (
-                                    <Slide
-                                        key={p.slug ?? p.href ?? i}
-                                        variant={variant}
-                                        post={p}
-                                        active={i === index}
-                                        slideIndex={i}
-                                        total={total}
-                                        accent={accent}
-                                        fg={fg}
-                                        bg={bg}
-                                        mutedFg={mutedFg}
-                                        showCategory={showCategory}
-                                        showDate={showDate}
-                                        showExcerpt={showExcerpt}
-                                        showReadMore={showReadMore}
-                                        readMoreLabel={readMoreLabel}
-                                    />
-                                ))}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        height: '100%',
+                                        transform: `translate3d(-${index * 100}%, 0, 0)`,
+                                        transition: 'transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1)',
+                                        willChange: 'transform',
+                                    }}
+                                >
+                                    {posts.map((p, i) => (
+                                        <Slide
+                                            key={p.slug ?? p.href ?? i}
+                                            variant={variant}
+                                            post={p}
+                                            active={i === index}
+                                            slideIndex={i}
+                                            total={total}
+                                            accent={accent}
+                                            fg={fg}
+                                            bg={bg}
+                                            mutedFg={mutedFg}
+                                            showCategory={showCategory}
+                                            showDate={showDate}
+                                            showExcerpt={showExcerpt}
+                                            showReadMore={showReadMore}
+                                            readMoreLabel={readMoreLabel}
+                                        />
+                                    ))}
+                                </div>
                             </div>
 
                             {showArrows && total > 1 && (
@@ -209,34 +219,22 @@ export default function DynamicBlogCarousel({ settings }: { settings: BlogCarous
                                         type="button"
                                         aria-label="Previous post"
                                         onClick={prev}
-                                        className="tb-bc-arrow"
-                                        style={{ ...arrowBtnStyle, left: 16 }}
+                                        className="tb-bc-arrow tb-bc-arrow-prev"
                                     >
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 18l-6-6 6-6" />
                                         </svg>
                                     </button>
                                     <button
                                         type="button"
                                         aria-label="Next post"
                                         onClick={next}
-                                        className="tb-bc-arrow"
-                                        style={{ ...arrowBtnStyle, right: 16 }}
+                                        className="tb-bc-arrow tb-bc-arrow-next"
                                     >
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 6l6 6-6 6" />
                                         </svg>
                                     </button>
-                                    {/* On phones the arrows sit on top of the
-                                        slide content; swipe + dots already
-                                        cover navigation, so hide them under
-                                        720px to free the full frame for the
-                                        post copy. */}
-                                    <style>{`
-                                        @media (max-width: 720px) {
-                                            .tb-bc-arrow { display: none !important; }
-                                        }
-                                    `}</style>
                                 </>
                             )}
                         </div>
@@ -709,21 +707,50 @@ function EditorialSlide({ post, active, accent, fg, bg, mutedFg, showCategory, s
     );
 }
 
-const arrowBtnStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    zIndex: 2,
-    width: 44,
-    height: 44,
-    borderRadius: 9999,
-    border: '1px solid rgba(15,23,42,0.10)',
-    background: 'rgba(255,255,255,0.95)',
-    color: '#0f172a',
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 4px 14px rgba(15,23,42,0.18)',
-    backdropFilter: 'blur(6px)',
-};
+// Frosted-glass arrow buttons. Defined as a global stylesheet rather than
+// inline so we can layer hover/active state and viewport-aware positioning
+// (sit fully outside the carousel on wide screens, hug the edge on narrower
+// ones, hide entirely on phones where swipe + dots already cover nav).
+const ARROW_CSS = `
+.tb-bc-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 48px;
+    height: 48px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: currentColor;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    transition: background 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+.tb-bc-arrow:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.32);
+    transform: translateY(-50%) scale(1.04);
+}
+.tb-bc-arrow:active { transform: translateY(-50%) scale(0.97); }
+.tb-bc-arrow:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 3px;
+}
+/* Sit fully outside the carousel where there's room to spare; pull in
+   gracefully as the viewport narrows. clamp(min, preferred, max) with
+   negative values: wide screens hit the deeper -56px push, mid screens
+   get a vw-based offset, narrow desktops keep the buttons close to the
+   edge so they don't fall off the page padding. */
+.tb-bc-arrow-prev { left:  clamp(-56px, -3.5vw, -12px); }
+.tb-bc-arrow-next { right: clamp(-56px, -3.5vw, -12px); }
+@media (max-width: 720px) {
+    .tb-bc-arrow { display: none !important; }
+}
+`;
