@@ -113,8 +113,17 @@ class SectionRegistry
     {
         return match ($type) {
             'hero' => [
-                ['key' => 'centered', 'label' => 'Centered',     'description' => 'Eyebrow, headline, subtitle and button stacked in the middle.'],
-                ['key' => 'split',    'label' => 'Split image',  'description' => 'Heading and button on the left, image on the right.'],
+                ['key' => 'centered',    'label' => 'Centered',         'description' => 'Eyebrow, headline, subtitle and button stacked in the middle.'],
+                ['key' => 'split',       'label' => 'Split image',      'description' => 'Heading and button on the left, image on the right.'],
+                ['key' => 'bg_image',    'label' => 'Background image', 'description' => 'Full-bleed photo with a dark overlay; content sits on top.'],
+                ['key' => 'minimal',     'label' => 'Minimal',          'description' => 'Compact left-aligned — just the headline and one button.'],
+                ['key' => 'with_stats',  'label' => 'With stats',       'description' => 'Centered hero plus a small row of three quick stats.'],
+            ],
+            'text' => [
+                ['key' => 'default',     'label' => 'Heading + body',   'description' => 'Plain heading with paragraph below, alignment configurable.'],
+                ['key' => 'two_column',  'label' => 'Two columns',      'description' => 'Heading on the left, body on the right — editorial layout.'],
+                ['key' => 'callout',     'label' => 'Callout box',      'description' => 'Highlighted box with a colored left border. Good for tips and notes.'],
+                ['key' => 'quote',       'label' => 'Pull quote',       'description' => 'Big italic quote with optional attribution.'],
             ],
             default => [],
         };
@@ -146,7 +155,8 @@ class SectionRegistry
             ],
             'hero' => [
                 'variant'    => 'centered',
-                'image'      => null,    // used by the 'split' variant
+                'image'      => null,    // used by the 'split' and 'bg_image' variants
+                'overlay'    => 0.55,    // dark overlay opacity for 'bg_image'
                 'eyebrow'    => 'Welcome',
                 'headline'   => 'A great big headline goes here',
                 'subtitle'   => 'A short paragraph that explains what your product does and why people should care.',
@@ -157,13 +167,21 @@ class SectionRegistry
                 'fg'         => '#000000',
                 'buttonBg'   => '#000000',
                 'buttonFg'   => '#ffffff',
+                'stats'      => [
+                    ['value' => '10k+',  'label' => 'happy users'],
+                    ['value' => '4.9★',  'label' => 'avg. rating'],
+                    ['value' => '24/7',  'label' => 'support'],
+                ],
             ],
             'text' => [
-                'heading'    => 'About us',
-                'body'       => 'Replace this with your own copy. Use the editor on the left to change colors, alignment, and typography.',
-                'align'      => 'left',
-                'bg'         => '#ffffff',
-                'fg'         => '#0f172a',
+                'variant'      => 'default',
+                'heading'      => 'About us',
+                'body'         => 'Replace this with your own copy. Use the editor on the left to change colors, alignment, and typography.',
+                'attribution'  => '',     // used by the 'quote' variant
+                'calloutColor' => 'info', // used by the 'callout' variant
+                'align'        => 'left',
+                'bg'           => '#ffffff',
+                'fg'           => '#0f172a',
             ],
             'gallery' => [
                 'heading'        => 'Gallery',
@@ -464,21 +482,50 @@ class SectionRegistry
                     ->schema([
                         Select::make('settings.variant')
                             ->label('Layout')
-                            ->options(['centered' => 'Centered', 'split' => 'Split image'])
+                            ->options([
+                                'centered'   => 'Centered',
+                                'split'      => 'Split image',
+                                'bg_image'   => 'Background image',
+                                'minimal'    => 'Minimal',
+                                'with_stats' => 'With stats',
+                            ])
                             ->default('centered')
                             ->required()
                             ->live()
                             ->helperText('Use the small icon on the section card to switch designs visually.'),
                         FileUpload::make('settings.image')
-                            ->label('Right-side image')
+                            ->label('Image')
                             ->image()
                             ->disk('public')
                             ->directory('theme-builder/hero')
                             ->maxSize(4096)
                             ->imagePreviewHeight('80')
                             ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
-                            ->visible(fn (Get $get) => $get('settings.variant') === 'split')
-                            ->helperText('Used by the Split image variant.'),
+                            ->visible(fn (Get $get) => in_array($get('settings.variant'), ['split', 'bg_image'], true))
+                            ->helperText('Used as the side image (Split) or full-bleed background (Background image).'),
+                        TextInput::make('settings.overlay')
+                            ->label('Background overlay opacity')
+                            ->helperText('How dark the layer over the photo is, 0–1 (e.g. 0.55).')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(1)
+                            ->step(0.05)
+                            ->default(0.55)
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'bg_image'),
+                        Repeater::make('settings.stats')
+                            ->label('Stats row')
+                            ->schema([
+                                TextInput::make('value')->label('Value')->required()->maxLength(16),
+                                TextInput::make('label')->label('Label')->required()->maxLength(40),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->reorderable()
+                            ->minItems(1)
+                            ->maxItems(4)
+                            ->addActionLabel('Add stat')
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'with_stats')
+                            ->helperText('Three works best. Used by the With stats variant.'),
                     ])->columns(1),
                 Section::make('Content')
                     ->schema([
@@ -502,14 +549,53 @@ class SectionRegistry
             ],
 
             'text' => [
+                Section::make('Design')
+                    ->schema([
+                        Select::make('settings.variant')
+                            ->label('Layout')
+                            ->options([
+                                'default'    => 'Heading + body',
+                                'two_column' => 'Two columns',
+                                'callout'    => 'Callout box',
+                                'quote'      => 'Pull quote',
+                            ])
+                            ->default('default')
+                            ->required()
+                            ->live()
+                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                    ])->columns(1),
                 Section::make('Content')
                     ->schema([
                         TextInput::make('settings.heading')->label('Heading')->maxLength(120),
                         Textarea::make('settings.body')->label('Body')->rows(5)->required(),
+                        TextInput::make('settings.attribution')
+                            ->label('Attribution')
+                            ->maxLength(120)
+                            ->placeholder('— Author Name')
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'quote')
+                            ->helperText('Used by the Pull quote variant.'),
+                        Select::make('settings.calloutColor')
+                            ->label('Callout color')
+                            ->options([
+                                'info'    => 'Info — light blue / blue accent',
+                                'success' => 'Success — light green / green accent',
+                                'warning' => 'Warning — light amber / amber accent',
+                                'danger'  => 'Danger — light red / red accent',
+                                'note'    => 'Note — light violet / purple accent',
+                                'neutral' => 'Neutral — light gray / slate accent',
+                                'brand'   => 'Brand — uses your site primary color',
+                            ])
+                            ->default('info')
+                            ->required()
+                            ->native(false)
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'callout')
+                            ->helperText('Used by the Callout box variant.'),
                         Select::make('settings.align')
                             ->label('Alignment')
                             ->options(['left' => 'Left', 'center' => 'Center', 'right' => 'Right'])
-                            ->default('left'),
+                            ->default('left')
+                            ->visible(fn (Get $get) => in_array($get('settings.variant') ?? 'default', ['default', 'callout', 'quote'], true))
+                            ->helperText('Two-column variant ignores alignment.'),
                     ])->columns(1),
                 Section::make('Style')
                     ->schema([

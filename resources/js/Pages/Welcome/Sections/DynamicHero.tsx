@@ -1,6 +1,9 @@
+interface HeroStat { value?: string; label?: string }
+
 interface HeroSettings {
-    variant?: 'centered' | 'split';
+    variant?: 'centered' | 'split' | 'bg_image' | 'minimal' | 'with_stats';
     image?: string | null;
+    overlay?: number | string;
     eyebrow?: string;
     headline?: string;
     subtitle?: string;
@@ -11,11 +14,18 @@ interface HeroSettings {
     fg?: string;
     buttonBg?: string;
     buttonFg?: string;
+    stats?: HeroStat[];
 }
 
 export default function DynamicHero({ settings }: { settings: HeroSettings }) {
-    const variant = settings.variant ?? 'centered';
-    return variant === 'split' ? <SplitHero settings={settings} /> : <CenteredHero settings={settings} />;
+    switch (settings.variant) {
+        case 'split':      return <SplitHero      settings={settings} />;
+        case 'bg_image':   return <BgImageHero    settings={settings} />;
+        case 'minimal':    return <MinimalHero    settings={settings} />;
+        case 'with_stats': return <WithStatsHero  settings={settings} />;
+        case 'centered':
+        default:           return <CenteredHero   settings={settings} />;
+    }
 }
 
 // ── Variant: centered ───────────────────────────────────────────────────────
@@ -150,6 +160,178 @@ function SplitHero({ settings }: { settings: HeroSettings }) {
                     }
                 }
             `}</style>
+        </section>
+    );
+}
+
+// ── Variant: bg_image (full-bleed background photo + overlay) ──────────────
+
+function BgImageHero({ settings }: { settings: HeroSettings }) {
+    const overlay = Math.max(0, Math.min(1, Number(settings.overlay) || 0));
+    const fg = settings.fg && settings.fg !== '#000000' ? settings.fg : '#ffffff';
+
+    return (
+        <section
+            style={{
+                position: 'relative',
+                background: settings.bg ?? '#0f172a',
+                color: fg,
+                overflow: 'hidden',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+            }}
+        >
+            {settings.image && (
+                <img
+                    src={`/storage/${settings.image}`}
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                    }}
+                />
+            )}
+            {/* Dark overlay for legibility */}
+            <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: `linear-gradient(180deg, rgba(0,0,0,${overlay * 0.85}) 0%, rgba(0,0,0,${overlay}) 100%)`,
+            }} />
+            <div style={{
+                position: 'relative',
+                maxWidth: '900px',
+                margin: '0 auto',
+                padding: 'clamp(80px, 14vw, 180px) clamp(16px, 4vw, 32px)',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '20px',
+            }}>
+                {settings.eyebrow && (
+                    <span style={{ ...eyebrowStyle, color: fg, opacity: 0.85 }}>{settings.eyebrow}</span>
+                )}
+                <h1 style={{ ...headlineStyle, color: fg, maxWidth: '24ch' }}>
+                    {settings.headline ?? 'A great big headline goes here'}
+                </h1>
+                {settings.subtitle && (
+                    <p style={{ ...subtitleStyle, color: fg, opacity: 0.9 }}>{settings.subtitle}</p>
+                )}
+                {settings.buttonText && (
+                    <a href={settings.buttonHref || '#'} style={ctaStyle(settings)}>{settings.buttonText}</a>
+                )}
+            </div>
+        </section>
+    );
+}
+
+// ── Variant: minimal (compact left-aligned headline + button) ──────────────
+
+function MinimalHero({ settings }: { settings: HeroSettings }) {
+    return (
+        <section
+            style={{
+                background: settings.bg ?? '#ffffff',
+                color: settings.fg ?? '#000000',
+                padding: 'clamp(40px, 7vw, 80px) clamp(16px, 4vw, 32px)',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+            }}
+        >
+            <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 14 }}>
+                <h1 style={{
+                    fontSize: 'clamp(1.75rem, 4.5vw, 3rem)',
+                    fontWeight: 700,
+                    letterSpacing: '-0.025em',
+                    lineHeight: 1.15,
+                    margin: 0,
+                    maxWidth: '24ch',
+                }}>
+                    {settings.headline ?? 'A great big headline goes here'}
+                </h1>
+                {settings.buttonText && (
+                    <a href={settings.buttonHref || '#'} style={ctaStyle(settings)}>{settings.buttonText}</a>
+                )}
+            </div>
+        </section>
+    );
+}
+
+// ── Variant: with_stats (centered + a small row of stats) ──────────────────
+
+function WithStatsHero({ settings }: { settings: HeroSettings }) {
+    const stats = (settings.stats ?? []).filter((s) => s.value || s.label);
+
+    return (
+        <section
+            style={{
+                background: settings.bg ?? '#ffffff',
+                color: settings.fg ?? '#000000',
+                padding: 'clamp(48px, 10vw, 120px) clamp(16px, 4vw, 32px)',
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+            }}
+        >
+            <div style={{
+                maxWidth: '900px',
+                margin: '0 auto',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 20,
+            }}>
+                {settings.eyebrow && (
+                    <span style={eyebrowStyle}>{settings.eyebrow}</span>
+                )}
+                <h1 style={{ ...headlineStyle, maxWidth: '24ch' }}>
+                    {settings.headline ?? 'A great big headline goes here'}
+                </h1>
+                {settings.subtitle && (
+                    <p style={subtitleStyle}>{settings.subtitle}</p>
+                )}
+                {settings.buttonText && (
+                    <a href={settings.buttonHref || '#'} style={ctaStyle(settings)}>{settings.buttonText}</a>
+                )}
+
+                {stats.length > 0 && (
+                    <div style={{
+                        marginTop: 28,
+                        paddingTop: 24,
+                        borderTop: '1px solid color-mix(in srgb, currentColor 12%, transparent)',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        gap: 'clamp(24px, 4vw, 48px)',
+                        rowGap: 18,
+                    }}>
+                        {stats.map((s, i) => (
+                            <div key={i} style={{ textAlign: 'center', minWidth: 80 }}>
+                                <div style={{
+                                    fontSize: 'clamp(1.25rem, 2.4vw, 1.75rem)',
+                                    fontWeight: 800,
+                                    letterSpacing: '-0.02em',
+                                    lineHeight: 1,
+                                }}>
+                                    {s.value}
+                                </div>
+                                <div style={{
+                                    marginTop: 4,
+                                    fontSize: '0.8125rem',
+                                    opacity: 0.65,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.08em',
+                                    fontWeight: 600,
+                                }}>
+                                    {s.label}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </section>
     );
 }
