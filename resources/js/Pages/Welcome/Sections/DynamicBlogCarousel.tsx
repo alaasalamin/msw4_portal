@@ -540,11 +540,11 @@ function SplitSlide({ post, slideIndex, active, accent, fg, bg, mutedFg, showCat
 
 function CardSlide({ post, active, accent, fg, bg, mutedFg, showCategory, showDate, showExcerpt, showReadMore, readMoreLabel }: SlideProps) {
     return (
-        <div style={{
+        <div className="tb-bc-card" style={{
             height: '100%',
             padding: 'clamp(16px, 3vw, 32px)',
         }}>
-            <div style={{
+            <div className="tb-bc-card-inner" style={{
                 height: '100%',
                 background: bg,
                 color: fg,
@@ -554,10 +554,23 @@ function CardSlide({ post, active, accent, fg, bg, mutedFg, showCategory, showDa
                 display: 'flex',
                 flexDirection: 'column',
             }}>
-                <div style={{ flex: '0 0 58%', position: 'relative', background: '#0b1220' }}>
+                {/* Mobile-only meta row — sits above the image so the
+                    category pill stays visible when the card height
+                    collapses below the desktop break (the desktop meta
+                    row inside the content panel gets clipped because
+                    the carousel viewport's aspect ratio leaves it too
+                    little vertical space). */}
+                <div className="tb-bc-card-meta-mobile" style={{
+                    padding: '14px 18px 4px',
+                }}>
+                    <MetaRow post={post} accent={accent} showCategory={showCategory} showDate={showDate} color={mutedFg} />
+                </div>
+
+                <div className="tb-bc-card-image" style={{ flex: '0 0 58%', position: 'relative', background: '#0b1220' }}>
                     <CoverImage src={post.image} accent={accent} eager={active} />
                 </div>
-                <div style={{
+
+                <div className="tb-bc-card-body" style={{
                     flex: '1 1 auto',
                     padding: 'clamp(20px, 3vw, 32px)',
                     display: 'flex',
@@ -566,7 +579,9 @@ function CardSlide({ post, active, accent, fg, bg, mutedFg, showCategory, showDa
                     gap: 12,
                     minHeight: 0,
                 }}>
-                    <MetaRow post={post} accent={accent} showCategory={showCategory} showDate={showDate} color={mutedFg} />
+                    <div className="tb-bc-card-meta-desktop">
+                        <MetaRow post={post} accent={accent} showCategory={showCategory} showDate={showDate} color={mutedFg} />
+                    </div>
                     <h3 style={{
                         margin: 0,
                         fontSize: 'clamp(1.25rem, 2.2vw, 1.875rem)',
@@ -577,7 +592,7 @@ function CardSlide({ post, active, accent, fg, bg, mutedFg, showCategory, showDa
                         <a href={post.href} style={{ color: fg, textDecoration: 'none' }}>{post.title}</a>
                     </h3>
                     {showExcerpt && post.excerpt && (
-                        <p style={{
+                        <p className="tb-bc-card-excerpt" style={{
                             margin: 0,
                             fontSize: '0.9375rem',
                             color: mutedFg,
@@ -591,6 +606,19 @@ function CardSlide({ post, active, accent, fg, bg, mutedFg, showCategory, showDa
                     {showReadMore && <ReadMoreBtn href={post.href} label={readMoreLabel} onLight />}
                 </div>
             </div>
+            <style>{`
+                .tb-bc-card-meta-mobile { display: none; }
+                @media (max-width: 720px) {
+                    .tb-bc-card { padding: 12px !important; }
+                    .tb-bc-card-meta-mobile  { display: block !important; }
+                    .tb-bc-card-meta-desktop { display: none !important; }
+                    /* Cap the image so the body always has room for
+                       the title + excerpt + button on a 16:9 phone slide. */
+                    .tb-bc-card-image { flex: 0 0 42% !important; }
+                    .tb-bc-card-body  { padding: 14px 18px 18px !important; gap: 8px !important; justify-content: flex-start !important; }
+                    .tb-bc-card-excerpt { -webkit-line-clamp: 2 !important; }
+                }
+            `}</style>
         </div>
     );
 }
