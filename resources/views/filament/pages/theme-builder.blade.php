@@ -403,23 +403,13 @@
                     <span style="font-size:11px; font-weight:500; color:var(--tb-fg-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Live preview · {{ $previewUrl }}</span>
                 </div>
 
-                {{-- Device toggle: desktop / tablet / mobile --}}
+                {{-- Device toggle: iPad / mobile. Click an active button
+                     again to clear it and return to the full-width view. --}}
                 <div style="display:inline-flex; align-items:center; gap:4px; padding:3px; border-radius:8px; background:var(--tb-card-bg); border:1px solid var(--tb-border);">
                     <button type="button"
                         class="tb-device-btn"
-                        x-bind:class="device === 'desktop' ? 'tb-device-btn--active' : ''"
-                        x-on:click="device = 'desktop'"
-                        title="Desktop view"
-                        aria-label="Desktop view"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px; height:14px;">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
-                        </svg>
-                    </button>
-                    <button type="button"
-                        class="tb-device-btn"
                         x-bind:class="device === 'tablet' ? 'tb-device-btn--active' : ''"
-                        x-on:click="device = 'tablet'"
+                        x-on:click="device = device === 'tablet' ? 'desktop' : 'tablet'"
                         title="iPad / tablet view"
                         aria-label="Tablet view"
                     >
@@ -431,7 +421,7 @@
                     <button type="button"
                         class="tb-device-btn"
                         x-bind:class="device === 'mobile' ? 'tb-device-btn--active' : ''"
-                        x-on:click="device = 'mobile'"
+                        x-on:click="device = device === 'mobile' ? 'desktop' : 'mobile'"
                         title="Mobile view"
                         aria-label="Mobile view"
                     >
