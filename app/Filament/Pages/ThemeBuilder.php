@@ -346,13 +346,7 @@ class ThemeBuilder extends Page
         return Action::make('editSection')
             ->label('Edit')
             ->icon('heroicon-m-pencil-square')
-            // Hero gets the wide modal because it ships a click-to-edit
-            // visual preview at the top of the form. The other section
-            // types stay at 2xl until they get the same treatment.
-            ->modalWidth(function (array $arguments) {
-                $section = $this->findSection($arguments['id'] ?? null);
-                return ($section['type'] ?? null) === 'hero' ? '5xl' : '2xl';
-            })
+            ->modalWidth('2xl')
             ->modalSubmitActionLabel('Save')
             ->modalHeading(function (array $arguments): string {
                 $section = $this->findSection($arguments['id'] ?? null);
