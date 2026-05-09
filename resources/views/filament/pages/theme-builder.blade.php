@@ -49,7 +49,18 @@
             outline-offset: 2px;
         }
 
-        /* Drag handle + row drag affordances */
+        /* ── Drag-and-drop styling (SortableJS-driven) ──
+           SortableJS is bundled globally by Filament (window.Sortable).
+           In forceFallback mode it owns three classes on a row:
+             - .tb-row-chosen   the original li while drag is active.
+                                We keep it visually quiet so the floating
+                                clone is the focal point.
+             - .tb-row-ghost    the slot Sortable opens up to show where
+                                the item will land. We render it as a
+                                dashed-bordered empty placeholder.
+             - .tb-row-dragging the floating clone that follows the
+                                cursor. This is what we lift to scale 1.04
+                                with a primary-tinted shadow. */
         .tb-grip {
             flex: 0 0 18px;
             display: flex;
@@ -62,40 +73,36 @@
             transition: color .12s ease;
         }
         .tb-grip:hover { color: var(--tb-fg-soft); }
-        .tb-grip:active,
-        .tb-row--dragging .tb-grip { cursor: grabbing; }
+        .tb-grip:active { cursor: grabbing; }
 
-        /* Smooth physics for both the dragged row's lift and the surrounding
-           rows' shift-to-make-room translateY. Two different easings:
-           transform glides on a strong outwards curve, the box-shadow fades
-           gently. */
-        .tb-row {
-            position: relative;
-            transition:
-                transform   240ms cubic-bezier(0.22, 0.61, 0.36, 1),
-                box-shadow  200ms ease,
-                border-color 160ms ease,
-                opacity     180ms ease;
-            will-change: transform;
+        .tb-row { position: relative; }
+
+        /* The empty drop slot Sortable opens up between rows. */
+        .tb-row-ghost {
+            opacity: 1;
+            background: var(--tb-empty-bg) !important;
+            border-style: dashed !important;
+            border-color: #0284c7 !important;
         }
-        /* The dragged row stays in its DOM position but scales up slightly
-           and lifts with a soft shadow, becoming the visible "picked up"
-           anchor. The browser's default drag-image still follows the cursor,
-           but that's secondary — this is what the user reads as "selected". */
-        .tb-row--dragging {
+        .tb-row-ghost > * { visibility: hidden; }
+
+        /* Original li while dragging — Sortable hides this once the
+           fallback clone is created, but during the brief mount it
+           shouldn't flash either. */
+        .tb-row-chosen { opacity: 0.001; }
+
+        /* The cursor-following floating clone. */
+        .tb-row-dragging {
             transform: scale(1.04);
             box-shadow:
-                0 14px 32px -8px rgba(2, 132, 199, 0.35),
-                0 6px 14px rgba(15, 23, 42, 0.12);
+                0 18px 36px -10px rgba(2, 132, 199, 0.40),
+                0 8px 18px rgba(15, 23, 42, 0.18);
             border-color: #0284c7 !important;
-            z-index: 5;
+            cursor: grabbing !important;
+            opacity: 1 !important;
+            transition: transform 160ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                        box-shadow 160ms ease;
         }
-        /* Drop indicator — a thin primary line on the side the dragged row
-           will land on. Implemented via box-shadow so it doesn't shift
-           layout the way an actual border would. Layered above the
-           default transition so it appears immediately. */
-        .tb-row--over-before { box-shadow: inset 0 3px 0 0 #0284c7; }
-        .tb-row--over-after  { box-shadow: inset 0 -3px 0 0 #0284c7; }
         .dark .tb-panel,
         html.dark .tb-panel {
             --tb-bg:           #18181b;  /* zinc-900 */
@@ -229,33 +236,23 @@
                     </p>
                 </div>
             @else
-                <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;">
+                <ul
+                    x-ref="sectionList"
+                    x-init="$nextTick(() => initSortable($refs.sectionList))"
+                    style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;"
+                >
                     @foreach ($sections as $i => $section)
                         @php
                             $type = $section['type'] ?? null;
                             $meta = $types[$type] ?? ['label' => ucfirst((string) $type), 'icon' => 'heroicon-o-square-2-stack', 'desc' => ''];
                             $sid  = $section['id'] ?? '';
-                            $first = $i === 0;
-                            $last  = $i === $count - 1;
                         @endphp
                         @php $hasVariants = $this->typeHasVariants($type ?? ''); @endphp
                         <li
                             class="tb-row"
                             data-section-id="{{ $sid }}"
-                            draggable="true"
-                            x-on:dragstart="onRowDragStart($event, '{{ $sid }}')"
-                            x-on:dragover.prevent="onRowDragOver($event, '{{ $sid }}')"
-                            x-on:dragleave="onRowDragLeave($event, '{{ $sid }}')"
-                            x-on:drop.prevent="onRowDrop($event, '{{ $sid }}')"
-                            x-on:dragend="onRowDragEnd()"
-                            x-bind:class="{
-                                'tb-row--dragging':    dragId === '{{ $sid }}',
-                                'tb-row--over-before': overId === '{{ $sid }}' && overPos === 'before' && dragId !== '{{ $sid }}',
-                                'tb-row--over-after':  overId === '{{ $sid }}' && overPos === 'after'  && dragId !== '{{ $sid }}',
-                            }"
                             style="display:flex; align-items:center; gap:10px; padding:10px;
-                                   background:var(--tb-card-bg); border:1px solid var(--tb-border); border-radius:10px;
-                                   transition: transform .12s ease, opacity .12s ease;"
+                                   background:var(--tb-card-bg); border:1px solid var(--tb-border); border-radius:10px;"
                         >
                             <span class="tb-grip" title="Drag to reorder" aria-hidden="true">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px; height:14px;">
@@ -384,134 +381,37 @@
     <script>
         function themeBuilder() {
             return {
-                // ── Drag-and-drop reorder state ──
-                // dragId    = id of the row currently being dragged (dragstart)
-                // overId    = id of the row the cursor is currently over
-                // overPos   = 'before' | 'after' — which side of overId the
-                //             dragged row will land on, decided by whether the
-                //             cursor is in the top or bottom half of overId.
-                // rowShift  = pixel distance one row should travel to make
-                //             space for an adjacent slot. Captured at dragstart
-                //             from the dragged row's height + the parent gap
-                //             so adjacent rows slide cleanly into each other.
-                dragId: null,
-                overId: null,
-                overPos: null,
-                rowShift: 0,
-
-                onRowDragStart(event, id) {
-                    const row = event.currentTarget;
-                    const rect = row.getBoundingClientRect();
-                    // Parent uses `gap: 8px` between list items — include it
-                    // in the shift distance so adjacent rows align perfectly
-                    // with the empty slot left behind.
-                    this.rowShift = Math.round(rect.height + 8);
-                    this.dragId = id;
-                    // Required by Firefox to actually start the drag.
-                    event.dataTransfer.effectAllowed = 'move';
-                    event.dataTransfer.setData('text/plain', id);
-                },
-                onRowDragOver(event, id) {
-                    if (!this.dragId || this.dragId === id) return;
-                    event.dataTransfer.dropEffect = 'move';
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    const midY = rect.top + rect.height / 2;
-                    this.overId  = id;
-                    this.overPos = event.clientY < midY ? 'before' : 'after';
-                    this.applyShifts();
-                },
-                onRowDragLeave(event, id) {
-                    // Only clear the indicator when the cursor truly leaves
-                    // this row — dragover fires repeatedly during a slow drag
-                    // and we don't want to flicker. relatedTarget is the
-                    // element the pointer just entered, so contains() tells us
-                    // whether we're still inside this row's subtree.
-                    if (this.overId === id && !event.currentTarget.contains(event.relatedTarget)) {
-                        this.overId  = null;
-                        this.overPos = null;
-                        this.applyShifts();
-                    }
-                },
-                onRowDrop(event, targetId) {
-                    // Clear inline transforms BEFORE Livewire re-renders, or
-                    // the still-translated rows will jump from their shifted
-                    // position back to wherever the new HTML places them.
-                    this.clearShifts();
-
-                    if (!this.dragId || this.dragId === targetId) {
-                        this.resetDragState();
-                        return;
-                    }
-                    const rows = [...this.$root.querySelectorAll('[data-section-id]')];
-                    const ids  = rows.map(r => r.dataset.sectionId);
-                    const fromIdx = ids.indexOf(this.dragId);
-                    if (fromIdx === -1) { this.resetDragState(); return; }
-
-                    const [moved] = ids.splice(fromIdx, 1);
-                    let toIdx = ids.indexOf(targetId);
-                    if (this.overPos === 'after') toIdx += 1;
-                    ids.splice(toIdx, 0, moved);
-
-                    this.$wire.reorderSections(ids);
-                    this.resetDragState();
-                },
-                onRowDragEnd() {
-                    // Fires whether the drop succeeded or the user dropped
-                    // outside the list / hit Esc. Make sure transforms are
-                    // cleaned up either way.
-                    this.clearShifts();
-                    this.resetDragState();
-                },
-
                 /**
-                 * Slide every row that sits between the dragged row's slot
-                 * and the chosen drop slot — those are the ones whose visual
-                 * position would change in the final layout, so they animate
-                 * out of the way to telegraph the upcoming reorder. The
-                 * dragged row itself and rows outside the affected range get
-                 * an empty transform so any lingering inline value is reset.
+                 * Wire SortableJS onto the section list. Filament bundles
+                 * SortableJS globally as window.Sortable, so no extra
+                 * dependency is needed. forceFallback gives us full control
+                 * over the cursor-following clone (`tb-row-dragging`),
+                 * letting us scale it up and add a primary-tinted shadow.
+                 * The real layout shifting between rows is animated by
+                 * Sortable itself with a 240ms cubic-bezier easing — no
+                 * manual translateY math, no overlap bugs.
                  */
-                applyShifts() {
-                    const rows = [...this.$root.querySelectorAll('[data-section-id]')];
-                    if (!this.dragId || !this.overId || this.dragId === this.overId) {
-                        rows.forEach(r => { r.style.transform = ''; });
-                        return;
-                    }
-                    const ids     = rows.map(r => r.dataset.sectionId);
-                    const dragIdx = ids.indexOf(this.dragId);
-                    const overIdx = ids.indexOf(this.overId);
-                    let insertIdx = overIdx + (this.overPos === 'after' ? 1 : 0);
-
-                    rows.forEach((row, i) => {
-                        if (i === dragIdx) {
-                            // Dragged row keeps its CSS-driven scale lift —
-                            // do not write an inline transform here.
-                            row.style.transform = '';
-                            return;
-                        }
-                        let dy = 0;
-                        if (insertIdx > dragIdx && i > dragIdx && i < insertIdx) {
-                            // Moving the dragged row down past these — they
-                            // shift up to fill its old slot.
-                            dy = -this.rowShift;
-                        } else if (insertIdx < dragIdx && i >= insertIdx && i < dragIdx) {
-                            // Moving the dragged row up past these — they
-                            // shift down to clear the new slot.
-                            dy = this.rowShift;
-                        }
-                        row.style.transform = dy ? `translateY(${dy}px)` : '';
+                initSortable(list) {
+                    if (!list || !window.Sortable) return;
+                    if (list.__tbSortable) list.__tbSortable.destroy();
+                    list.__tbSortable = new window.Sortable(list, {
+                        animation: 240,
+                        easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
+                        handle: '.tb-grip',
+                        forceFallback: true,
+                        fallbackTolerance: 4,
+                        ghostClass:  'tb-row-ghost',
+                        chosenClass: 'tb-row-chosen',
+                        dragClass:   'tb-row-dragging',
+                        onEnd: (evt) => {
+                            if (evt.oldIndex === evt.newIndex) return;
+                            const ids = [...list.querySelectorAll('[data-section-id]')]
+                                .map(r => r.dataset.sectionId);
+                            this.$wire.reorderSections(ids);
+                        },
                     });
                 },
-                clearShifts() {
-                    this.$root.querySelectorAll('[data-section-id]')
-                        .forEach(r => { r.style.transform = ''; });
-                },
-                resetDragState() {
-                    this.dragId = null;
-                    this.overId = null;
-                    this.overPos = null;
-                    this.rowShift = 0;
-                },
+
 
                 reloadPreview() {
                     const iframe = this.$refs.preview;
