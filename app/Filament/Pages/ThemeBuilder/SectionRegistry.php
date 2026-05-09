@@ -703,7 +703,16 @@ class SectionRegistry
             ],
 
             'hero' => [
+                // Click-to-edit visual preview that mirrors the rendered
+                // hero. Reads/writes the same form state the fields below
+                // do, so power users can still drop into the structured
+                // form for advanced bits (variant, alignment, image upload,
+                // stats repeater) while everyday text/color tweaks happen
+                // right on top of the rendered preview.
+                \Filament\Schemas\Components\View::make('filament.pages.theme-builder.hero-visual-editor'),
                 Section::make('Design')
+                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         Select::make('settings.variant')
                             ->label('Layout')
