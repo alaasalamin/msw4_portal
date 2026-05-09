@@ -484,10 +484,9 @@
 
                 // Desktop simulates a 1366px-wide laptop viewport. The
                 // preview pane in the page is narrower, so we render the
-                // iframe at the full logical width and CSS-scale it down to
-                // fit. ResizeObserver keeps the scale honest as the window
-                // resizes or the user toggles between devices.
-                previewObserver: null,
+                // iframe at the full logical width and CSS-scale it down
+                // to fit. The scale is recomputed on window resize and on
+                // the stage's max-width transitionend (device toggles).
 
                 // ── Drag-and-drop reorder state ──
                 // dragId  = id of the row currently being dragged (set on dragstart)
@@ -564,32 +563,32 @@
                 // iframe so the desktop view always fills its container at a
                 // 1366px logical width. Tablet and mobile render 1:1.
                 //
-                // We observe the OUTER frame, not the inner stage. The stage's
-                // size depends on iframe content layout; updating iframe
-                // height inside the observer caused a feedback loop that
-                // flickered the preview. The frame's size only changes when
-                // the browser window resizes — not when iframe styles change.
-                // Device toggles are picked up via $watch + the stage's
-                // max-width transitionend so we still recompute after the
-                // 280ms width animation finishes.
+                // ResizeObserver was used here originally but caused a
+                // flicker loop — observing any container in the preview tree
+                // re-fired the callback after we wrote iframe styles, which
+                // then re-wrote them. Switched to a plain window resize
+                // listener (the only thing that genuinely changes the
+                // outer frame's width) plus the stage's max-width
+                // transitionend (the only thing that changes the inner
+                // stage's width during a device toggle).
                 init() {
+                    if (this._previewInited) return;
+                    this._previewInited = true;
+
+                    let raf = null;
                     const recompute = () => {
-                        if (this._previewRaf) return;
-                        this._previewRaf = requestAnimationFrame(() => {
-                            this._previewRaf = null;
+                        if (raf) return;
+                        raf = requestAnimationFrame(() => {
+                            raf = null;
                             this.updatePreviewScale();
                         });
                     };
 
                     this.$watch('device', () => recompute());
+                    window.addEventListener('resize', recompute, { passive: true });
 
                     this.$nextTick(() => {
-                        const frame = this.$root.querySelector('.tb-preview-frame');
                         const stage = this.$root.querySelector('.tb-preview-stage');
-                        if (frame && window.ResizeObserver) {
-                            this.previewObserver = new ResizeObserver(recompute);
-                            this.previewObserver.observe(frame);
-                        }
                         if (stage) {
                             stage.addEventListener('transitionend', (e) => {
                                 if (e.propertyName === 'max-width') recompute();
