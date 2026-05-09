@@ -282,9 +282,26 @@ function Burger({ open, onToggle, color, className }: { open: boolean; onToggle:
 }
 
 function MobileMenu({ open, links, linkColor, onLinkClick }: { open: boolean; links: NavLink[]; linkColor: string; onLinkClick: () => void }) {
-    if (!open) return null;
+    // Always render so max-height + opacity have something to transition to.
+    // The .tb-header-mobile class flips display:block on narrow viewports
+    // via the shared responsive stylesheet at the bottom of the file.
     return (
-        <div className="tb-header-mobile" style={{ display: 'none', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+        <div
+            className="tb-header-mobile"
+            aria-hidden={!open}
+            style={{
+                display: 'none',
+                overflow: 'hidden',
+                maxHeight: open ? 480 : 0,
+                opacity: open ? 1 : 0,
+                borderTop: open ? '1px solid rgba(255,255,255,.08)' : '1px solid transparent',
+                transition:
+                    'max-height 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
+                    'opacity 220ms ease, ' +
+                    'border-color 220ms ease',
+                pointerEvents: open ? 'auto' : 'none',
+            }}
+        >
             <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {links.map((l, i) => (
                     <a key={i} href={l.href} onClick={onLinkClick} style={{
@@ -397,21 +414,32 @@ function CenteredHeader({ settings, bottom }: { settings: HeaderSettings; bottom
                     </button>
                 )}
             </div>
-            {open && (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,.08)' }}>
-                    <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
-                        {d.links.map((l, i) => (
-                            <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
-                                color: d.linkColor,
-                                textDecoration: 'none',
-                                padding: '10px 8px',
-                                borderRadius: 6,
-                                fontSize: '0.9375rem',
-                            }}>{l.label}</a>
-                        ))}
-                    </nav>
-                </div>
-            )}
+            <div
+                aria-hidden={!open}
+                style={{
+                    overflow: 'hidden',
+                    maxHeight: open ? 480 : 0,
+                    opacity: open ? 1 : 0,
+                    borderTop: open ? '1px solid rgba(255,255,255,.08)' : '1px solid transparent',
+                    transition:
+                        'max-height 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
+                        'opacity 220ms ease, ' +
+                        'border-color 220ms ease',
+                    pointerEvents: open ? 'auto' : 'none',
+                }}
+            >
+                <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
+                    {d.links.map((l, i) => (
+                        <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
+                            color: d.linkColor,
+                            textDecoration: 'none',
+                            padding: '10px 8px',
+                            borderRadius: 6,
+                            fontSize: '0.9375rem',
+                        }}>{l.label}</a>
+                    ))}
+                </nav>
+            </div>
             {bottom}
         </header>
     );
@@ -517,21 +545,32 @@ function MinimalHeader({ settings, bottom }: { settings: HeaderSettings; bottom?
                     </button>
                 )}
             </div>
-            {open && (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,.08)' }}>
-                    <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
-                        {d.links.map((l, i) => (
-                            <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
-                                color: d.linkColor,
-                                textDecoration: 'none',
-                                padding: '10px 8px',
-                                borderRadius: 6,
-                                fontSize: '0.9375rem',
-                            }}>{l.label}</a>
-                        ))}
-                    </nav>
-                </div>
-            )}
+            <div
+                aria-hidden={!open}
+                style={{
+                    overflow: 'hidden',
+                    maxHeight: open ? 480 : 0,
+                    opacity: open ? 1 : 0,
+                    borderTop: open ? '1px solid rgba(255,255,255,.08)' : '1px solid transparent',
+                    transition:
+                        'max-height 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
+                        'opacity 220ms ease, ' +
+                        'border-color 220ms ease',
+                    pointerEvents: open ? 'auto' : 'none',
+                }}
+            >
+                <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
+                    {d.links.map((l, i) => (
+                        <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
+                            color: d.linkColor,
+                            textDecoration: 'none',
+                            padding: '10px 8px',
+                            borderRadius: 6,
+                            fontSize: '0.9375rem',
+                        }}>{l.label}</a>
+                    ))}
+                </nav>
+            </div>
             {bottom}
         </header>
     );
