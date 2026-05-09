@@ -560,40 +560,16 @@
                     iframe.src = url.pathname + url.search;
                 },
 
-                // Watch for device changes + window resizes and rescale the
+                // Watch for device changes + stage resizes and rescale the
                 // iframe so the desktop view always fills its container at a
                 // 1366px logical width. Tablet and mobile render 1:1.
-                //
-                // We observe the OUTER frame, not the inner stage. The stage's
-                // size depends on iframe content layout; updating iframe
-                // height inside the observer caused a feedback loop that
-                // flickered the preview. The frame's size only changes when
-                // the browser window resizes — not when iframe styles change.
-                // Device toggles are picked up via $watch + the stage's
-                // max-width transitionend so we still recompute after the
-                // 280ms width animation finishes.
                 init() {
-                    const recompute = () => {
-                        if (this._previewRaf) return;
-                        this._previewRaf = requestAnimationFrame(() => {
-                            this._previewRaf = null;
-                            this.updatePreviewScale();
-                        });
-                    };
-
-                    this.$watch('device', () => recompute());
-
+                    this.$watch('device', () => this.updatePreviewScale());
                     this.$nextTick(() => {
-                        const frame = this.$root.querySelector('.tb-preview-frame');
                         const stage = this.$root.querySelector('.tb-preview-stage');
-                        if (frame && window.ResizeObserver) {
-                            this.previewObserver = new ResizeObserver(recompute);
-                            this.previewObserver.observe(frame);
-                        }
-                        if (stage) {
-                            stage.addEventListener('transitionend', (e) => {
-                                if (e.propertyName === 'max-width') recompute();
-                            });
+                        if (stage && window.ResizeObserver) {
+                            this.previewObserver = new ResizeObserver(() => this.updatePreviewScale());
+                            this.previewObserver.observe(stage);
                         }
                         this.updatePreviewScale();
                     });
@@ -603,52 +579,37 @@
                     const stage = this.$root.querySelector('.tb-preview-stage');
                     if (!iframe || !stage) return;
 
-                    // Compute next state up-front, then bail if it matches
-                    // the last applied state. Stops the feedback loop where
-                    // setting iframe.height shifts the stage's reported
-                    // bounding rect by < 1px which the observer treats as a
-                    // change and re-triggers us. Comparing rounded values
-                    // also avoids subpixel thrash.
-                    const want = this._computePreviewState(stage);
-                    if (this._lastPreviewState === want.key) return;
-                    this._lastPreviewState = want.key;
-
-                    iframe.style.width = want.width;
-                    iframe.style.height = want.height;
-                    iframe.style.transform = want.transform;
-                    iframe.style.transformOrigin = want.transformOrigin;
-                },
-                _computePreviewState(stage) {
                     if (this.device !== 'desktop') {
-                        return {
-                            key: 'native',
-                            width: '100%',
-                            height: '100%',
-                            transform: '',
-                            transformOrigin: '',
-                        };
+                        // Tablet / mobile render at their actual viewport
+                        // size — no scale, no compensating height inflation.
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100%';
+                        iframe.style.transform = '';
+                        iframe.style.transformOrigin = '';
+                        return;
                     }
+
                     const TARGET = 1366;
                     const rect = stage.getBoundingClientRect();
-                    const w = Math.round(rect.width);
-                    const h = Math.round(rect.height);
-                    if (w <= 0 || w >= TARGET) {
-                        return {
-                            key: `desktop-native-${w}-${h}`,
-                            width: '100%',
-                            height: '100%',
-                            transform: '',
-                            transformOrigin: '',
-                        };
+                    if (rect.width <= 0) return;
+
+                    if (rect.width >= TARGET) {
+                        // Container is wider than a typical laptop — no need
+                        // to fake a smaller viewport, just fill normally.
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100%';
+                        iframe.style.transform = '';
+                        iframe.style.transformOrigin = '';
+                        return;
                     }
-                    const scale = w / TARGET;
-                    return {
-                        key: `desktop-${w}-${h}`,
-                        width: TARGET + 'px',
-                        height: Math.round(h / scale) + 'px',
-                        transform: `scale(${scale.toFixed(4)})`,
-                        transformOrigin: 'top left',
-                    };
+
+                    const scale = rect.width / TARGET;
+                    iframe.style.width = TARGET + 'px';
+                    // Inflate the iframe's logical height by 1/scale so the
+                    // scaled-down result still fills the stage vertically.
+                    iframe.style.height = (rect.height / scale) + 'px';
+                    iframe.style.transform = `scale(${scale})`;
+                    iframe.style.transformOrigin = 'top left';
                 },
             };
         }
