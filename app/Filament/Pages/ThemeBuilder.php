@@ -471,6 +471,38 @@ class ThemeBuilder extends Page
         $this->dispatch('theme-builder:section-saved');
     }
 
+    /**
+     * Persist a new section order from a drag-and-drop reorder. The frontend
+     * sends section ids in their new top-to-bottom order; we look each one
+     * up in the current section list, rebuild the array in that sequence,
+     * and append any sections that weren't in the payload (defensive — should
+     * never happen during a normal drag, but keeps state from being lost).
+     *
+     * @param  array<int, string>  $ids
+     */
+    public function reorderSections(array $ids): void
+    {
+        $sections = $this->getPlacedSections();
+
+        $byId = [];
+        foreach ($sections as $s) {
+            if (! empty($s['id'])) $byId[$s['id']] = $s;
+        }
+
+        $reordered = [];
+        foreach ($ids as $id) {
+            if (isset($byId[$id])) {
+                $reordered[] = $byId[$id];
+                unset($byId[$id]);
+            }
+        }
+        // Preserve any sections the payload didn't reference (paranoia guard).
+        foreach ($byId as $section) $reordered[] = $section;
+
+        $this->persistSections($reordered);
+        $this->dispatch('theme-builder:section-saved');
+    }
+
     // ─────────────────────────────────────────────────────────────────
     // Header actions
     // ─────────────────────────────────────────────────────────────────

@@ -48,6 +48,33 @@
             outline: 2px solid #0284c7;
             outline-offset: 2px;
         }
+
+        /* Drag handle + row drag affordances */
+        .tb-grip {
+            flex: 0 0 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--tb-very-muted);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            transition: color .12s ease;
+        }
+        .tb-grip:hover { color: var(--tb-fg-soft); }
+        .tb-grip:active,
+        .tb-row--dragging .tb-grip { cursor: grabbing; }
+
+        .tb-row { position: relative; }
+        .tb-row--dragging {
+            opacity: 0.45;
+            transform: scale(0.99);
+        }
+        /* Drop indicator — a thin primary line on the side the dragged row
+           will land on. Implemented via box-shadow so it doesn't shift
+           layout the way an actual border would. */
+        .tb-row--over-before { box-shadow: inset 0 3px 0 0 #0284c7; }
+        .tb-row--over-after  { box-shadow: inset 0 -3px 0 0 #0284c7; }
         .dark .tb-panel,
         html.dark .tb-panel {
             --tb-bg:           #18181b;  /* zinc-900 */
@@ -150,7 +177,7 @@
                             {{ $count }}
                         </span>
                     </h2>
-                    <p style="font-size:11px; color:var(--tb-muted); margin:2px 0 0;">Top to bottom — drag isn't enabled yet, use ↑↓.</p>
+                    <p style="font-size:11px; color:var(--tb-muted); margin:2px 0 0;">Top to bottom — drag a section by its grip to reorder.</p>
                 </div>
                 <button
                     type="button"
@@ -191,8 +218,34 @@
                             $last  = $i === $count - 1;
                         @endphp
                         @php $hasVariants = $this->typeHasVariants($type ?? ''); @endphp
-                        <li style="display:flex; align-items:center; gap:10px; padding:10px;
-                                   background:var(--tb-card-bg); border:1px solid var(--tb-border); border-radius:10px;">
+                        <li
+                            class="tb-row"
+                            data-section-id="{{ $sid }}"
+                            draggable="true"
+                            x-on:dragstart="onRowDragStart($event, '{{ $sid }}')"
+                            x-on:dragover.prevent="onRowDragOver($event, '{{ $sid }}')"
+                            x-on:dragleave="onRowDragLeave($event, '{{ $sid }}')"
+                            x-on:drop.prevent="onRowDrop($event, '{{ $sid }}')"
+                            x-on:dragend="onRowDragEnd()"
+                            x-bind:class="{
+                                'tb-row--dragging':    dragId === '{{ $sid }}',
+                                'tb-row--over-before': overId === '{{ $sid }}' && overPos === 'before' && dragId !== '{{ $sid }}',
+                                'tb-row--over-after':  overId === '{{ $sid }}' && overPos === 'after'  && dragId !== '{{ $sid }}',
+                            }"
+                            style="display:flex; align-items:center; gap:10px; padding:10px;
+                                   background:var(--tb-card-bg); border:1px solid var(--tb-border); border-radius:10px;
+                                   transition: transform .12s ease, opacity .12s ease;"
+                        >
+                            <span class="tb-grip" title="Drag to reorder" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px; height:14px;">
+                                    <circle cx="9"  cy="6"  r="1.6"/>
+                                    <circle cx="15" cy="6"  r="1.6"/>
+                                    <circle cx="9"  cy="12" r="1.6"/>
+                                    <circle cx="15" cy="12" r="1.6"/>
+                                    <circle cx="9"  cy="18" r="1.6"/>
+                                    <circle cx="15" cy="18" r="1.6"/>
+                                </svg>
+                            </span>
                             @if ($hasVariants)
                                 <button
                                     type="button"
@@ -233,40 +286,6 @@
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:4px; flex:0 0 auto;">
-                                {{-- Up --}}
-                                <button
-                                    type="button"
-                                    @if ($first) disabled @endif
-                                    wire:click="moveSection('{{ $sid }}', 'up')"
-                                    title="Move up"
-                                    @style([
-                                        'width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center;
-                                         border:1px solid var(--tb-border); border-radius:6px; background:var(--tb-btn-bg);',
-                                        'cursor:pointer; color:var(--tb-fg-soft);' => ! $first,
-                                        'cursor:not-allowed; color:var(--tb-btn-disabled);' => $first,
-                                    ])
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:13px; height:13px;">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
-                                    </svg>
-                                </button>
-                                {{-- Down --}}
-                                <button
-                                    type="button"
-                                    @if ($last) disabled @endif
-                                    wire:click="moveSection('{{ $sid }}', 'down')"
-                                    title="Move down"
-                                    @style([
-                                        'width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center;
-                                         border:1px solid var(--tb-border); border-radius:6px; background:var(--tb-btn-bg);',
-                                        'cursor:pointer; color:var(--tb-fg-soft);' => ! $last,
-                                        'cursor:not-allowed; color:var(--tb-btn-disabled);' => $last,
-                                    ])
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" style="width:13px; height:13px;">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
                                 {{-- Edit (gradient — same in both themes for emphasis) --}}
                                 <button
                                     type="button"
@@ -344,6 +363,66 @@
     <script>
         function themeBuilder() {
             return {
+                // ── Drag-and-drop reorder state ──
+                // dragId  = id of the row currently being dragged (set on dragstart)
+                // overId  = id of the row the cursor is currently over
+                // overPos = 'before' | 'after' relative to overId — which side of
+                //           the hovered row the dragged item will land on, decided
+                //           by whether the cursor is in the top or bottom half.
+                dragId: null,
+                overId: null,
+                overPos: null,
+
+                onRowDragStart(event, id) {
+                    this.dragId = id;
+                    // Required by Firefox to actually start the drag.
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', id);
+                },
+                onRowDragOver(event, id) {
+                    if (!this.dragId || this.dragId === id) return;
+                    event.dataTransfer.dropEffect = 'move';
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    const midY = rect.top + rect.height / 2;
+                    this.overId  = id;
+                    this.overPos = event.clientY < midY ? 'before' : 'after';
+                },
+                onRowDragLeave(event, id) {
+                    // Only clear the indicator when the cursor truly leaves
+                    // this row — dragover fires repeatedly during a slow drag
+                    // and we don't want to flicker.
+                    if (this.overId === id && !event.currentTarget.contains(event.relatedTarget)) {
+                        this.overId  = null;
+                        this.overPos = null;
+                    }
+                },
+                onRowDrop(event, targetId) {
+                    if (!this.dragId || this.dragId === targetId) {
+                        this.resetDragState();
+                        return;
+                    }
+                    const rows = [...this.$root.querySelectorAll('[data-section-id]')];
+                    const ids  = rows.map(r => r.dataset.sectionId);
+                    const fromIdx = ids.indexOf(this.dragId);
+                    if (fromIdx === -1) { this.resetDragState(); return; }
+
+                    const [moved] = ids.splice(fromIdx, 1);
+                    let toIdx = ids.indexOf(targetId);
+                    if (this.overPos === 'after') toIdx += 1;
+                    ids.splice(toIdx, 0, moved);
+
+                    this.$wire.reorderSections(ids);
+                    this.resetDragState();
+                },
+                onRowDragEnd() {
+                    this.resetDragState();
+                },
+                resetDragState() {
+                    this.dragId = null;
+                    this.overId = null;
+                    this.overPos = null;
+                },
+
                 reloadPreview() {
                     const iframe = this.$refs.preview;
                     if (!iframe) return;
