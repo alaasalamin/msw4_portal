@@ -2,10 +2,13 @@
     use App\Filament\Pages\ThemeBuilder\SectionRegistry;
 
     // The chooseDesign action mounts with arguments[id] (the section id).
-    // Pull them out of the topmost mounted action so the picker knows
-    // which section's variants to render and which variant is currently
-    // applied (highlighted as active).
-    $args      = $this->mountedActionsArguments[count($this->mountedActions ?? []) - 1] ?? [];
+    // Filament v5.5 stores them as mountedActions[last]['arguments'] —
+    // there is no separate mountedActionsArguments property in this
+    // version. getMountedAction()->getArguments() works too but is
+    // slightly more expensive (resolves the action object); the array
+    // path is enough for a render-time read.
+    $mounted   = $this->mountedActions ?? [];
+    $args      = end($mounted)['arguments'] ?? [];
     $sectionId = $args['id'] ?? null;
     $section   = $sectionId ? $this->findSection($sectionId) : null;
 
