@@ -54,6 +54,96 @@ class AdminPanelProvider extends PanelProvider
                 return "<style>{$css}</style>";
             },
         );
+
+        // Rail-style sidebar — collapsed to icons by default on desktop,
+        // expands smoothly on hover. The sidebar is pulled out of the
+        // document flow with position: fixed so the main content area
+        // doesn't shift when the sidebar widens; .fi-main-ctn carries a
+        // left margin equal to the rail width to compensate. Mobile
+        // (< 1024px) keeps Filament's default overlay behaviour.
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::STYLES_AFTER,
+            fn () => <<<'BLADE'
+<style>
+    @media (min-width: 1024px) {
+        :root { --tb-rail: 72px; --tb-rail-open: 260px; }
+
+        /* Pull the sidebar out of the layout so width changes don't
+           push the main content. Lock it to the rail width by default. */
+        .fi-sidebar {
+            position: fixed !important;
+            top: 0; bottom: 0; left: 0;
+            width: var(--tb-rail) !important;
+            transform: none !important;
+            z-index: 40;
+            overflow: hidden;
+            transition: width 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                        box-shadow 200ms ease;
+        }
+
+        /* Reserve the rail width on the main content area. */
+        .fi-main-ctn { margin-left: var(--tb-rail) !important; }
+
+        /* Fade out everything that doesn't fit in 72px while collapsed.
+           Smooth transitions so re-entering the sidebar feels fluid. */
+        .fi-sidebar .fi-sidebar-item-label,
+        .fi-sidebar .fi-sidebar-group-label,
+        .fi-sidebar .fi-sidebar-item-badge-ctn,
+        .fi-sidebar .fi-sidebar-database-notifications-btn-label,
+        .fi-sidebar .fi-sidebar-database-notifications-btn-badge-ctn,
+        .fi-sidebar .fi-sidebar-group-collapse-btn,
+        .fi-sidebar .fi-logo {
+            opacity: 0;
+            pointer-events: none;
+            white-space: nowrap;
+            transition: opacity 220ms ease;
+        }
+
+        /* Hide Filament's sidebar collapse toggle — hover replaces it. */
+        .fi-sidebar-close-collapse-sidebar-btn,
+        .fi-sidebar-open-collapse-sidebar-btn,
+        .fi-layout-sidebar-toggle-btn-ctn {
+            display: none !important;
+        }
+
+        /* Center every nav button inside the rail so icons sit in the
+           middle of the 72px column rather than hugging the start edge. */
+        .fi-sidebar .fi-sidebar-item-btn,
+        .fi-sidebar .fi-sidebar-database-notifications-btn,
+        .fi-sidebar .fi-sidebar-group-dropdown-trigger-btn,
+        .fi-sidebar .fi-sidebar-group-btn {
+            justify-content: center !important;
+        }
+
+        /* Hover state — expand to full width, light shadow, reveal copy. */
+        .fi-sidebar:hover {
+            width: var(--tb-rail-open) !important;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        }
+        html.dark .fi-sidebar:hover {
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        }
+        .fi-sidebar:hover .fi-sidebar-item-btn,
+        .fi-sidebar:hover .fi-sidebar-database-notifications-btn,
+        .fi-sidebar:hover .fi-sidebar-group-dropdown-trigger-btn,
+        .fi-sidebar:hover .fi-sidebar-group-btn {
+            justify-content: flex-start !important;
+        }
+        .fi-sidebar:hover .fi-sidebar-item-label,
+        .fi-sidebar:hover .fi-sidebar-group-label,
+        .fi-sidebar:hover .fi-sidebar-item-badge-ctn,
+        .fi-sidebar:hover .fi-sidebar-database-notifications-btn-label,
+        .fi-sidebar:hover .fi-sidebar-database-notifications-btn-badge-ctn,
+        .fi-sidebar:hover .fi-sidebar-group-collapse-btn,
+        .fi-sidebar:hover .fi-logo {
+            opacity: 1;
+            pointer-events: auto;
+            transition-delay: 80ms;
+        }
+    }
+</style>
+BLADE,
+        );
     }
 
     public function panel(Panel $panel): Panel
