@@ -482,13 +482,6 @@
                 // matching viewport (full / 820px / 412px) with smooth easing.
                 device: 'desktop',
 
-                // Desktop simulates a 1366px-wide laptop viewport. The
-                // preview pane in the page is narrower, so we render the
-                // iframe at the full logical width and CSS-scale it down to
-                // fit. ResizeObserver keeps the scale honest as the window
-                // resizes or the user toggles between devices.
-                previewObserver: null,
-
                 // ── Drag-and-drop reorder state ──
                 // dragId  = id of the row currently being dragged (set on dragstart)
                 // overId  = id of the row the cursor is currently over
@@ -558,58 +551,6 @@
                     const url  = new URL(base, window.location.origin);
                     url.searchParams.set('t', Date.now());
                     iframe.src = url.pathname + url.search;
-                },
-
-                // Watch for device changes + stage resizes and rescale the
-                // iframe so the desktop view always fills its container at a
-                // 1366px logical width. Tablet and mobile render 1:1.
-                init() {
-                    this.$watch('device', () => this.updatePreviewScale());
-                    this.$nextTick(() => {
-                        const stage = this.$root.querySelector('.tb-preview-stage');
-                        if (stage && window.ResizeObserver) {
-                            this.previewObserver = new ResizeObserver(() => this.updatePreviewScale());
-                            this.previewObserver.observe(stage);
-                        }
-                        this.updatePreviewScale();
-                    });
-                },
-                updatePreviewScale() {
-                    const iframe = this.$refs.preview;
-                    const stage = this.$root.querySelector('.tb-preview-stage');
-                    if (!iframe || !stage) return;
-
-                    if (this.device !== 'desktop') {
-                        // Tablet / mobile render at their actual viewport
-                        // size — no scale, no compensating height inflation.
-                        iframe.style.width = '100%';
-                        iframe.style.height = '100%';
-                        iframe.style.transform = '';
-                        iframe.style.transformOrigin = '';
-                        return;
-                    }
-
-                    const TARGET = 1366;
-                    const rect = stage.getBoundingClientRect();
-                    if (rect.width <= 0) return;
-
-                    if (rect.width >= TARGET) {
-                        // Container is wider than a typical laptop — no need
-                        // to fake a smaller viewport, just fill normally.
-                        iframe.style.width = '100%';
-                        iframe.style.height = '100%';
-                        iframe.style.transform = '';
-                        iframe.style.transformOrigin = '';
-                        return;
-                    }
-
-                    const scale = rect.width / TARGET;
-                    iframe.style.width = TARGET + 'px';
-                    // Inflate the iframe's logical height by 1/scale so the
-                    // scaled-down result still fills the stage vertically.
-                    iframe.style.height = (rect.height / scale) + 'px';
-                    iframe.style.transform = `scale(${scale})`;
-                    iframe.style.transformOrigin = 'top left';
                 },
             };
         }
