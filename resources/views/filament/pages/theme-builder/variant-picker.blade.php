@@ -108,70 +108,6 @@
         color: var(--color-gray-500, #6b7280);
     }
 
-    /* Hover thinking-bubble that pops a larger version of the preview. */
-    .tb-variant-picker__bubble {
-        position: absolute;
-        left: 50%;
-        bottom: calc(100% + 14px);
-        transform: translateX(-50%) translateY(6px) scale(0.96);
-        width: 320px;
-        padding: 12px;
-        background: #ffffff;
-        border: 1px solid var(--color-gray-200, #e5e7eb);
-        border-radius: 12px;
-        box-shadow: 0 16px 40px -8px rgba(15, 23, 42, 0.18), 0 4px 10px rgba(15, 23, 42, 0.06);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 160ms ease, transform 160ms ease;
-        z-index: 50;
-    }
-    .tb-variant-picker__bubble::before,
-    .tb-variant-picker__bubble::after {
-        content: '';
-        position: absolute;
-        background: #ffffff;
-        border: 1px solid var(--color-gray-200, #e5e7eb);
-        border-radius: 50%;
-    }
-    .tb-variant-picker__bubble::before {
-        width: 10px; height: 10px;
-        bottom: -7px; left: 50%;
-        transform: translateX(-50%);
-    }
-    .tb-variant-picker__bubble::after {
-        width: 6px; height: 6px;
-        bottom: -16px; left: 50%;
-        transform: translateX(-180%);
-    }
-    .tb-variant-picker__bubble-svg {
-        width: 100%;
-        aspect-ratio: 240 / 140;
-        background: #f8fafc;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .tb-variant-picker__card:hover .tb-variant-picker__bubble,
-    .tb-variant-picker__card:focus-visible .tb-variant-picker__bubble {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
-    }
-    @media (min-width: 640px) {
-        .tb-variant-picker__card:nth-child(-n+3) .tb-variant-picker__bubble {
-            bottom: auto;
-            top: calc(100% + 14px);
-            transform: translateX(-50%) translateY(-6px) scale(0.96);
-        }
-        .tb-variant-picker__card:nth-child(-n+3) .tb-variant-picker__bubble::before { bottom: auto; top: -7px; }
-        .tb-variant-picker__card:nth-child(-n+3) .tb-variant-picker__bubble::after  { bottom: auto; top: -16px; }
-        .tb-variant-picker__card:nth-child(-n+3):hover .tb-variant-picker__bubble,
-        .tb-variant-picker__card:nth-child(-n+3):focus-visible .tb-variant-picker__bubble {
-            transform: translateX(-50%) translateY(0) scale(1);
-        }
-    }
-    @media (max-width: 639px) {
-        .tb-variant-picker__bubble { display: none; }
-    }
-
     /* Dark mode */
     .dark .tb-variant-picker__card {
         border-color: rgba(255, 255, 255, 0.1);
@@ -189,16 +125,6 @@
     .dark .tb-variant-picker__label { color: #ffffff; }
     .dark .tb-variant-picker__desc  { color: var(--color-gray-400, #9ca3af); }
     .dark .tb-variant-picker__thumb { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.06); }
-    .dark .tb-variant-picker__bubble {
-        background: #0f172a;
-        border-color: rgba(255, 255, 255, 0.10);
-        box-shadow: 0 16px 40px -8px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3);
-    }
-    .dark .tb-variant-picker__bubble::before,
-    .dark .tb-variant-picker__bubble::after {
-        background: #0f172a; border-color: rgba(255, 255, 255, 0.10);
-    }
-    .dark .tb-variant-picker__bubble-svg { background: rgba(255,255,255,0.04); }
 </style>
 
 <div class="tb-variant-picker">
@@ -223,12 +149,6 @@
             <span style="display:block; padding: 4px 4px 2px;">
                 <span class="tb-variant-picker__label">{{ $v['label'] }}</span>
                 <span class="tb-variant-picker__desc">{{ $v['description'] }}</span>
-            </span>
-
-            <span class="tb-variant-picker__bubble" aria-hidden="true">
-                <span class="tb-variant-picker__bubble-svg">
-                    @include('filament.pages.theme-builder.variant-preview', ['type' => $type, 'variant' => $v['key']])
-                </span>
             </span>
         </button>
     @endforeach
