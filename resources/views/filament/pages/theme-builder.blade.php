@@ -383,43 +383,19 @@
                     display: flex;
                     align-items: flex-start;
                     justify-content: center;
-                    padding: 0;
-                    transition: padding 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
-                }
-                .tb-preview-frame--tablet,
-                .tb-preview-frame--mobile {
-                    /* Padding gives the device viewport some breathing room
-                       inside the preview pane and signals the resize visually. */
-                    padding: 16px;
                 }
                 .tb-preview-stage {
                     height: 100%;
                     width: 100%;
                     background: #ffffff;
-                    border-radius: 0;
                     overflow: hidden;
-                    transition: max-width 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
-                                border-radius 240ms ease,
-                                box-shadow 240ms ease;
-                    box-shadow: none;
+                    transition: max-width 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
                 }
-                .tb-preview-frame--tablet .tb-preview-stage {
-                    max-width: 820px;       /* iPad-ish viewport width */
-                    border-radius: 18px;
-                    box-shadow: 0 12px 32px rgba(15,23,42,0.16),
-                                0 0 0 8px #0f172a;
-                }
-                .tb-preview-frame--mobile .tb-preview-stage {
-                    max-width: 412px;       /* iPhone-ish viewport width */
-                    border-radius: 26px;
-                    box-shadow: 0 12px 32px rgba(15,23,42,0.18),
-                                0 0 0 6px #0f172a;
-                }
-                html.dark .tb-preview-frame--tablet .tb-preview-stage,
-                html.dark .tb-preview-frame--mobile .tb-preview-stage {
-                    box-shadow: 0 12px 32px rgba(0,0,0,0.6),
-                                0 0 0 6px #1f1f23;
-                }
+                /* Just the viewport size — no device chrome. The user wanted
+                   the iframe to resize to iPad / iPhone widths without the
+                   surrounding bezel-style frame. */
+                .tb-preview-frame--tablet .tb-preview-stage { max-width: 820px; }
+                .tb-preview-frame--mobile .tb-preview-stage { max-width: 412px; }
             </style>
             <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px 8px; gap: 12px; flex-wrap: wrap;">
                 <div style="display:flex; align-items:center; gap:8px; min-width: 0;">
