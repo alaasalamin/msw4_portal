@@ -343,6 +343,13 @@
         {{-- ── Live preview (right) ────────────────────────────────── --}}
         <section style="background:var(--tb-bg); border:1px solid var(--tb-border); border-radius:12px; padding:8px; box-shadow:var(--tb-shadow);">
             <style>
+                /* Resting buttons sit on the toolbar's own bg — the
+                   .tb-device-btn--active state paints them in primary
+                   so the user can spot which device is selected. The
+                   pre-existing inline `style="background: transparent"`
+                   was outranking the active class via specificity, so
+                   the active state never showed. Everything is class-
+                   driven now. */
                 .tb-device-btn {
                     display: inline-flex;
                     align-items: center;
@@ -350,22 +357,22 @@
                     width: 28px;
                     height: 28px;
                     border-radius: 6px;
-                    border: 1px solid var(--tb-border);
-                    background: var(--tb-btn-bg);
+                    border: 1px solid transparent;
+                    background: transparent;
                     color: var(--tb-fg-soft);
                     cursor: pointer;
                     transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
                 }
                 .tb-device-btn:hover {
                     color: #0284c7;
-                    border-color: #0284c7;
+                    background: rgba(2, 132, 199, 0.08);
                 }
-                .tb-device-btn--active {
-                    background: #0284c7;
-                    border-color: #0284c7;
-                    color: #ffffff;
+                .tb-device-btn--active,
+                .tb-device-btn--active:hover {
+                    background: #0284c7 !important;
+                    border-color: #0284c7 !important;
+                    color: #ffffff !important;
                 }
-                .tb-device-btn--active:hover { color: #ffffff; }
                 .tb-preview-frame {
                     height: calc(100vh - 220px);
                     min-height: 600px;
@@ -428,7 +435,6 @@
                         x-on:click="device = 'desktop'"
                         title="Desktop view"
                         aria-label="Desktop view"
-                        style="border-color: transparent; background: transparent;"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px; height:14px;">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
@@ -440,7 +446,6 @@
                         x-on:click="device = 'tablet'"
                         title="iPad / tablet view"
                         aria-label="Tablet view"
-                        style="border-color: transparent; background: transparent;"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px; height:14px;">
                             <rect x="5" y="2.5" width="14" height="19" rx="2.2" />
@@ -453,7 +458,6 @@
                         x-on:click="device = 'mobile'"
                         title="Mobile view"
                         aria-label="Mobile view"
-                        style="border-color: transparent; background: transparent;"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px; height:14px;">
                             <rect x="7" y="2.5" width="10" height="19" rx="2" />
