@@ -4,12 +4,12 @@
     drop zone, and an image-overlay slider for the bg_image variant.
 
     The form data path:
-      The schema is mounted as Filament's editSection action, so its
-      reactive state lives at $wire.mountedActionsData[N], where N is
-      the index of the topmost mounted action (always last in the
-      stack). Every read/write below derives that index from
-      $wire.mountedActions.length on the fly so we don't get stale
-      indexes after a nested action is mounted on top.
+      Filament v5.5 mounts each open action with its form state at
+      $wire.mountedActions[N].data — there's no separate
+      mountedActionsData array (that's an older Filament shape and
+      throws PublicPropertyNotFoundException here). N is the topmost
+      action's index, derived on the fly from mountedActions.length so
+      we don't go stale after a nested action gets pushed on top.
 --}}
 
 <style>
@@ -172,8 +172,8 @@
         get idx() { return ($wire.mountedActions || []).length - 1; },
         get s() {
             const i = this.idx; if (i < 0) return {};
-            const d = $wire.mountedActionsData || {};
-            return (d[i] && d[i].settings) || {};
+            const actions = $wire.mountedActions || [];
+            return (actions[i] && actions[i].data && actions[i].data.settings) || {};
         },
         // Read with a default fallback so empty state still renders
         // sensible placeholder copy.
@@ -183,7 +183,7 @@
         },
         set(key, value) {
             const i = this.idx; if (i < 0) return;
-            $wire.set(`mountedActionsData.${i}.settings.${key}`, value);
+            $wire.set(`mountedActions.${i}.data.settings.${key}`, value);
         },
         commitText(key, fallback, event) {
             // Trim leading/trailing newlines that contenteditable sometimes
