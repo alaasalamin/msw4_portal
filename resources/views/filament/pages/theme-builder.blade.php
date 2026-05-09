@@ -342,11 +342,126 @@
 
         {{-- ── Live preview (right) ────────────────────────────────── --}}
         <section style="background:var(--tb-bg); border:1px solid var(--tb-border); border-radius:12px; padding:8px; box-shadow:var(--tb-shadow);">
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px 8px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="display:inline-block; width:8px; height:8px; border-radius:9999px; background:var(--tb-status-ok);"></span>
-                    <span style="font-size:11px; font-weight:500; color:var(--tb-fg-soft);">Live preview · {{ $previewUrl }}</span>
+            <style>
+                .tb-device-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 6px;
+                    border: 1px solid var(--tb-border);
+                    background: var(--tb-btn-bg);
+                    color: var(--tb-fg-soft);
+                    cursor: pointer;
+                    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+                }
+                .tb-device-btn:hover {
+                    color: #0284c7;
+                    border-color: #0284c7;
+                }
+                .tb-device-btn--active {
+                    background: #0284c7;
+                    border-color: #0284c7;
+                    color: #ffffff;
+                }
+                .tb-device-btn--active:hover { color: #ffffff; }
+                .tb-preview-frame {
+                    height: calc(100vh - 220px);
+                    min-height: 600px;
+                    border: 1px solid var(--tb-border);
+                    border-radius: 8px;
+                    background: var(--tb-empty-bg);
+                    overflow: hidden;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+                    padding: 0;
+                    transition: padding 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
+                }
+                .tb-preview-frame--tablet,
+                .tb-preview-frame--mobile {
+                    /* Padding gives the device viewport some breathing room
+                       inside the preview pane and signals the resize visually. */
+                    padding: 16px;
+                }
+                .tb-preview-stage {
+                    height: 100%;
+                    width: 100%;
+                    background: #ffffff;
+                    border-radius: 0;
+                    overflow: hidden;
+                    transition: max-width 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                                border-radius 240ms ease,
+                                box-shadow 240ms ease;
+                    box-shadow: none;
+                }
+                .tb-preview-frame--tablet .tb-preview-stage {
+                    max-width: 820px;       /* iPad-ish viewport width */
+                    border-radius: 18px;
+                    box-shadow: 0 12px 32px rgba(15,23,42,0.16),
+                                0 0 0 8px #0f172a;
+                }
+                .tb-preview-frame--mobile .tb-preview-stage {
+                    max-width: 412px;       /* iPhone-ish viewport width */
+                    border-radius: 26px;
+                    box-shadow: 0 12px 32px rgba(15,23,42,0.18),
+                                0 0 0 6px #0f172a;
+                }
+                html.dark .tb-preview-frame--tablet .tb-preview-stage,
+                html.dark .tb-preview-frame--mobile .tb-preview-stage {
+                    box-shadow: 0 12px 32px rgba(0,0,0,0.6),
+                                0 0 0 6px #1f1f23;
+                }
+            </style>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px 8px; gap: 12px; flex-wrap: wrap;">
+                <div style="display:flex; align-items:center; gap:8px; min-width: 0;">
+                    <span style="display:inline-block; width:8px; height:8px; border-radius:9999px; background:var(--tb-status-ok); flex:none;"></span>
+                    <span style="font-size:11px; font-weight:500; color:var(--tb-fg-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Live preview · {{ $previewUrl }}</span>
                 </div>
+
+                {{-- Device toggle: desktop / tablet / mobile --}}
+                <div style="display:inline-flex; align-items:center; gap:4px; padding:3px; border-radius:8px; background:var(--tb-card-bg); border:1px solid var(--tb-border);">
+                    <button type="button"
+                        class="tb-device-btn"
+                        x-bind:class="device === 'desktop' ? 'tb-device-btn--active' : ''"
+                        x-on:click="device = 'desktop'"
+                        title="Desktop view"
+                        aria-label="Desktop view"
+                        style="border-color: transparent; background: transparent;"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px; height:14px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+                        </svg>
+                    </button>
+                    <button type="button"
+                        class="tb-device-btn"
+                        x-bind:class="device === 'tablet' ? 'tb-device-btn--active' : ''"
+                        x-on:click="device = 'tablet'"
+                        title="iPad / tablet view"
+                        aria-label="Tablet view"
+                        style="border-color: transparent; background: transparent;"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px; height:14px;">
+                            <rect x="5" y="2.5" width="14" height="19" rx="2.2" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 18.5h2" />
+                        </svg>
+                    </button>
+                    <button type="button"
+                        class="tb-device-btn"
+                        x-bind:class="device === 'mobile' ? 'tb-device-btn--active' : ''"
+                        x-on:click="device = 'mobile'"
+                        title="Mobile view"
+                        aria-label="Mobile view"
+                        style="border-color: transparent; background: transparent;"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" style="width:14px; height:14px;">
+                            <rect x="7" y="2.5" width="10" height="19" rx="2" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 18.5h2" />
+                        </svg>
+                    </button>
+                </div>
+
                 <a
                     href="{{ $previewUrl }}"
                     target="_blank"
@@ -360,14 +475,18 @@
                     </svg>
                 </a>
             </div>
-            <div style="height:calc(100vh - 220px); min-height:600px; overflow:hidden;
-                        border:1px solid var(--tb-border); border-radius:8px; background:#ffffff;">
-                <iframe
-                    x-ref="preview"
-                    src="{{ $previewUrl }}"
-                    style="width:100%; height:100%; border:0; display:block; background:#ffffff;"
-                    title="Page preview"
-                ></iframe>
+            <div
+                class="tb-preview-frame"
+                x-bind:class="`tb-preview-frame--${device}`"
+            >
+                <div class="tb-preview-stage">
+                    <iframe
+                        x-ref="preview"
+                        src="{{ $previewUrl }}"
+                        style="width:100%; height:100%; border:0; display:block; background:#ffffff;"
+                        title="Page preview"
+                    ></iframe>
+                </div>
             </div>
         </section>
     </div>
@@ -377,6 +496,12 @@
     <script>
         function themeBuilder() {
             return {
+                // ── Preview device toggle ──
+                // 'desktop' | 'tablet' | 'mobile' — drives a class on the
+                // preview frame that constrains the iframe's max-width to the
+                // matching viewport (full / 820px / 412px) with smooth easing.
+                device: 'desktop',
+
                 // ── Drag-and-drop reorder state ──
                 // dragId  = id of the row currently being dragged (set on dragstart)
                 // overId  = id of the row the cursor is currently over
