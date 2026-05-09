@@ -65,14 +65,35 @@
         .tb-grip:active,
         .tb-row--dragging .tb-grip { cursor: grabbing; }
 
-        .tb-row { position: relative; }
+        /* Smooth physics for both the dragged row's lift and the surrounding
+           rows' shift-to-make-room translateY. Two different easings:
+           transform glides on a strong outwards curve, the box-shadow fades
+           gently. */
+        .tb-row {
+            position: relative;
+            transition:
+                transform   240ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                box-shadow  200ms ease,
+                border-color 160ms ease,
+                opacity     180ms ease;
+            will-change: transform;
+        }
+        /* The dragged row stays in its DOM position but scales up slightly
+           and lifts with a soft shadow, becoming the visible "picked up"
+           anchor. The browser's default drag-image still follows the cursor,
+           but that's secondary — this is what the user reads as "selected". */
         .tb-row--dragging {
-            opacity: 0.45;
-            transform: scale(0.99);
+            transform: scale(1.04);
+            box-shadow:
+                0 14px 32px -8px rgba(2, 132, 199, 0.35),
+                0 6px 14px rgba(15, 23, 42, 0.12);
+            border-color: #0284c7 !important;
+            z-index: 5;
         }
         /* Drop indicator — a thin primary line on the side the dragged row
            will land on. Implemented via box-shadow so it doesn't shift
-           layout the way an actual border would. */
+           layout the way an actual border would. Layered above the
+           default transition so it appears immediately. */
         .tb-row--over-before { box-shadow: inset 0 3px 0 0 #0284c7; }
         .tb-row--over-after  { box-shadow: inset 0 -3px 0 0 #0284c7; }
         .dark .tb-panel,
@@ -364,16 +385,27 @@
         function themeBuilder() {
             return {
                 // ── Drag-and-drop reorder state ──
-                // dragId  = id of the row currently being dragged (set on dragstart)
-                // overId  = id of the row the cursor is currently over
-                // overPos = 'before' | 'after' relative to overId — which side of
-                //           the hovered row the dragged item will land on, decided
-                //           by whether the cursor is in the top or bottom half.
+                // dragId    = id of the row currently being dragged (dragstart)
+                // overId    = id of the row the cursor is currently over
+                // overPos   = 'before' | 'after' — which side of overId the
+                //             dragged row will land on, decided by whether the
+                //             cursor is in the top or bottom half of overId.
+                // rowShift  = pixel distance one row should travel to make
+                //             space for an adjacent slot. Captured at dragstart
+                //             from the dragged row's height + the parent gap
+                //             so adjacent rows slide cleanly into each other.
                 dragId: null,
                 overId: null,
                 overPos: null,
+                rowShift: 0,
 
                 onRowDragStart(event, id) {
+                    const row = event.currentTarget;
+                    const rect = row.getBoundingClientRect();
+                    // Parent uses `gap: 8px` between list items — include it
+                    // in the shift distance so adjacent rows align perfectly
+                    // with the empty slot left behind.
+                    this.rowShift = Math.round(rect.height + 8);
                     this.dragId = id;
                     // Required by Firefox to actually start the drag.
                     event.dataTransfer.effectAllowed = 'move';
@@ -386,17 +418,26 @@
                     const midY = rect.top + rect.height / 2;
                     this.overId  = id;
                     this.overPos = event.clientY < midY ? 'before' : 'after';
+                    this.applyShifts();
                 },
                 onRowDragLeave(event, id) {
                     // Only clear the indicator when the cursor truly leaves
                     // this row — dragover fires repeatedly during a slow drag
-                    // and we don't want to flicker.
+                    // and we don't want to flicker. relatedTarget is the
+                    // element the pointer just entered, so contains() tells us
+                    // whether we're still inside this row's subtree.
                     if (this.overId === id && !event.currentTarget.contains(event.relatedTarget)) {
                         this.overId  = null;
                         this.overPos = null;
+                        this.applyShifts();
                     }
                 },
                 onRowDrop(event, targetId) {
+                    // Clear inline transforms BEFORE Livewire re-renders, or
+                    // the still-translated rows will jump from their shifted
+                    // position back to wherever the new HTML places them.
+                    this.clearShifts();
+
                     if (!this.dragId || this.dragId === targetId) {
                         this.resetDragState();
                         return;
@@ -415,12 +456,61 @@
                     this.resetDragState();
                 },
                 onRowDragEnd() {
+                    // Fires whether the drop succeeded or the user dropped
+                    // outside the list / hit Esc. Make sure transforms are
+                    // cleaned up either way.
+                    this.clearShifts();
                     this.resetDragState();
+                },
+
+                /**
+                 * Slide every row that sits between the dragged row's slot
+                 * and the chosen drop slot — those are the ones whose visual
+                 * position would change in the final layout, so they animate
+                 * out of the way to telegraph the upcoming reorder. The
+                 * dragged row itself and rows outside the affected range get
+                 * an empty transform so any lingering inline value is reset.
+                 */
+                applyShifts() {
+                    const rows = [...this.$root.querySelectorAll('[data-section-id]')];
+                    if (!this.dragId || !this.overId || this.dragId === this.overId) {
+                        rows.forEach(r => { r.style.transform = ''; });
+                        return;
+                    }
+                    const ids     = rows.map(r => r.dataset.sectionId);
+                    const dragIdx = ids.indexOf(this.dragId);
+                    const overIdx = ids.indexOf(this.overId);
+                    let insertIdx = overIdx + (this.overPos === 'after' ? 1 : 0);
+
+                    rows.forEach((row, i) => {
+                        if (i === dragIdx) {
+                            // Dragged row keeps its CSS-driven scale lift —
+                            // do not write an inline transform here.
+                            row.style.transform = '';
+                            return;
+                        }
+                        let dy = 0;
+                        if (insertIdx > dragIdx && i > dragIdx && i < insertIdx) {
+                            // Moving the dragged row down past these — they
+                            // shift up to fill its old slot.
+                            dy = -this.rowShift;
+                        } else if (insertIdx < dragIdx && i >= insertIdx && i < dragIdx) {
+                            // Moving the dragged row up past these — they
+                            // shift down to clear the new slot.
+                            dy = this.rowShift;
+                        }
+                        row.style.transform = dy ? `translateY(${dy}px)` : '';
+                    });
+                },
+                clearShifts() {
+                    this.$root.querySelectorAll('[data-section-id]')
+                        .forEach(r => { r.style.transform = ''; });
                 },
                 resetDragState() {
                     this.dragId = null;
                     this.overId = null;
                     this.overPos = null;
+                    this.rowShift = 0;
                 },
 
                 reloadPreview() {
