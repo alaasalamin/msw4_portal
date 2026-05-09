@@ -282,37 +282,41 @@ function Burger({ open, onToggle, color, className }: { open: boolean; onToggle:
 }
 
 function MobileMenu({ open, links, linkColor, onLinkClick }: { open: boolean; links: NavLink[]; linkColor: string; onLinkClick: () => void }) {
-    // Always render so max-height + opacity have something to transition to.
-    // The .tb-header-mobile class flips display:block on narrow viewports
-    // via the shared responsive stylesheet at the bottom of the file.
+    // Always render so the height animation has something to transition to.
+    // Uses the grid-template-rows: 0fr → 1fr trick so the height animates to
+    // the *actual* content height — a fixed max-height overshoot makes the
+    // expand look instant (the visible content fits long before max-height
+    // finishes growing). Symmetry with the close direction is what we're
+    // after here.
     return (
         <div
             className="tb-header-mobile"
             aria-hidden={!open}
             style={{
                 display: 'none',
-                overflow: 'hidden',
-                maxHeight: open ? 480 : 0,
+                gridTemplateRows: open ? '1fr' : '0fr',
                 opacity: open ? 1 : 0,
                 borderTop: open ? '1px solid rgba(255,255,255,.08)' : '1px solid transparent',
                 transition:
-                    'max-height 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
+                    'grid-template-rows 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
                     'opacity 220ms ease, ' +
                     'border-color 220ms ease',
                 pointerEvents: open ? 'auto' : 'none',
             }}
         >
-            <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {links.map((l, i) => (
-                    <a key={i} href={l.href} onClick={onLinkClick} style={{
-                        color: linkColor,
-                        textDecoration: 'none',
-                        padding: '10px 8px',
-                        borderRadius: 6,
-                        fontSize: '0.9375rem',
-                    }}>{l.label}</a>
-                ))}
-            </nav>
+            <div style={{ overflow: 'hidden' }}>
+                <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {links.map((l, i) => (
+                        <a key={i} href={l.href} onClick={onLinkClick} style={{
+                            color: linkColor,
+                            textDecoration: 'none',
+                            padding: '10px 8px',
+                            borderRadius: 6,
+                            fontSize: '0.9375rem',
+                        }}>{l.label}</a>
+                    ))}
+                </nav>
+            </div>
         </div>
     );
 }
@@ -331,7 +335,7 @@ const responsiveCss = `
     @media (max-width: 720px) {
         .tb-header-desktop { display: none !important; }
         .tb-header-burger  { display: inline-flex !important; }
-        .tb-header-mobile  { display: block !important; }
+        .tb-header-mobile  { display: grid !important; }
         .tb-header-cta     { display: none !important; }
     }
 `;
@@ -417,28 +421,30 @@ function CenteredHeader({ settings, bottom }: { settings: HeaderSettings; bottom
             <div
                 aria-hidden={!open}
                 style={{
-                    overflow: 'hidden',
-                    maxHeight: open ? 480 : 0,
+                    display: 'grid',
+                    gridTemplateRows: open ? '1fr' : '0fr',
                     opacity: open ? 1 : 0,
                     borderTop: open ? '1px solid rgba(255,255,255,.08)' : '1px solid transparent',
                     transition:
-                        'max-height 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
+                        'grid-template-rows 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
                         'opacity 220ms ease, ' +
                         'border-color 220ms ease',
                     pointerEvents: open ? 'auto' : 'none',
                 }}
             >
-                <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
-                    {d.links.map((l, i) => (
-                        <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
-                            color: d.linkColor,
-                            textDecoration: 'none',
-                            padding: '10px 8px',
-                            borderRadius: 6,
-                            fontSize: '0.9375rem',
-                        }}>{l.label}</a>
-                    ))}
-                </nav>
+                <div style={{ overflow: 'hidden' }}>
+                    <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
+                        {d.links.map((l, i) => (
+                            <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
+                                color: d.linkColor,
+                                textDecoration: 'none',
+                                padding: '10px 8px',
+                                borderRadius: 6,
+                                fontSize: '0.9375rem',
+                            }}>{l.label}</a>
+                        ))}
+                    </nav>
+                </div>
             </div>
             {bottom}
         </header>
@@ -548,28 +554,30 @@ function MinimalHeader({ settings, bottom }: { settings: HeaderSettings; bottom?
             <div
                 aria-hidden={!open}
                 style={{
-                    overflow: 'hidden',
-                    maxHeight: open ? 480 : 0,
+                    display: 'grid',
+                    gridTemplateRows: open ? '1fr' : '0fr',
                     opacity: open ? 1 : 0,
                     borderTop: open ? '1px solid rgba(255,255,255,.08)' : '1px solid transparent',
                     transition:
-                        'max-height 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
+                        'grid-template-rows 320ms cubic-bezier(0.22, 0.61, 0.36, 1), ' +
                         'opacity 220ms ease, ' +
                         'border-color 220ms ease',
                     pointerEvents: open ? 'auto' : 'none',
                 }}
             >
-                <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
-                    {d.links.map((l, i) => (
-                        <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
-                            color: d.linkColor,
-                            textDecoration: 'none',
-                            padding: '10px 8px',
-                            borderRadius: 6,
-                            fontSize: '0.9375rem',
-                        }}>{l.label}</a>
-                    ))}
-                </nav>
+                <div style={{ overflow: 'hidden' }}>
+                    <nav style={{ padding: '8px 16px 16px', display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '1200px', margin: '0 auto' }}>
+                        {d.links.map((l, i) => (
+                            <a key={i} href={l.href} onClick={() => setOpen(false)} style={{
+                                color: d.linkColor,
+                                textDecoration: 'none',
+                                padding: '10px 8px',
+                                borderRadius: 6,
+                                fontSize: '0.9375rem',
+                            }}>{l.label}</a>
+                        ))}
+                    </nav>
+                </div>
             </div>
             {bottom}
         </header>
