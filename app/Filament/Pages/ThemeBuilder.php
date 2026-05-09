@@ -400,57 +400,43 @@ class ThemeBuilder extends Page
         return Action::make('chooseDesign')
             ->label('Choose design')
             ->icon('heroicon-m-swatch')
-            ->modalWidth('md')
+            ->modalWidth('3xl')
             ->modalHeading(function (array $arguments): string {
                 $section = $this->findSection($arguments['id'] ?? null);
                 if (! $section) return 'Choose design';
                 $label = SectionRegistry::types()[$section['type']]['label'] ?? ucfirst($section['type']);
                 return "Choose {$label} design";
             })
-            ->modalSubmitActionLabel('Apply')
-            ->fillForm(function (array $arguments) {
-                $section = $this->findSection($arguments['id'] ?? null);
-                $current = $section['settings']['variant'] ?? null;
-                if (! $current && $section) {
-                    // Fall back to the first variant for the section type.
-                    $variants = SectionRegistry::variants($section['type']);
-                    $current = $variants[0]['key'] ?? null;
-                }
-                return ['variant' => $current];
-            })
-            ->schema(function (array $arguments) {
-                $section = $this->findSection($arguments['id'] ?? null);
-                if (! $section) return [];
-                $variants = SectionRegistry::variants($section['type']);
-                $options       = [];
-                $descriptions  = [];
-                foreach ($variants as $v) {
-                    $options[$v['key']]      = $v['label'];
-                    $descriptions[$v['key']] = $v['description'];
-                }
-                return [
-                    Radio::make('variant')
-                        ->label('Pick a design')
-                        ->options($options)
-                        ->descriptions($descriptions)
-                        ->required(),
-                ];
-            })
-            ->action(function (array $arguments, array $data) {
-                $id       = $arguments['id'] ?? null;
-                $sections = $this->getPlacedSections();
-                $i        = $this->findSectionIndex($sections, $id);
-                if ($i === null) return;
+            // Cards apply directly on click — no submit button.
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Close')
+            ->schema([
+                SchemaView::make('filament.pages.theme-builder.variant-picker'),
+            ]);
+    }
 
-                $sections[$i]['settings'] = array_merge(
-                    $sections[$i]['settings'] ?? [],
-                    ['variant' => $data['variant'] ?? null],
-                );
-                $this->persistSections($sections);
+    /** Direct apply — invoked by the variant cards in the design picker. */
+    public function applyDesignVariant(string $id, string $variant): void
+    {
+        $sections = $this->getPlacedSections();
+        $i        = $this->findSectionIndex($sections, $id);
+        if ($i === null) return;
 
-                Notification::make()->title('Design updated')->success()->send();
-                $this->dispatch('theme-builder:section-saved');
-            });
+        // Defensive: only accept variant keys that actually exist for this type.
+        $type  = $sections[$i]['type'] ?? null;
+        $valid = collect(SectionRegistry::variants($type))->pluck('key')->all();
+        if (! in_array($variant, $valid, true)) return;
+
+        $sections[$i]['settings'] = array_merge(
+            $sections[$i]['settings'] ?? [],
+            ['variant' => $variant],
+        );
+        $this->persistSections($sections);
+
+        Notification::make()->title('Design updated')->success()->send();
+        $this->dispatch('theme-builder:section-saved');
+
+        $this->unmountAction();
     }
 
     // ─────────────────────────────────────────────────────────────────
