@@ -15,14 +15,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
 
-    {{-- Vite entry that exposes window.tbMountTextPreview so the
-         Edit Text Block modal can mount the real DynamicTextBlock
-         React component into the live preview pane. The React
-         refresh preamble has to run before any React module loads,
-         otherwise @vitejs/plugin-react throws "can't detect
-         preamble". --}}
-    @viteReactRefresh
-    @vite(['resources/js/text-block-preview.tsx'])
 
     {{--
         Theme variables: light defaults on .tb-panel, dark overrides under .dark.
