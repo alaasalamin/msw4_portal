@@ -94,12 +94,19 @@
         // Filament action data. The mountedActions stack grows when
         // Filament opens a modal action, so the live edit form's data
         // sits at the last entry.
+        //
+        // The value Livewire exposes is a proxy, not a plain object,
+        // and postMessage's structured-clone algorithm cannot traverse
+        // proxies — it throws DataCloneError. JSON round-trip strips
+        // the proxy and any non-serializable values in one step.
         readSettings() {
             try {
                 const stack = this.$wire.mountedActions ?? [];
                 const top = stack[stack.length - 1] ?? {};
-                return (top && top.data && top.data.settings) ? top.data.settings : {};
+                const raw = (top && top.data && top.data.settings) ? top.data.settings : {};
+                return JSON.parse(JSON.stringify(raw));
             } catch (e) {
+                console.warn('[tb-preview-pane] readSettings failed', e);
                 return {};
             }
         },
