@@ -171,15 +171,23 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                     gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
                 }}>
                     {visible.map((r, i) => (
-                        <article key={i} style={{
-                            background: cardBg,
-                            borderRadius: 16,
-                            padding: 'clamp(20px, 2.5vw, 28px)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 14,
-                            boxShadow: '0 1px 2px rgba(15,23,42,.05), 0 4px 12px -4px rgba(15,23,42,.08)',
-                        }}>
+                        // Re-key on `start` so React remounts each card on
+                        // every carousel step — that re-runs the staggered
+                        // CSS keyframe animation defined below.
+                        <article
+                            key={`${start}-${i}`}
+                            className="tb-review-card"
+                            style={{
+                                background: cardBg,
+                                borderRadius: 16,
+                                padding: 'clamp(20px, 2.5vw, 28px)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 14,
+                                boxShadow: '0 1px 2px rgba(15,23,42,.05), 0 4px 12px -4px rgba(15,23,42,.08)',
+                                animationDelay: `${i * 80}ms`,
+                            }}
+                        >
                             {showStars && r.rating != null && (
                                 <StarRow value={Number(r.rating) || 0} color={starColor} mutedColor="rgba(0,0,0,0.12)" />
                             )}
@@ -225,6 +233,7 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                                 type="button"
                                 onClick={() => setStart(i)}
                                 aria-label={`Show review ${i + 1}`}
+                                className="tb-review-dot"
                                 style={{
                                     width: active ? 24 : 8,
                                     height: 8,
@@ -232,7 +241,6 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                                     border: 'none',
                                     cursor: 'pointer',
                                     background: active ? fg : 'rgba(15,23,42,0.2)',
-                                    transition: 'width 200ms ease, background 200ms ease',
                                 }}
                             />
                         );
@@ -245,6 +253,45 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                 }
                 @media (max-width: 560px) {
                     .tb-reviews-grid { grid-template-columns: 1fr !important; }
+                }
+
+                /* Cards lift in with a soft fade + scale + slight upward
+                   motion, staggered by their column index. The remount
+                   key on each card restarts the animation on every
+                   carousel step, so the whole row feels alive. */
+                @keyframes tb-review-card-in {
+                    0%   { opacity: 0; transform: translateY(14px) scale(0.97); filter: blur(2px); }
+                    60%  { filter: blur(0); }
+                    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+                }
+                .tb-review-card {
+                    animation: tb-review-card-in 540ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+                    will-change: transform, opacity;
+                }
+
+                .tb-review-arrow {
+                    transition: transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                                box-shadow 180ms ease,
+                                background 180ms ease;
+                }
+                .tb-review-arrow:hover {
+                    transform: translateY(-50%) scale(1.08);
+                    box-shadow: 0 4px 12px rgba(15,23,42,0.16), 0 12px 28px -10px rgba(15,23,42,0.22);
+                }
+                .tb-review-arrow:active {
+                    transform: translateY(-50%) scale(0.94);
+                }
+
+                .tb-review-dot {
+                    transition: width 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                                background 280ms ease,
+                                transform 180ms ease;
+                }
+                .tb-review-dot:hover { transform: scale(1.25); }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .tb-review-card { animation: none; }
+                    .tb-review-arrow, .tb-review-dot { transition: none; }
                 }
             `}</style>
         </Wrapper>
@@ -263,6 +310,7 @@ function CarouselArrow({ direction, onClick, fg, cardBg }: {
             type="button"
             onClick={onClick}
             aria-label={isPrev ? 'Previous reviews' : 'Next reviews'}
+            className="tb-review-arrow"
             style={{
                 position: 'absolute',
                 top: '50%',
