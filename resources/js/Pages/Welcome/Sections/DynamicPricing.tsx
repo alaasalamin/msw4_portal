@@ -191,8 +191,10 @@ function CardsView({ settings }: { settings: PricingSettings }) {
                     .tb-pricing-grid.tb-pricing-cols-3,
                     .tb-pricing-grid.tb-pricing-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
                 }
-                @media (max-width: 600px) {
-                    .tb-pricing-grid { grid-template-columns: 1fr !important; }
+                @media (max-width: 768px) {
+                    .tb-pricing-grid.tb-pricing-cols-2,
+                    .tb-pricing-grid.tb-pricing-cols-3,
+                    .tb-pricing-grid.tb-pricing-cols-4 { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </SectionWrap>
