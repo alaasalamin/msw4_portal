@@ -69,7 +69,10 @@
         <span class="tb-text-preview-dot"></span>
         Live preview
     </div>
-    <div class="tb-text-preview-stage">
+    {{-- wire:ignore tells Livewire to leave the React mount point
+         alone during partial re-renders, otherwise it morphs away
+         the rendered output and leaves React holding a stale Root. --}}
+    <div class="tb-text-preview-stage" wire:ignore>
         <div x-ref="target" class="tb-text-preview-target"></div>
     </div>
 </div>
