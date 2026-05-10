@@ -288,6 +288,10 @@ class SectionRegistry
                 'variant'      => 'default',
                 'heading'      => 'About us',
                 'body'         => 'Replace this with your own copy. Use the editor on the left to change colors, alignment, and typography.',
+                'blocks'       => [
+                    ['type' => 'heading',   'level' => 'h2', 'text' => 'About us'],
+                    ['type' => 'paragraph', 'text' => 'Replace this with your own copy. Use the editor on the left to change colors, alignment, and typography.'],
+                ],
                 'attribution'  => '',     // used by the 'quote' variant
                 'calloutColor' => 'info', // used by the 'callout' variant
                 'align'        => 'left',
@@ -791,8 +795,71 @@ class SectionRegistry
                     ])->columns(1),
                 Section::make('Content')
                     ->schema([
-                        TextInput::make('settings.heading')->label('Heading')->maxLength(120),
-                        Textarea::make('settings.body')->label('Body')->rows(5)->required(),
+                        Repeater::make('settings.blocks')
+                            ->label('Content blocks')
+                            ->visible(fn (Get $get) => ($get('settings.variant') ?? 'default') === 'default')
+                            ->helperText('Add as many headings (H1–H6) and paragraphs as you like, in any order.')
+                            ->afterStateHydrated(function ($state, $set, $get) {
+                                if (! empty($state)) {
+                                    return;
+                                }
+                                $heading = trim((string) ($get('settings.heading') ?? ''));
+                                $body    = trim((string) ($get('settings.body') ?? ''));
+                                $blocks  = [];
+                                if ($heading !== '') {
+                                    $blocks[] = ['type' => 'heading', 'level' => 'h2', 'text' => $heading];
+                                }
+                                if ($body !== '') {
+                                    $blocks[] = ['type' => 'paragraph', 'text' => $body];
+                                }
+                                if ($blocks !== []) {
+                                    $set('settings.blocks', $blocks);
+                                }
+                            })
+                            ->schema([
+                                Select::make('type')
+                                    ->label('Type')
+                                    ->options(['heading' => 'Heading', 'paragraph' => 'Paragraph'])
+                                    ->default('paragraph')
+                                    ->required()
+                                    ->live(),
+                                Select::make('level')
+                                    ->label('Heading level')
+                                    ->options([
+                                        'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3',
+                                        'h4' => 'H4', 'h5' => 'H5', 'h6' => 'H6',
+                                    ])
+                                    ->default('h2')
+                                    ->required()
+                                    ->visible(fn (Get $get) => ($get('type') ?? 'paragraph') === 'heading'),
+                                Textarea::make('text')
+                                    ->label('Text')
+                                    ->required()
+                                    ->rows(fn (Get $get) => ($get('type') ?? 'paragraph') === 'heading' ? 1 : 4)
+                                    ->maxLength(2000),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->cloneable()
+                            ->reorderable()
+                            ->addActionLabel('Add block')
+                            ->itemLabel(function (array $state): ?string {
+                                $type = $state['type'] ?? 'paragraph';
+                                $text = trim((string) ($state['text'] ?? ''));
+                                $preview = $text === '' ? '(empty)' : (mb_strlen($text) > 50 ? mb_substr($text, 0, 50) . '…' : $text);
+                                return $type === 'heading'
+                                    ? strtoupper($state['level'] ?? 'h2') . ' · ' . $preview
+                                    : 'Paragraph · ' . $preview;
+                            }),
+                        TextInput::make('settings.heading')
+                            ->label('Heading')
+                            ->maxLength(120)
+                            ->visible(fn (Get $get) => ($get('settings.variant') ?? 'default') !== 'default'),
+                        Textarea::make('settings.body')
+                            ->label('Body')
+                            ->rows(5)
+                            ->required(fn (Get $get) => ($get('settings.variant') ?? 'default') !== 'default')
+                            ->visible(fn (Get $get) => ($get('settings.variant') ?? 'default') !== 'default'),
                         TextInput::make('settings.attribution')
                             ->label('Attribution')
                             ->maxLength(120)

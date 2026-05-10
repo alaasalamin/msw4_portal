@@ -1,7 +1,16 @@
+type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
+interface ContentBlock {
+    type?: 'heading' | 'paragraph';
+    level?: HeadingLevel;
+    text?: string;
+}
+
 interface TextSettings {
     variant?: 'default' | 'two_column' | 'callout' | 'quote';
     heading?: string;
     body?: string;
+    blocks?: ContentBlock[];
     attribution?: string;
     calloutColor?: 'info' | 'success' | 'warning' | 'danger' | 'note' | 'neutral' | 'brand';
     align?: 'left' | 'center' | 'right';
@@ -35,19 +44,54 @@ export default function DynamicTextBlock({ settings }: { settings: TextSettings 
 
 function Default({ settings }: { settings: TextSettings }) {
     const align = settings.align ?? 'left';
+    const blocks = (settings.blocks ?? []).filter((b) => (b.text ?? '').trim() !== '');
 
     return (
         <Section settings={settings}>
             <div style={{ maxWidth: '760px', margin: '0 auto', textAlign: align }}>
-                {settings.heading && (
-                    <h2 style={headingStyle}>{settings.heading}</h2>
-                )}
-                {settings.body && (
-                    <p style={bodyStyle}>{settings.body}</p>
-                )}
+                {blocks.length > 0
+                    ? blocks.map((b, i) => <BlockRenderer key={i} block={b} />)
+                    : (
+                        <>
+                            {settings.heading && <h2 style={headingStyle}>{settings.heading}</h2>}
+                            {settings.body && <p style={bodyStyle}>{settings.body}</p>}
+                        </>
+                    )}
             </div>
         </Section>
     );
+}
+
+const HEADING_SIZES: Record<HeadingLevel, string> = {
+    h1: 'clamp(2rem, 4vw, 3rem)',
+    h2: 'clamp(1.5rem, 3vw, 2.25rem)',
+    h3: 'clamp(1.25rem, 2.4vw, 1.75rem)',
+    h4: 'clamp(1.125rem, 2vw, 1.375rem)',
+    h5: 'clamp(1rem, 1.6vw, 1.125rem)',
+    h6: 'clamp(0.9375rem, 1.4vw, 1rem)',
+};
+
+function BlockRenderer({ block }: { block: ContentBlock }) {
+    const text = block.text ?? '';
+    if (block.type === 'heading') {
+        const level: HeadingLevel = block.level ?? 'h2';
+        const style: React.CSSProperties = {
+            fontSize: HEADING_SIZES[level] ?? HEADING_SIZES.h2,
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            lineHeight: 1.2,
+            margin: '0 0 16px',
+        };
+        switch (level) {
+            case 'h1': return <h1 style={style}>{text}</h1>;
+            case 'h2': return <h2 style={style}>{text}</h2>;
+            case 'h3': return <h3 style={style}>{text}</h3>;
+            case 'h4': return <h4 style={style}>{text}</h4>;
+            case 'h5': return <h5 style={style}>{text}</h5>;
+            case 'h6': return <h6 style={style}>{text}</h6>;
+        }
+    }
+    return <p style={{ ...bodyStyle, margin: '0 0 16px' }}>{text}</p>;
 }
 
 // ── Variant: two_column (heading on left, body on right) ───────────────────
