@@ -9,6 +9,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 
@@ -780,7 +781,7 @@ class SectionRegistry
             'text' => [
                 Section::make('Design')
                     ->schema([
-                        Select::make('settings.variant')
+                        ToggleButtons::make('settings.variant')
                             ->label('Layout')
                             ->options([
                                 'default'    => 'Heading + body',
@@ -788,10 +789,30 @@ class SectionRegistry
                                 'callout'    => 'Callout box',
                                 'quote'      => 'Pull quote',
                             ])
+                            ->icons([
+                                'default'    => 'heroicon-o-bars-3-bottom-left',
+                                'two_column' => 'heroicon-o-view-columns',
+                                'callout'    => 'heroicon-o-megaphone',
+                                'quote'      => 'heroicon-o-chat-bubble-bottom-center-text',
+                            ])
+                            ->tooltips([
+                                'default'    => 'Heading + body',
+                                'two_column' => 'Two columns',
+                                'callout'    => 'Callout box',
+                                'quote'      => 'Pull quote',
+                            ])
+                            ->colors([
+                                'default'    => 'primary',
+                                'two_column' => 'primary',
+                                'callout'    => 'primary',
+                                'quote'      => 'primary',
+                            ])
+                            ->hiddenButtonLabels()
+                            ->inline()
                             ->default('default')
                             ->required()
                             ->live()
-                            ->helperText('Use the small icon on the section card to switch designs visually.'),
+                            ->helperText('Pick a layout. The selected one is highlighted in your brand color.'),
                     ])->columns(1),
                 Section::make('Content')
                     ->schema([
