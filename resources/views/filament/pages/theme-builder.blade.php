@@ -144,6 +144,34 @@
         .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color:hover {
             background: color-mix(in srgb, var(--color-500) 28%, transparent) !important;
         }
+
+        /* ── Gradient preset swatches ──
+           Each option button is painted with the gradient it represents,
+           so users can see the result without committing to it. The
+           selected swatch wears a brand-color ring + inner white border. */
+        .tb-gradient-presets .fi-fo-toggle-buttons-btn-ctn { width: 3.75rem; }
+        .tb-gradient-presets label.fi-btn {
+            width: 3.75rem; height: 2.25rem;
+            padding: 0 !important;
+            border-radius: 0.5rem !important;
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.15) !important;
+            transition: transform 120ms ease, box-shadow 120ms ease !important;
+        }
+        .tb-gradient-presets label.fi-btn:hover { transform: scale(1.04); }
+        .tb-gradient-presets input:checked + label.fi-btn {
+            box-shadow: 0 0 0 2px var(--color-primary-500), inset 0 0 0 2px #ffffff !important;
+        }
+        .tb-gradient-presets label.fi-btn .fi-btn-label,
+        .tb-gradient-presets label.fi-btn .fi-icon { display: none !important; }
+
+        .tb-gradient-presets input[value="sunrise"]  + label.fi-btn { background: linear-gradient(to bottom right, #fb923c, #fb7185) !important; }
+        .tb-gradient-presets input[value="ocean"]    + label.fi-btn { background: linear-gradient(to right,        #0ea5e9, #14b8a6) !important; }
+        .tb-gradient-presets input[value="mint"]     + label.fi-btn { background: linear-gradient(to bottom,       #a7f3d0, #2dd4bf) !important; }
+        .tb-gradient-presets input[value="lavender"] + label.fi-btn { background: linear-gradient(to right,        #a78bfa, #f472b6) !important; }
+        .tb-gradient-presets input[value="sunset"]   + label.fi-btn { background: linear-gradient(to bottom,       #f97316, #dc2626) !important; }
+        .tb-gradient-presets input[value="forest"]   + label.fi-btn { background: linear-gradient(to bottom,       #22c55e, #14532d) !important; }
+        .tb-gradient-presets input[value="sky"]      + label.fi-btn { background: linear-gradient(to bottom,       #bae6fd, #6366f1) !important; }
+        .tb-gradient-presets input[value="charcoal"] + label.fi-btn { background: linear-gradient(to bottom right, #475569, #0f172a) !important; }
     </style>
 
     <div

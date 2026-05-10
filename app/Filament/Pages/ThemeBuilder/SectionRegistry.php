@@ -301,6 +301,7 @@ class SectionRegistry
                 'bgGradient'         => false,
                 'bgGradientTo'       => '#0ea5e9',
                 'bgGradientDir'      => 'to right',
+                'bgGradientPreset'   => null,
                 'bgImage'            => null,
                 'bgImageOnCallout'   => true,
                 'fg'                 => '#0f172a', // legacy — kept so existing renders still pick up saved values
@@ -966,6 +967,52 @@ class SectionRegistry
                             ->helperText('Blends the background color into a second color along the chosen direction.')
                             ->default(false)
                             ->live(),
+                        ToggleButtons::make('settings.bgGradientPreset')
+                            ->label('Gradient presets')
+                            ->options([
+                                'sunrise'  => 'Sunrise',
+                                'ocean'    => 'Ocean',
+                                'mint'     => 'Mint',
+                                'lavender' => 'Lavender',
+                                'sunset'   => 'Sunset',
+                                'forest'   => 'Forest',
+                                'sky'      => 'Sky',
+                                'charcoal' => 'Charcoal',
+                            ])
+                            ->tooltips([
+                                'sunrise'  => 'Sunrise — orange → pink',
+                                'ocean'    => 'Ocean — blue → teal',
+                                'mint'     => 'Mint — pale → teal',
+                                'lavender' => 'Lavender — purple → pink',
+                                'sunset'   => 'Sunset — orange → red',
+                                'forest'   => 'Forest — bright → deep green',
+                                'sky'      => 'Sky — pale blue → indigo',
+                                'charcoal' => 'Charcoal — slate → ink',
+                            ])
+                            ->hiddenButtonLabels()
+                            ->inline()
+                            ->live()
+                            ->afterStateUpdated(function (?string $state, $set): void {
+                                $presets = [
+                                    'sunrise'  => ['#fb923c', '#fb7185', 'to bottom right'],
+                                    'ocean'    => ['#0ea5e9', '#14b8a6', 'to right'],
+                                    'mint'     => ['#a7f3d0', '#2dd4bf', 'to bottom'],
+                                    'lavender' => ['#a78bfa', '#f472b6', 'to right'],
+                                    'sunset'   => ['#f97316', '#dc2626', 'to bottom'],
+                                    'forest'   => ['#22c55e', '#14532d', 'to bottom'],
+                                    'sky'      => ['#bae6fd', '#6366f1', 'to bottom'],
+                                    'charcoal' => ['#475569', '#0f172a', 'to bottom right'],
+                                ];
+                                if ($state && isset($presets[$state])) {
+                                    [$from, $to, $dir] = $presets[$state];
+                                    $set('settings.bg', $from);
+                                    $set('settings.bgGradientTo', $to);
+                                    $set('settings.bgGradientDir', $dir);
+                                }
+                            })
+                            ->extraAttributes(['class' => 'tb-gradient-presets'])
+                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient'))
+                            ->helperText('Pick one to fill in colors and direction. Tweak below if you want.'),
                         ColorPicker::make('settings.bgGradientTo')
                             ->label('Gradient end color')
                             ->default('#0ea5e9')
