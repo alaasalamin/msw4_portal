@@ -14,10 +14,12 @@
 <div
     class="tb-text-preview-pane"
     wire:ignore
+    wire:key="tb-text-block-live-preview"
     x-data="{
         _debounceTimer: null,
 
         init() {
+            console.debug('[tb-preview] init');
             this.render();
 
             // Re-render on every input/change inside the modal —
@@ -32,11 +34,14 @@
             }
 
             // Livewire commits cover server round-tripping field
-            // changes (image uploads, etc.) before any DOM event
-            // fires reliably.
+            // changes (image uploads, repeater add/remove, etc.)
+            // before any DOM event fires reliably.
             if (window.Livewire) {
                 window.Livewire.hook('commit', ({ succeed }) => {
-                    succeed(() => this.scheduleRender());
+                    succeed(() => {
+                        console.debug('[tb-preview] livewire commit succeeded → schedule render');
+                        this.scheduleRender();
+                    });
                 });
             }
         },
@@ -53,8 +58,21 @@
         },
 
         render() {
-            if (! window.tbMountTextPreview || ! this.$refs.target) return;
-            window.tbMountTextPreview(this.$refs.target, this.readSettings());
+            if (! window.tbMountTextPreview) {
+                console.warn('[tb-preview] tbMountTextPreview missing');
+                return;
+            }
+            if (! this.$refs.target) {
+                console.warn('[tb-preview] target ref missing');
+                return;
+            }
+            const settings = this.readSettings();
+            console.debug('[tb-preview] render', {
+                blocks: Array.isArray(settings.blocks) ? settings.blocks.length : 0,
+                variant: settings.variant,
+                connected: this.$refs.target.isConnected,
+            });
+            window.tbMountTextPreview(this.$refs.target, settings);
         },
 
         // Strip the Livewire proxy so React gets a plain object.
