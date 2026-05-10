@@ -20,8 +20,17 @@ interface TextSettings {
     bgGradientDir?: string;
     bgImage?: string | null;
     bgImageOnCallout?: boolean;
+    font?: 'system' | 'inter' | 'display' | 'serif' | 'mono';
     fg?: string;
 }
+
+const FONT_STACKS: Record<string, string> = {
+    system:  'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+    inter:   '"Inter", system-ui, -apple-system, sans-serif',
+    display: '"Calistoga", Georgia, "Times New Roman", serif',
+    serif:   'Georgia, "Times New Roman", Cambria, serif',
+    mono:    '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace',
+};
 
 interface CalloutPreset { bg: string; border: string; fg: string; headingFg: string }
 
@@ -314,7 +323,7 @@ function Section({ settings, children }: { settings: TextSettings; children: Rea
         backgroundColor: bgColor,
         color: settings.fg ?? '#0f172a',
         padding: 'clamp(40px, 7vw, 80px) clamp(16px, 4vw, 32px)',
-        fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+        fontFamily: FONT_STACKS[settings.font ?? 'system'] ?? FONT_STACKS.system,
     };
 
     if (hasImage) {

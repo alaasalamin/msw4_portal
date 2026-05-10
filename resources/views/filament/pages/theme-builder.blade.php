@@ -8,6 +8,13 @@
         $previewUrl  = $this->getPreviewUrl();
     @endphp
 
+    {{-- Make the same Google Fonts the welcome page loads available
+         inside the admin so the font picker (and any rendered preview)
+         shows each option in its real typeface. --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+
     {{--
         Theme variables: light defaults on .tb-panel, dark overrides under .dark.
         Filament toggles a `dark` class on <html>, so these flip whenever the
@@ -182,6 +189,16 @@
         .tb-gradient-presets input[value="forest"]   + label.fi-btn { background-image: linear-gradient(to bottom,       #22c55e, #14532d) !important; }
         .tb-gradient-presets input[value="sky"]      + label.fi-btn { background-image: linear-gradient(to bottom,       #bae6fd, #6366f1) !important; }
         .tb-gradient-presets input[value="charcoal"] + label.fi-btn { background-image: linear-gradient(to bottom right, #475569, #0f172a) !important; }
+
+        /* ── Font picker ──
+           Render each option's label in the actual font it represents,
+           so the editor can preview the typeface without applying it. */
+        .tb-font-picker label.fi-btn { font-size: 0.95rem !important; letter-spacing: -0.005em; }
+        .tb-font-picker input[value="system"]  + label.fi-btn { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important; }
+        .tb-font-picker input[value="inter"]   + label.fi-btn { font-family: 'Inter', system-ui, sans-serif !important; font-weight: 600 !important; }
+        .tb-font-picker input[value="display"] + label.fi-btn { font-family: 'Calistoga', Georgia, serif !important; }
+        .tb-font-picker input[value="serif"]   + label.fi-btn { font-family: Georgia, "Times New Roman", serif !important; font-style: italic; }
+        .tb-font-picker input[value="mono"]    + label.fi-btn { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace !important; font-size: 0.85rem !important; }
     </style>
 
     <div

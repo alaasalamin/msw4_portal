@@ -304,6 +304,7 @@ class SectionRegistry
                 'bgGradientPreset'   => null,
                 'bgImage'            => null,
                 'bgImageOnCallout'   => true,
+                'font'               => 'system',
                 'fg'                 => '#0f172a', // legacy — kept so existing renders still pick up saved values
             ],
             'gallery' => [
@@ -958,6 +959,32 @@ class SectionRegistry
                     ])->columns(1),
                 Section::make('Style')
                     ->schema([
+                        ToggleButtons::make('settings.font')
+                            ->label('Font')
+                            ->options([
+                                'system'  => 'System',
+                                'inter'   => 'Inter',
+                                'display' => 'Calistoga',
+                                'serif'   => 'Georgia',
+                                'mono'    => 'JetBrains Mono',
+                            ])
+                            ->tooltips([
+                                'system'  => 'System default — fast, native to the device',
+                                'inter'   => 'Inter — modern geometric sans',
+                                'display' => 'Calistoga — bold display serif',
+                                'serif'   => 'Georgia — classic editorial serif',
+                                'mono'    => 'JetBrains Mono — monospace',
+                            ])
+                            ->colors([
+                                'system'  => 'primary',
+                                'inter'   => 'primary',
+                                'display' => 'primary',
+                                'serif'   => 'primary',
+                                'mono'    => 'primary',
+                            ])
+                            ->inline()
+                            ->default('system')
+                            ->extraAttributes(['class' => 'tb-font-picker']),
                         ColorPicker::make('settings.bg')
                             ->label(fn (Get $get) => $get('settings.bgGradient') ? 'Gradient start color' : 'Background color')
                             ->live()
