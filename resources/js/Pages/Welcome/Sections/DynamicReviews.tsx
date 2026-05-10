@@ -142,18 +142,35 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
     const showRole = settings.showRole !== false;
     const showDate = settings.showDate !== false;
 
+    // Carousel: show `cols` reviews at a time. Once there are more
+    // reviews than visible slots, prev/next arrows step the window
+    // through the list (wrapping around at both ends) so visitors can
+    // read every review without the section growing unbounded.
+    const [start, setStart] = useState(0);
+    const total = reviews.length;
+    const isCarousel = total > cols;
+    const visible: Review[] = isCarousel
+        ? Array.from({ length: cols }, (_, k) => reviews[(start + k) % total])
+        : reviews;
+    const next = () => setStart((s) => (s + 1) % Math.max(total, 1));
+    const prev = () => setStart((s) => (s - 1 + Math.max(total, 1)) % Math.max(total, 1));
+
     return (
         <Wrapper settings={settings}>
             <SectionHeader heading={settings.heading} subtitle={settings.subtitle} mutedFg={mutedFg} />
             {reviews.length === 0 ? (
                 <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>No reviews yet — add some in the Website Builder.</p>
             ) : (
+                <div style={{ position: 'relative' }}>
+                {isCarousel && (
+                    <CarouselArrow direction="prev" onClick={prev} fg={fg} cardBg={cardBg} />
+                )}
                 <div className={`tb-reviews-grid tb-reviews-cols-${cols}`} style={{
                     display: 'grid',
                     gap: 'clamp(20px, 2.5vw, 28px)',
                     gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
                 }}>
-                    {reviews.map((r, i) => (
+                    {visible.map((r, i) => (
                         <article key={i} style={{
                             background: cardBg,
                             borderRadius: 16,
@@ -193,6 +210,34 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                         </article>
                     ))}
                 </div>
+                {isCarousel && (
+                    <CarouselArrow direction="next" onClick={next} fg={fg} cardBg={cardBg} />
+                )}
+                </div>
+            )}
+            {isCarousel && (
+                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
+                    {reviews.map((_, i) => {
+                        const active = i === start;
+                        return (
+                            <button
+                                key={i}
+                                type="button"
+                                onClick={() => setStart(i)}
+                                aria-label={`Show review ${i + 1}`}
+                                style={{
+                                    width: active ? 24 : 8,
+                                    height: 8,
+                                    borderRadius: 9999,
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    background: active ? fg : 'rgba(15,23,42,0.2)',
+                                    transition: 'width 200ms ease, background 200ms ease',
+                                }}
+                            />
+                        );
+                    })}
+                </div>
             )}
             <style>{`
                 @media (max-width: 900px) {
@@ -203,6 +248,46 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                 }
             `}</style>
         </Wrapper>
+    );
+}
+
+function CarouselArrow({ direction, onClick, fg, cardBg }: {
+    direction: 'prev' | 'next';
+    onClick: () => void;
+    fg: string;
+    cardBg: string;
+}) {
+    const isPrev = direction === 'prev';
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            aria-label={isPrev ? 'Previous reviews' : 'Next reviews'}
+            style={{
+                position: 'absolute',
+                top: '50%',
+                [isPrev ? 'left' : 'right']: 'clamp(-20px, -1.5vw, -8px)',
+                transform: 'translateY(-50%)',
+                width: 44,
+                height: 44,
+                borderRadius: 9999,
+                border: '1px solid rgba(15,23,42,0.10)',
+                background: cardBg,
+                color: fg,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 6px rgba(15,23,42,0.10), 0 8px 24px -8px rgba(15,23,42,0.18)',
+                zIndex: 2,
+            }}
+        >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {isPrev
+                    ? <polyline points="15 18 9 12 15 6" />
+                    : <polyline points="9 18 15 12 9 6" />}
+            </svg>
+        </button>
     );
 }
 
