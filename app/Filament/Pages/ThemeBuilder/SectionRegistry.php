@@ -951,8 +951,58 @@ class SectionRegistry
                     ])->columns(1),
                 Section::make('Style')
                     ->schema([
-                        ColorPicker::make('settings.bg')->label('Background'),
-                        ColorPicker::make('settings.fg')->label('Text color'),
+                        ToggleButtons::make('settings.bg')
+                            ->label('Background')
+                            ->options([
+                                '#ffffff' => 'White',
+                                '#f8fafc' => 'Slate',
+                                '#fffbeb' => 'Cream',
+                                '#fef2f2' => 'Blush',
+                                '#eff6ff' => 'Sky',
+                                '#f0fdf4' => 'Mint',
+                                '#fdf4ff' => 'Lilac',
+                                '#0f172a' => 'Ink',
+                            ])
+                            ->tooltips([
+                                '#ffffff' => 'White',
+                                '#f8fafc' => 'Slate',
+                                '#fffbeb' => 'Cream',
+                                '#fef2f2' => 'Blush',
+                                '#eff6ff' => 'Sky',
+                                '#f0fdf4' => 'Mint',
+                                '#fdf4ff' => 'Lilac',
+                                '#0f172a' => 'Ink',
+                            ])
+                            ->hiddenButtonLabels()
+                            ->inline()
+                            ->default('#ffffff')
+                            ->extraAttributes(['class' => 'tb-color-swatches']),
+                        ToggleButtons::make('settings.fg')
+                            ->label('Text color')
+                            ->options([
+                                '#0f172a' => 'Ink',
+                                '#1e293b' => 'Slate',
+                                '#1d4ed8' => 'Royal',
+                                '#15803d' => 'Forest',
+                                '#b91c1c' => 'Crimson',
+                                '#6d28d9' => 'Violet',
+                                '#a16207' => 'Bronze',
+                                '#ffffff' => 'White',
+                            ])
+                            ->tooltips([
+                                '#0f172a' => 'Ink',
+                                '#1e293b' => 'Slate',
+                                '#1d4ed8' => 'Royal blue',
+                                '#15803d' => 'Forest green',
+                                '#b91c1c' => 'Crimson',
+                                '#6d28d9' => 'Violet',
+                                '#a16207' => 'Bronze',
+                                '#ffffff' => 'White',
+                            ])
+                            ->hiddenButtonLabels()
+                            ->inline()
+                            ->default('#0f172a')
+                            ->extraAttributes(['class' => 'tb-color-swatches']),
                     ])->columns(2),
             ],
 
