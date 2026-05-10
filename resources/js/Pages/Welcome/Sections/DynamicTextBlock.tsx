@@ -198,10 +198,11 @@ function Callout({ settings }: { settings: TextSettings }) {
         overflow: 'hidden',
     };
 
-    if (settings.bgImage && settings.bgImageOnCallout !== false) {
+    const calloutBgImagePath = typeof settings.bgImage === 'string' ? settings.bgImage.trim() : '';
+    if (calloutBgImagePath.length > 0 && settings.bgImageOnCallout !== false) {
         const tint = `color-mix(in srgb, ${calloutBg} 80%, transparent)`;
         calloutStyle.backgroundColor = 'transparent';
-        calloutStyle.backgroundImage = `linear-gradient(${tint}, ${tint}), url('/storage/${settings.bgImage}')`;
+        calloutStyle.backgroundImage = `linear-gradient(${tint}, ${tint}), url('/storage/${calloutBgImagePath}')`;
         calloutStyle.backgroundSize = 'cover';
         calloutStyle.backgroundPosition = 'center';
         calloutStyle.backgroundRepeat = 'no-repeat';
@@ -316,7 +317,11 @@ function Quote({ settings }: { settings: TextSettings }) {
 
 function Section({ settings, children }: { settings: TextSettings; children: React.ReactNode }) {
     const bgColor = settings.bg ?? '#ffffff';
-    const hasImage = !!settings.bgImage;
+    // Only treat bgImage as set when it's a non-empty string. During
+    // edits the FileUpload field can briefly hold an array or empty
+    // value, which used to produce `url('/storage/')` and a 404.
+    const bgImagePath = typeof settings.bgImage === 'string' ? settings.bgImage.trim() : '';
+    const hasImage = bgImagePath.length > 0;
     const hasGradient = !!settings.bgGradient && !!settings.bgGradientTo;
 
     const sectionStyle: React.CSSProperties = {
@@ -327,7 +332,7 @@ function Section({ settings, children }: { settings: TextSettings; children: Rea
     };
 
     if (hasImage) {
-        sectionStyle.backgroundImage = `url('/storage/${settings.bgImage}')`;
+        sectionStyle.backgroundImage = `url('/storage/${bgImagePath}')`;
         sectionStyle.backgroundSize = 'cover';
         sectionStyle.backgroundPosition = 'center';
         sectionStyle.backgroundRepeat = 'no-repeat';
