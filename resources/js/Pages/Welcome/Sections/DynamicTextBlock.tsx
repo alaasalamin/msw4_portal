@@ -172,22 +172,32 @@ function Callout({ settings }: { settings: TextSettings }) {
 
     const blocks = (settings.blocks ?? []).filter((b) => (b.text ?? '').trim() !== '');
 
+    const calloutStyle: React.CSSProperties = {
+        maxWidth: '900px',
+        margin: '0 auto',
+        backgroundColor: calloutBg,
+        border: `1px solid ${calloutBorder}`,
+        borderLeft: `4px solid ${calloutAccent}`,
+        borderRadius: 12,
+        padding: 'clamp(20px, 3vw, 28px) clamp(20px, 3vw, 32px)',
+        textAlign: align,
+        color: calloutBody,
+        overflow: 'hidden',
+    };
+
+    if (settings.bgImage) {
+        const tint = `color-mix(in srgb, ${calloutBg} 80%, transparent)`;
+        calloutStyle.backgroundColor = 'transparent';
+        calloutStyle.backgroundImage = `linear-gradient(${tint}, ${tint}), url('/storage/${settings.bgImage}')`;
+        calloutStyle.backgroundSize = 'cover';
+        calloutStyle.backgroundPosition = 'center';
+        calloutStyle.backgroundRepeat = 'no-repeat';
+        calloutStyle.minHeight = 'clamp(220px, 35vw, 380px)';
+    }
+
     return (
         <Section settings={settings}>
-            <div
-                role="note"
-                style={{
-                    maxWidth: '900px',
-                    margin: '0 auto',
-                    background: calloutBg,
-                    border: `1px solid ${calloutBorder}`,
-                    borderLeft: `4px solid ${calloutAccent}`,
-                    borderRadius: 12,
-                    padding: 'clamp(20px, 3vw, 28px) clamp(20px, 3vw, 32px)',
-                    textAlign: align,
-                    color: calloutBody,
-                }}
-            >
+            <div role="note" style={calloutStyle}>
                 {blocks.length > 0
                     ? blocks.map((b, i) => (
                         <BlockRenderer
