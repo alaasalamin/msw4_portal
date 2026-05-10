@@ -125,23 +125,23 @@
            Each .fi-color-{name} element has --color-50 … --color-950 set
            locally by Filament's utilities.css, so a single rule per state
            reads the right shade no matter which color is on the option. */
-        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color {
+        .fi-fo-toggle-buttons:not(.tb-gradient-presets) input:not(:checked) + label.fi-color {
             background: var(--color-50) !important;
             color: var(--color-700) !important;
             box-shadow: inset 0 0 0 1px var(--color-200) !important;
             transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
         }
-        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color:hover {
+        .fi-fo-toggle-buttons:not(.tb-gradient-presets) input:not(:checked) + label.fi-color:hover {
             background: var(--color-100) !important;
         }
 
         /* Dark mode: deeper translucent tint instead of the light-50 shade. */
-        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color {
+        .dark .fi-fo-toggle-buttons:not(.tb-gradient-presets) input:not(:checked) + label.fi-color {
             background: color-mix(in srgb, var(--color-500) 18%, transparent) !important;
             color: var(--color-200) !important;
             box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-400) 30%, transparent) !important;
         }
-        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color:hover {
+        .dark .fi-fo-toggle-buttons:not(.tb-gradient-presets) input:not(:checked) + label.fi-color:hover {
             background: color-mix(in srgb, var(--color-500) 28%, transparent) !important;
         }
 
