@@ -15,6 +15,7 @@ interface TextSettings {
     calloutColor?: 'info' | 'success' | 'warning' | 'danger' | 'note' | 'neutral' | 'brand';
     align?: 'left' | 'center' | 'right';
     bg?: string;
+    bgImage?: string | null;
     fg?: string;
 }
 
@@ -291,10 +292,13 @@ function Quote({ settings }: { settings: TextSettings }) {
 // ── Shared wrappers / styles ───────────────────────────────────────────────
 
 function Section({ settings, children }: { settings: TextSettings; children: React.ReactNode }) {
+    const bgColor = settings.bg ?? '#ffffff';
+    const bgImage = settings.bgImage ? `url('/storage/${settings.bgImage}')` : null;
+
     return (
         <section
             style={{
-                background: settings.bg ?? '#ffffff',
+                background: bgImage ? `${bgImage} center / cover no-repeat, ${bgColor}` : bgColor,
                 color: settings.fg ?? '#0f172a',
                 padding: 'clamp(40px, 7vw, 80px) clamp(16px, 4vw, 32px)',
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',

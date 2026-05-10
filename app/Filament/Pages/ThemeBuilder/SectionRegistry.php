@@ -297,7 +297,8 @@ class SectionRegistry
                 'calloutColor' => 'info', // used by the 'callout' variant
                 'align'        => 'left',
                 'bg'           => '#ffffff',
-                'fg'           => '#0f172a',
+                'bgImage'      => null,
+                'fg'           => '#0f172a', // legacy — kept so existing renders still pick up saved values
             ],
             'gallery' => [
                 'variant'        => 'grid',
@@ -951,9 +952,19 @@ class SectionRegistry
                     ])->columns(1),
                 Section::make('Style')
                     ->schema([
-                        ColorPicker::make('settings.bg')->label('Background'),
-                        ColorPicker::make('settings.fg')->label('Text color'),
-                    ])->columns(2),
+                        ColorPicker::make('settings.bg')
+                            ->label('Background color')
+                            ->helperText('Used when no background image is set.'),
+                        FileUpload::make('settings.bgImage')
+                            ->label('Background image')
+                            ->image()
+                            ->disk('public')
+                            ->directory('theme-builder/text-bg')
+                            ->maxSize(5120)
+                            ->imagePreviewHeight('80')
+                            ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
+                            ->helperText('Optional. Overrides the background color when set.'),
+                    ])->columns(1),
             ],
 
             'gallery' => [
