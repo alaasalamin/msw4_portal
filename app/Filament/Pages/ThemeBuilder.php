@@ -353,7 +353,7 @@ class ThemeBuilder extends Page
                 // .tb-text-card so the cards sit on the left and the
                 // right side stays empty for breathing room.
                 $section = $this->findSection($arguments['id'] ?? null);
-                return ($section['type'] ?? null) === 'text' ? '5xl' : '2xl';
+                return ($section['type'] ?? null) === 'text' ? '6xl' : '2xl';
             })
             ->modalSubmitActionLabel('Save')
             ->modalHeading(function (array $arguments): string {
