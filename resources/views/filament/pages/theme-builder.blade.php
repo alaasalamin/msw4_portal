@@ -115,6 +115,38 @@
             --tb-status-ok:    #34d399;
             --tb-link-fg:      #38bdf8;
         }
+
+        /* Toggle-buttons in our edit-section modals: tint each unselected
+           option with a light shade of its own color so users can read the
+           color at a glance, even without knowing the keyword (info,
+           danger, …). The selected option keeps Filament's default solid
+           color treatment. */
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color { transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-info     { background: var(--color-info-50)    !important; color: var(--color-info-700)    !important; box-shadow: inset 0 0 0 1px var(--color-info-200) !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-success  { background: var(--color-success-50) !important; color: var(--color-success-700) !important; box-shadow: inset 0 0 0 1px var(--color-success-200) !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-warning  { background: var(--color-warning-50) !important; color: var(--color-warning-700) !important; box-shadow: inset 0 0 0 1px var(--color-warning-200) !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-danger   { background: var(--color-danger-50)  !important; color: var(--color-danger-700)  !important; box-shadow: inset 0 0 0 1px var(--color-danger-200) !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-purple   { background: var(--color-purple-50)  !important; color: var(--color-purple-700)  !important; box-shadow: inset 0 0 0 1px var(--color-purple-200) !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-gray     { background: var(--color-gray-100)   !important; color: var(--color-gray-700)    !important; box-shadow: inset 0 0 0 1px var(--color-gray-200)   !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-primary  { background: var(--color-primary-50) !important; color: var(--color-primary-700) !important; box-shadow: inset 0 0 0 1px var(--color-primary-200) !important; }
+
+        /* Hover gives a slightly stronger tint without committing to a selection. */
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-info:hover     { background: var(--color-info-100)    !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-success:hover  { background: var(--color-success-100) !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-warning:hover  { background: var(--color-warning-100) !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-danger:hover   { background: var(--color-danger-100)  !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-purple:hover   { background: var(--color-purple-100)  !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-gray:hover     { background: var(--color-gray-200)    !important; }
+        .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-primary:hover  { background: var(--color-primary-100) !important; }
+
+        /* Dark-mode variants: deeper translucent tint instead of the light-50 shade. */
+        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-info     { background: color-mix(in srgb, var(--color-info-500)    18%, transparent) !important; color: var(--color-info-200)    !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-info-400) 30%,    transparent) !important; }
+        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-success  { background: color-mix(in srgb, var(--color-success-500) 18%, transparent) !important; color: var(--color-success-200) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-success-400) 30%, transparent) !important; }
+        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-warning  { background: color-mix(in srgb, var(--color-warning-500) 18%, transparent) !important; color: var(--color-warning-200) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-warning-400) 30%, transparent) !important; }
+        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-danger   { background: color-mix(in srgb, var(--color-danger-500)  18%, transparent) !important; color: var(--color-danger-200)  !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-danger-400) 30%,  transparent) !important; }
+        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-purple   { background: color-mix(in srgb, var(--color-purple-500)  18%, transparent) !important; color: var(--color-purple-200)  !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-purple-400) 30%,  transparent) !important; }
+        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-gray     { background: color-mix(in srgb, var(--color-gray-500)    18%, transparent) !important; color: var(--color-gray-200)    !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-gray-400) 30%,    transparent) !important; }
+        .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color-primary  { background: color-mix(in srgb, var(--color-primary-500) 18%, transparent) !important; color: var(--color-primary-200) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary-400) 30%, transparent) !important; }
     </style>
 
     <div
