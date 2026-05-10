@@ -818,8 +818,12 @@ class SectionRegistry
                     ->schema([
                         Repeater::make('settings.blocks')
                             ->label('Content blocks')
-                            ->visible(fn (Get $get) => ($get('settings.variant') ?? 'default') === 'default')
-                            ->helperText('Add as many headings (H1–H6) and paragraphs as you like, in any order.')
+                            ->helperText(fn (Get $get) => match ($get('settings.variant') ?? 'default') {
+                                'two_column' => 'First heading appears in the left column. Everything else flows in the right column.',
+                                'callout'    => 'All blocks render inside the callout box.',
+                                'quote'      => 'Paragraph blocks make up the quote. Headings are ignored — use the Attribution field for the credit.',
+                                default      => 'Add as many headings (H1–H6) and paragraphs as you like, in any order.',
+                            })
                             ->afterStateHydrated(function ($state, $set, $get) {
                                 if (! empty($state)) {
                                     return;
@@ -872,15 +876,6 @@ class SectionRegistry
                                     ? strtoupper($state['level'] ?? 'h2') . ' · ' . $preview
                                     : 'Paragraph · ' . $preview;
                             }),
-                        TextInput::make('settings.heading')
-                            ->label('Heading')
-                            ->maxLength(120)
-                            ->visible(fn (Get $get) => ($get('settings.variant') ?? 'default') !== 'default'),
-                        Textarea::make('settings.body')
-                            ->label('Body')
-                            ->rows(5)
-                            ->required(fn (Get $get) => ($get('settings.variant') ?? 'default') !== 'default')
-                            ->visible(fn (Get $get) => ($get('settings.variant') ?? 'default') !== 'default'),
                         TextInput::make('settings.attribution')
                             ->label('Attribution')
                             ->maxLength(120)

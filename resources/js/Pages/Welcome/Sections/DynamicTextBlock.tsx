@@ -62,41 +62,65 @@ function Default({ settings }: { settings: TextSettings }) {
     );
 }
 
-const HEADING_SIZES: Record<HeadingLevel, string> = {
-    h1: 'clamp(2rem, 4vw, 3rem)',
-    h2: 'clamp(1.5rem, 3vw, 2.25rem)',
-    h3: 'clamp(1.25rem, 2.4vw, 1.75rem)',
-    h4: 'clamp(1.125rem, 2vw, 1.375rem)',
-    h5: 'clamp(1rem, 1.6vw, 1.125rem)',
-    h6: 'clamp(0.9375rem, 1.4vw, 1rem)',
+interface BlockRendererProps {
+    block: ContentBlock;
+    headingColor?: string;
+    bodyColor?: string;
+    compact?: boolean;
+}
+
+const HEADING_CLASSES: Record<HeadingLevel, string> = {
+    h1: 'text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none mb-6',
+    h2: 'text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-5',
+    h3: 'text-2xl md:text-3xl font-bold tracking-tight leading-snug mb-4',
+    h4: 'text-xl md:text-2xl font-semibold tracking-tight mb-3',
+    h5: 'text-lg md:text-xl font-semibold mb-2',
+    h6: 'text-base md:text-lg font-semibold mb-2',
 };
 
-function BlockRenderer({ block }: { block: ContentBlock }) {
+function BlockRenderer({ block, headingColor, bodyColor, compact = false }: BlockRendererProps) {
     const text = block.text ?? '';
     if (block.type === 'heading') {
         const level: HeadingLevel = block.level ?? 'h2';
-        const style: React.CSSProperties = {
-            fontSize: HEADING_SIZES[level] ?? HEADING_SIZES.h2,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            lineHeight: 1.2,
-            margin: '0 0 16px',
-        };
+        const className = HEADING_CLASSES[level] ?? HEADING_CLASSES.h2;
+        const style: React.CSSProperties = headingColor ? { color: headingColor } : {};
+        const compactStyle: React.CSSProperties = compact ? { marginBottom: '0.5rem' } : {};
+        const merged = { ...style, ...compactStyle };
         switch (level) {
-            case 'h1': return <h1 style={style}>{text}</h1>;
-            case 'h2': return <h2 style={style}>{text}</h2>;
-            case 'h3': return <h3 style={style}>{text}</h3>;
-            case 'h4': return <h4 style={style}>{text}</h4>;
-            case 'h5': return <h5 style={style}>{text}</h5>;
-            case 'h6': return <h6 style={style}>{text}</h6>;
+            case 'h1': return <h1 className={className} style={merged}>{text}</h1>;
+            case 'h2': return <h2 className={className} style={merged}>{text}</h2>;
+            case 'h3': return <h3 className={className} style={merged}>{text}</h3>;
+            case 'h4': return <h4 className={className} style={merged}>{text}</h4>;
+            case 'h5': return <h5 className={className} style={merged}>{text}</h5>;
+            case 'h6': return <h6 className={className} style={merged}>{text}</h6>;
         }
     }
-    return <p style={{ ...bodyStyle, margin: '0 0 16px' }}>{text}</p>;
+    const paraStyle: React.CSSProperties = {
+        ...bodyStyle,
+        margin: compact ? '0 0 8px' : '0 0 16px',
+        ...(bodyColor ? { color: bodyColor } : {}),
+        ...(compact ? { fontSize: 'clamp(0.9375rem, 1.1vw, 1rem)' } : {}),
+    };
+    return <p style={paraStyle}>{text}</p>;
 }
 
 // ── Variant: two_column (heading on left, body on right) ───────────────────
 
 function TwoColumn({ settings }: { settings: TextSettings }) {
+    const blocks = (settings.blocks ?? []).filter((b) => (b.text ?? '').trim() !== '');
+
+    let leftBlocks: ContentBlock[] = [];
+    let rightBlocks: ContentBlock[] = [];
+    if (blocks.length > 0) {
+        const firstHeadingIdx = blocks.findIndex((b) => b.type === 'heading');
+        if (firstHeadingIdx >= 0) {
+            leftBlocks = [blocks[firstHeadingIdx]];
+            rightBlocks = blocks.filter((_, i) => i !== firstHeadingIdx);
+        } else {
+            rightBlocks = blocks;
+        }
+    }
+
     return (
         <Section settings={settings}>
             <div
@@ -111,14 +135,14 @@ function TwoColumn({ settings }: { settings: TextSettings }) {
                 }}
             >
                 <div>
-                    {settings.heading && (
-                        <h2 style={{ ...headingStyle, margin: 0 }}>{settings.heading}</h2>
-                    )}
+                    {leftBlocks.length > 0
+                        ? leftBlocks.map((b, i) => <BlockRenderer key={i} block={b} />)
+                        : settings.heading && <h2 style={{ ...headingStyle, margin: 0 }}>{settings.heading}</h2>}
                 </div>
                 <div>
-                    {settings.body && (
-                        <p style={{ ...bodyStyle, margin: 0 }}>{settings.body}</p>
-                    )}
+                    {rightBlocks.length > 0
+                        ? rightBlocks.map((b, i) => <BlockRenderer key={i} block={b} />)
+                        : settings.body && <p style={{ ...bodyStyle, margin: 0 }}>{settings.body}</p>}
                 </div>
             </div>
             <style>{`
@@ -145,6 +169,8 @@ function Callout({ settings }: { settings: TextSettings }) {
     const calloutBody   = preset ? preset.fg     : settings.fg ?? '#0f172a';
     const calloutHead   = preset ? preset.headingFg : 'currentColor';
 
+    const blocks = (settings.blocks ?? []).filter((b) => (b.text ?? '').trim() !== '');
+
     return (
         <Section settings={settings}>
             <div
@@ -161,26 +187,40 @@ function Callout({ settings }: { settings: TextSettings }) {
                     color: calloutBody,
                 }}
             >
-                {settings.heading && (
-                    <h2 style={{
-                        ...headingStyle,
-                        fontSize: 'clamp(1.125rem, 2vw, 1.375rem)',
-                        margin: '0 0 8px',
-                        color: calloutHead,
-                    }}>
-                        {settings.heading}
-                    </h2>
-                )}
-                {settings.body && (
-                    <p style={{
-                        ...bodyStyle,
-                        margin: 0,
-                        fontSize: 'clamp(0.9375rem, 1.1vw, 1rem)',
-                        color: calloutBody,
-                    }}>
-                        {settings.body}
-                    </p>
-                )}
+                {blocks.length > 0
+                    ? blocks.map((b, i) => (
+                        <BlockRenderer
+                            key={i}
+                            block={b}
+                            headingColor={calloutHead}
+                            bodyColor={calloutBody}
+                            compact
+                        />
+                    ))
+                    : (
+                        <>
+                            {settings.heading && (
+                                <h2 style={{
+                                    ...headingStyle,
+                                    fontSize: 'clamp(1.125rem, 2vw, 1.375rem)',
+                                    margin: '0 0 8px',
+                                    color: calloutHead,
+                                }}>
+                                    {settings.heading}
+                                </h2>
+                            )}
+                            {settings.body && (
+                                <p style={{
+                                    ...bodyStyle,
+                                    margin: 0,
+                                    fontSize: 'clamp(0.9375rem, 1.1vw, 1rem)',
+                                    color: calloutBody,
+                                }}>
+                                    {settings.body}
+                                </p>
+                            )}
+                        </>
+                    )}
             </div>
         </Section>
     );
@@ -190,6 +230,10 @@ function Callout({ settings }: { settings: TextSettings }) {
 
 function Quote({ settings }: { settings: TextSettings }) {
     const align = settings.align ?? 'center';
+    const blockParas = (settings.blocks ?? [])
+        .filter((b) => b.type !== 'heading' && (b.text ?? '').trim() !== '')
+        .map((b) => b.text!.trim());
+    const quoteText = blockParas.length > 0 ? blockParas.join('\n\n') : (settings.body ?? '');
 
     return (
         <Section settings={settings}>
@@ -226,7 +270,7 @@ function Quote({ settings }: { settings: TextSettings }) {
                     letterSpacing: '-0.005em',
                     whiteSpace: 'pre-wrap',
                 }}>
-                    {settings.body}
+                    {quoteText}
                 </blockquote>
                 {(settings.heading || settings.attribution) && (
                     <figcaption style={{
