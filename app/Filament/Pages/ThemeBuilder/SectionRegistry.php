@@ -11,8 +11,11 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\View as SchemaView;
 
 class SectionRegistry
 {
@@ -787,6 +790,8 @@ class SectionRegistry
             ],
 
             'text' => [
+                Grid::make(['default' => 1, 'md' => 2])->schema([
+                    Group::make([
                 Section::make('Design')
                     ->extraAttributes(['class' => 'tb-text-card'])
                     ->schema([
@@ -1097,6 +1102,16 @@ class SectionRegistry
                             ->default(true)
                             ->visible(fn (Get $get) => $get('settings.variant') === 'callout' && filled($get('settings.bgImage'))),
                     ])->columns(1),
+                    ])->columnSpan(['default' => 1, 'md' => 1]),
+
+                    // Right column — live preview iframe. Sticks to the
+                    // top of the modal scroll area so the editor sees
+                    // their changes the whole time they scroll the form.
+                    Group::make([
+                        SchemaView::make('filament.pages.theme-builder.text-block-preview')
+                            ->extraAttributes(['class' => 'tb-text-preview-wrap']),
+                    ])->columnSpan(['default' => 1, 'md' => 1]),
+                ]),
             ],
 
             'gallery' => [
