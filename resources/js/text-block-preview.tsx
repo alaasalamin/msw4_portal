@@ -4,7 +4,7 @@
 // from Alpine to render the live preview pane on the right side of
 // the modal — no iframe, no separate page.
 
-import '../css/app.css';
+import '../css/text-block-preview.css';
 import { createRoot, type Root } from 'react-dom/client';
 import DynamicTextBlock from './Pages/Welcome/Sections/DynamicTextBlock';
 

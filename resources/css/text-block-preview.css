@@ -1,0 +1,9 @@
+/* Scoped stylesheet for the Theme Builder's inline text-block preview.
+   Pulls in Google Fonts (Calistoga / Inter / JetBrains Mono) and
+   Tailwind's utility layer ONLY — no @tailwind base / preflight,
+   because that reset would clobber Filament's input/button styles
+   when this file is loaded on the admin Theme Builder page. */
+
+@import url('https://fonts.googleapis.com/css2?family=Calistoga:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind utilities;
