@@ -21,7 +21,6 @@
             x-ref="frame"
             src="/admin/theme-builder/text-preview"
             title="Text block preview"
-            loading="lazy"
         ></iframe>
     </div>
 </div>
@@ -34,11 +33,31 @@
                 _debounceTimer: null,
 
                 init() {
+                    console.debug('[tb-preview-pane] init');
+
+                    // Seed the iframe URL with the current settings so
+                    // the first paint already shows the right preview.
+                    // Subsequent updates flow through postMessage and
+                    // never reload the iframe.
+                    try {
+                        const initial = this.readSettings();
+                        const url = new URL('/admin/theme-builder/text-preview', window.location.origin);
+                        url.searchParams.set('settings', JSON.stringify(initial));
+                        if (this.$refs.frame) {
+                            this.$refs.frame.src = url.pathname + url.search;
+                        }
+                        console.debug('[tb-preview-pane] iframe seeded', initial);
+                    } catch (e) {
+                        console.warn('[tb-preview-pane] seed failed', e);
+                    }
+
                     // The iframe page posts 'tb-text-preview:ready' as
-                    // soon as it mounts. Until then any push() is a
-                    // no-op (the listener doesn't exist yet).
+                    // soon as it mounts. We respond by pushing the
+                    // current settings — covers the case where the
+                    // iframe finishes loading after this handler runs.
                     window.addEventListener('message', (event) => {
                         if (event?.data?.type === 'tb-text-preview:ready') {
+                            console.debug('[tb-preview-pane] iframe ready');
                             this.ready = true;
                             this.push();
                         }
@@ -56,6 +75,16 @@
                             modal.addEventListener(evt, () => this.schedulePush(), true);
                         });
                     }
+
+                    // Belt-and-braces: also push on Livewire updates,
+                    // since some field changes (toggle buttons, image
+                    // uploads) round-trip through the server before the
+                    // DOM input event fires reliably.
+                    if (window.Livewire) {
+                        window.Livewire.hook('commit', ({ succeed }) => {
+                            succeed(() => this.schedulePush());
+                        });
+                    }
                 },
 
                 schedulePush() {
@@ -66,6 +95,7 @@
                 push() {
                     if (! this.ready || ! this.$refs.frame?.contentWindow) return;
                     const settings = this.readSettings();
+                    console.debug('[tb-preview-pane] push', settings);
                     this.$refs.frame.contentWindow.postMessage({
                         type: 'tb-text-preview:settings',
                         settings,

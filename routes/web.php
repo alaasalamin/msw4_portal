@@ -45,10 +45,15 @@ Route::post('/admin/broadcasting/auth', function (\Illuminate\Http\Request $requ
 // Live preview pane for the Theme Builder's text-block edit modal.
 // Mounts a single DynamicTextBlock (the actual production renderer)
 // and listens for postMessage from the parent so settings can change
-// in real time without an iframe reload.
+// in real time without an iframe reload. The initial settings can be
+// seeded via a JSON-encoded `settings` query parameter so the first
+// paint already shows the current form state.
 Route::get('/admin/theme-builder/text-preview', function (\Illuminate\Http\Request $request) {
+    $raw = $request->input('settings');
+    $settings = is_string($raw) ? (json_decode($raw, true) ?: []) : ($raw ?: []);
+
     return Inertia::render('ThemeBuilder/TextBlockPreview', [
-        'settings' => $request->input('settings', []),
+        'settings' => $settings,
     ]);
 })->middleware('auth:employee')->name('admin.theme-builder.text-preview');
 
