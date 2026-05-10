@@ -17,7 +17,11 @@
 
     {{-- Vite entry that exposes window.tbMountTextPreview so the
          Edit Text Block modal can mount the real DynamicTextBlock
-         React component into the live preview pane. --}}
+         React component into the live preview pane. The React
+         refresh preamble has to run before any React module loads,
+         otherwise @vitejs/plugin-react throws "can't detect
+         preamble". --}}
+    @viteReactRefresh
     @vite(['resources/js/text-block-preview.tsx'])
 
     {{--
