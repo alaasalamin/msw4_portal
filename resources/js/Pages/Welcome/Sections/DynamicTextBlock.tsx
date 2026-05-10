@@ -323,9 +323,23 @@ function Section({ settings, children }: { settings: TextSettings; children: Rea
         sectionStyle.backgroundPosition = 'center';
         sectionStyle.backgroundRepeat = 'no-repeat';
         sectionStyle.minHeight = 'clamp(280px, 45vw, 520px)';
+        // Photos vary; a subtle dark shadow keeps light text readable.
+        sectionStyle.textShadow = '0 1px 3px rgba(0, 0, 0, 0.35)';
     } else if (hasGradient) {
         const dir = settings.bgGradientDir ?? 'to right';
         sectionStyle.backgroundImage = `linear-gradient(${dir}, ${bgColor}, ${settings.bgGradientTo})`;
+
+        // Pick text color from the gradient's average luminance so both
+        // ends of the blend stay readable. Add a soft shadow in the
+        // opposite tone for that extra bit of contrast.
+        const avg = (relativeLuminance(bgColor) + relativeLuminance(settings.bgGradientTo!)) / 2;
+        if (avg < 0.55) {
+            sectionStyle.color = '#ffffff';
+            sectionStyle.textShadow = '0 1px 3px rgba(0, 0, 0, 0.35)';
+        } else {
+            sectionStyle.color = '#0f172a';
+            sectionStyle.textShadow = '0 1px 2px rgba(255, 255, 255, 0.55)';
+        }
     }
 
     return (
@@ -333,6 +347,23 @@ function Section({ settings, children }: { settings: TextSettings; children: Rea
             {children}
         </section>
     );
+}
+
+// WCAG relative luminance — used to decide whether a gradient leans light
+// or dark so we can flip the text color and shadow without the editor
+// having to think about it.
+function relativeLuminance(hex: string): number {
+    const clean = (hex || '').replace('#', '');
+    const expand = clean.length === 3
+        ? clean.split('').map((c) => c + c).join('')
+        : clean;
+    if (expand.length !== 6) return 0.5;
+
+    const r = parseInt(expand.slice(0, 2), 16) / 255;
+    const g = parseInt(expand.slice(2, 4), 16) / 255;
+    const b = parseInt(expand.slice(4, 6), 16) / 255;
+    const channel = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 }
 
 const headingStyle: React.CSSProperties = {
