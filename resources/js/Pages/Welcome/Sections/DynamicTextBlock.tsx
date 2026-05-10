@@ -16,6 +16,7 @@ interface TextSettings {
     align?: 'left' | 'center' | 'right';
     bg?: string;
     bgImage?: string | null;
+    bgImageOnCallout?: boolean;
     fg?: string;
 }
 
@@ -185,7 +186,7 @@ function Callout({ settings }: { settings: TextSettings }) {
         overflow: 'hidden',
     };
 
-    if (settings.bgImage) {
+    if (settings.bgImage && settings.bgImageOnCallout !== false) {
         const tint = `color-mix(in srgb, ${calloutBg} 80%, transparent)`;
         calloutStyle.backgroundColor = 'transparent';
         calloutStyle.backgroundImage = `linear-gradient(${tint}, ${tint}), url('/storage/${settings.bgImage}')`;

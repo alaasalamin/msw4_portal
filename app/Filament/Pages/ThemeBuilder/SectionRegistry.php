@@ -9,6 +9,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -296,9 +297,10 @@ class SectionRegistry
                 'attribution'  => '',     // used by the 'quote' variant
                 'calloutColor' => 'info', // used by the 'callout' variant
                 'align'        => 'left',
-                'bg'           => '#ffffff',
-                'bgImage'      => null,
-                'fg'           => '#0f172a', // legacy — kept so existing renders still pick up saved values
+                'bg'                 => '#ffffff',
+                'bgImage'            => null,
+                'bgImageOnCallout'   => true,
+                'fg'                 => '#0f172a', // legacy — kept so existing renders still pick up saved values
             ],
             'gallery' => [
                 'variant'        => 'grid',
@@ -963,7 +965,13 @@ class SectionRegistry
                             ->maxSize(5120)
                             ->imagePreviewHeight('80')
                             ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
+                            ->live()
                             ->helperText('Optional. Overrides the background color when set.'),
+                        Toggle::make('settings.bgImageOnCallout')
+                            ->label('Use background image inside the callout box')
+                            ->helperText('When off, the callout keeps its solid color and the image only shows around it.')
+                            ->default(true)
+                            ->visible(fn (Get $get) => $get('settings.variant') === 'callout' && filled($get('settings.bgImage'))),
                     ])->columns(1),
             ],
 
