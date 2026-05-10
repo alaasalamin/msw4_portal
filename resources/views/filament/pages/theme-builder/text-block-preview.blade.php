@@ -7,8 +7,13 @@
     page) and re-renders it whenever the editor changes anything in
     the modal.
 --}}
+{{-- wire:ignore on the OUTER pane: Livewire never re-morphs anything
+     here on commits, so Alpine state, the React root, and the React-
+     rendered DOM all survive across repeater adds, image uploads, and
+     other server round-trips. --}}
 <div
     class="tb-text-preview-pane"
+    wire:ignore
     x-data="{
         _debounceTimer: null,
 
@@ -69,10 +74,7 @@
         <span class="tb-text-preview-dot"></span>
         Live preview
     </div>
-    {{-- wire:ignore tells Livewire to leave the React mount point
-         alone during partial re-renders, otherwise it morphs away
-         the rendered output and leaves React holding a stale Root. --}}
-    <div class="tb-text-preview-stage" wire:ignore>
+    <div class="tb-text-preview-stage">
         <div x-ref="target" class="tb-text-preview-target"></div>
     </div>
 </div>
