@@ -26,6 +26,22 @@ interface ReviewsSettings {
     starColor?: string;
 }
 
+// Tiny media-query hook: returns true while the viewport is at least
+// `minWidth`px wide. Re-evaluates on resize. Used to disable the cards
+// carousel on mobile so each review stacks instead.
+function useMediaMin(minWidth: number): boolean {
+    const get = () => typeof window !== 'undefined' && window.innerWidth >= minWidth;
+    const [matches, setMatches] = useState<boolean>(get());
+    useEffect(() => {
+        const update = () => setMatches(get());
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [minWidth]);
+    return matches;
+}
+
 function initials(name?: string): string {
     if (!name) return '?';
     return name
@@ -147,8 +163,14 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
     // (the index of the carousel's centre card) through the list,
     // and the entire track translates left/right with a smooth ease
     // so the next card glides into the centre.
+    //
+    // On mobile (<= 768px) we skip the carousel entirely — the cards
+    // stack one per row via the existing grid styles, no peeks, no
+    // sliding, since horizontal carousels are awkward on small
+    // touch screens.
     const total = reviews.length;
-    const isCarousel = total > cols;
+    const isDesktop = useMediaMin(769);
+    const isCarousel = total > cols && isDesktop;
     const visibleSlots = cols + 2; // cols main + 2 peeks
     const halfMain = Math.floor(cols / 2);
     const minActive = halfMain;
@@ -309,11 +331,10 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                 </div>
             )}
             <style>{`
-                @media (max-width: 900px) {
-                    .tb-reviews-grid.tb-reviews-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-                }
-                @media (max-width: 560px) {
-                    .tb-reviews-grid { grid-template-columns: 1fr !important; }
+                @media (max-width: 768px) {
+                    .tb-reviews-grid.tb-reviews-cols-1,
+                    .tb-reviews-grid.tb-reviews-cols-2,
+                    .tb-reviews-grid.tb-reviews-cols-3 { grid-template-columns: 1fr !important; }
                 }
 
                 /* The track + every slide ease together: track translates
