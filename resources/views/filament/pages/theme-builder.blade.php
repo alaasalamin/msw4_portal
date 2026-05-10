@@ -148,7 +148,7 @@
 
     <div
         class="tb-panel"
-        x-data="themeBuilder()"
+        x-data="themeBuilder(@js(['pages' => $this->getPages()]))"
         x-on:theme-builder:section-saved.window="reloadPreview()"
         style="display:grid; grid-template-columns: 380px 1fr; gap:16px; align-items:start;"
     >
@@ -482,6 +482,7 @@
                     <iframe
                         x-ref="preview"
                         src="{{ $previewUrl }}"
+                        x-on:load="onPreviewNavigated"
                         style="width:100%; height:100%; border:0; display:block; background:#ffffff;"
                         title="Page preview"
                     ></iframe>
@@ -493,8 +494,14 @@
     <x-filament-actions::modals />
 
     <script>
-        function themeBuilder() {
+        function themeBuilder(config = {}) {
             return {
+                // ── Page list (for iframe ↔ page-picker sync) ──
+                // The full set of pages the user can edit. Used by
+                // onPreviewNavigated() to map the iframe's pathname back
+                // to a page id when the visitor clicks an internal link.
+                pages: config.pages || [],
+
                 // ── Preview device toggle ──
                 // 'desktop' | 'tablet' | 'mobile' — drives a class on the
                 // preview frame that constrains the iframe's max-width to the
@@ -570,6 +577,43 @@
                     const url  = new URL(base, window.location.origin);
                     url.searchParams.set('t', Date.now());
                     iframe.src = url.pathname + url.search;
+                },
+
+                // Fires whenever the iframe finishes loading — both on
+                // initial load and when the visitor clicks an internal
+                // link inside the preview. If the new pathname matches a
+                // page in the picker, sync the sidebar selection to it.
+                // External / off-page links (no slug match) are ignored
+                // so the picker stays where it was.
+                onPreviewNavigated(event) {
+                    const iframe = event.target;
+                    let pathname;
+                    try {
+                        pathname = iframe.contentWindow.location.pathname;
+                    } catch (e) {
+                        // Cross-origin — can't read the location. Should
+                        // never happen for our same-origin preview, but
+                        // bail safely if it does.
+                        return;
+                    }
+                    if (! pathname) return;
+
+                    // Normalize: drop trailing slashes except for the
+                    // homepage itself, which stays as '/'.
+                    const normalize = (p) => {
+                        if (! p || p === '/') return '/';
+                        return p.replace(/\/+$/, '');
+                    };
+                    const target = normalize(pathname);
+
+                    const matched = this.pages.find((p) => normalize(p.previewUrl || '') === target);
+                    if (! matched) return;
+
+                    const newId  = matched.id ?? null;
+                    const currId = this.$wire.currentPageId ?? null;
+                    if (String(currId) === String(newId)) return;
+
+                    this.$wire.selectPage(newId);
                 },
             };
         }
