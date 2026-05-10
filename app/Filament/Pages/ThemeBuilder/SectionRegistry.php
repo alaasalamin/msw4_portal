@@ -882,9 +882,36 @@ class SectionRegistry
                             ->placeholder('— Author Name')
                             ->visible(fn (Get $get) => $get('settings.variant') === 'quote')
                             ->helperText('Used by the Pull quote variant.'),
-                        Select::make('settings.calloutColor')
+                        ToggleButtons::make('settings.calloutColor')
                             ->label('Callout color')
                             ->options([
+                                'info'    => 'Info',
+                                'success' => 'Success',
+                                'warning' => 'Warning',
+                                'danger'  => 'Danger',
+                                'note'    => 'Note',
+                                'neutral' => 'Neutral',
+                                'brand'   => 'Brand',
+                            ])
+                            ->colors([
+                                'info'    => 'info',
+                                'success' => 'success',
+                                'warning' => 'warning',
+                                'danger'  => 'danger',
+                                'note'    => 'purple',
+                                'neutral' => 'gray',
+                                'brand'   => 'primary',
+                            ])
+                            ->icons([
+                                'info'    => 'heroicon-o-information-circle',
+                                'success' => 'heroicon-o-check-circle',
+                                'warning' => 'heroicon-o-exclamation-triangle',
+                                'danger'  => 'heroicon-o-x-circle',
+                                'note'    => 'heroicon-o-bookmark',
+                                'neutral' => 'heroicon-o-minus-circle',
+                                'brand'   => 'heroicon-o-sparkles',
+                            ])
+                            ->tooltips([
                                 'info'    => 'Info — light blue / blue accent',
                                 'success' => 'Success — light green / green accent',
                                 'warning' => 'Warning — light amber / amber accent',
@@ -893,14 +920,31 @@ class SectionRegistry
                                 'neutral' => 'Neutral — light gray / slate accent',
                                 'brand'   => 'Brand — uses your site primary color',
                             ])
+                            ->inline()
                             ->default('info')
                             ->required()
-                            ->native(false)
                             ->visible(fn (Get $get) => $get('settings.variant') === 'callout')
-                            ->helperText('Used by the Callout box variant.'),
-                        Select::make('settings.align')
+                            ->helperText('The selected color highlights the callout box. Hover an option to see what it looks like.'),
+                        ToggleButtons::make('settings.align')
                             ->label('Alignment')
                             ->options(['left' => 'Left', 'center' => 'Center', 'right' => 'Right'])
+                            ->icons([
+                                'left'   => 'heroicon-o-bars-3-bottom-left',
+                                'center' => 'heroicon-o-bars-3-center-left',
+                                'right'  => 'heroicon-o-bars-3-bottom-right',
+                            ])
+                            ->tooltips([
+                                'left'   => 'Left',
+                                'center' => 'Center',
+                                'right'  => 'Right',
+                            ])
+                            ->colors([
+                                'left'   => 'primary',
+                                'center' => 'primary',
+                                'right'  => 'primary',
+                            ])
+                            ->hiddenButtonLabels()
+                            ->inline()
                             ->default('left')
                             ->visible(fn (Get $get) => in_array($get('settings.variant') ?? 'default', ['default', 'callout', 'quote'], true))
                             ->helperText('Two-column variant ignores alignment.'),

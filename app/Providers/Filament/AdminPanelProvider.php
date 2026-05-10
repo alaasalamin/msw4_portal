@@ -66,6 +66,7 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('employee')
             ->colors([
                 'primary' => Color::Indigo,
+                'purple'  => Color::Purple,
             ])
             ->brandName('MSW 4')
             ->navigationGroups([
