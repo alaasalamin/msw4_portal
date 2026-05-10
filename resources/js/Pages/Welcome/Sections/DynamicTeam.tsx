@@ -153,8 +153,10 @@ function Cards({ settings }: { settings: TeamSettings }) {
                     .tb-team-grid.tb-team-cols-3,
                     .tb-team-grid.tb-team-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
                 }
-                @media (max-width: 560px) {
-                    .tb-team-grid { grid-template-columns: 1fr !important; }
+                @media (max-width: 768px) {
+                    .tb-team-grid.tb-team-cols-2,
+                    .tb-team-grid.tb-team-cols-3,
+                    .tb-team-grid.tb-team-cols-4 { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </SectionWrap>
@@ -281,8 +283,10 @@ function PhotoFocus({ settings }: { settings: TeamSettings }) {
                     .tb-team-photo-grid.tb-team-photo-cols-3,
                     .tb-team-photo-grid.tb-team-photo-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
                 }
-                @media (max-width: 480px) {
-                    .tb-team-photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+                @media (max-width: 768px) {
+                    .tb-team-photo-grid.tb-team-photo-cols-2,
+                    .tb-team-photo-grid.tb-team-photo-cols-3,
+                    .tb-team-photo-grid.tb-team-photo-cols-4 { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </SectionWrap>
@@ -302,14 +306,14 @@ function Compact({ settings }: { settings: TeamSettings }) {
             {members.length === 0 ? (
                 <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>No team members yet — add some in the Website Builder.</p>
             ) : (
-                <div style={{
+                <div className="tb-team-compact-grid" style={{
                     display: 'flex',
                     flexWrap: 'wrap',
                     justifyContent: 'center',
                     gap: 'clamp(20px, 3vw, 36px) clamp(16px, 2.5vw, 28px)',
                 }}>
                     {members.map((m, i) => (
-                        <div key={i} style={{
+                        <div key={i} className="tb-team-compact-tile" style={{
                             width: 'clamp(160px, 20vw, 200px)',
                             textAlign: 'center',
                             display: 'flex',
@@ -326,6 +330,12 @@ function Compact({ settings }: { settings: TeamSettings }) {
                     ))}
                 </div>
             )}
+            <style>{`
+                @media (max-width: 768px) {
+                    .tb-team-compact-grid { flex-direction: column !important; align-items: center !important; }
+                    .tb-team-compact-tile { width: 100% !important; max-width: 320px !important; }
+                }
+            `}</style>
         </SectionWrap>
     );
 }
