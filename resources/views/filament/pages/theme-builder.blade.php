@@ -202,69 +202,14 @@
         .tb-font-picker input[value="mono"]    + label.fi-btn { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace !important; font-size: 0.85rem !important; }
 
         /* ── Edit Text Block modal layout ──
-           Cards live in the left column of a 2-col Filament grid; the
-           right column hosts an inline live preview of the rendered
-           text block (DynamicTextBlock mounted via React, no iframe). */
+           Cards are capped narrower and aligned to the left so the
+           right side stays as empty breathing room. */
         .tb-text-card {
             max-width: 380px !important;
             margin-right: auto !important;
         }
         @media (max-width: 768px) {
             .tb-text-card { max-width: 100% !important; }
-        }
-
-        .tb-text-preview-wrap { align-self: flex-start; }
-        .tb-text-preview-pane {
-            position: sticky;
-            top: 1rem;
-            display: flex;
-            flex-direction: column;
-            border-radius: 0.75rem;
-            border: 1px solid var(--color-gray-200, #e5e7eb);
-            background: #ffffff;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px -10px rgba(15, 23, 42, 0.12);
-        }
-        .dark .tb-text-preview-pane {
-            border-color: rgba(255, 255, 255, 0.10);
-            background: #0f172a;
-        }
-        .tb-text-preview-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.6875rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            color: var(--color-gray-500, #64748b);
-            background: var(--color-gray-50, #f8fafc);
-            border-bottom: 1px solid var(--color-gray-200, #e5e7eb);
-        }
-        .dark .tb-text-preview-toolbar {
-            color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.04);
-            border-bottom-color: rgba(255, 255, 255, 0.08);
-        }
-        .tb-text-preview-dot {
-            width: 0.5rem; height: 0.5rem;
-            border-radius: 9999px;
-            background: #34d399;
-            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
-        }
-        .tb-text-preview-stage {
-            position: relative;
-            min-height: clamp(420px, 60vh, 720px);
-            max-height: 75vh;
-            overflow: auto;
-            background: #ffffff;
-        }
-        .dark .tb-text-preview-stage { background: #0f172a; }
-        .tb-text-preview-target { display: block; min-height: 100%; }
-        @media (max-width: 768px) {
-            .tb-text-preview-pane { position: static; }
-            .tb-text-preview-stage { min-height: 320px; max-height: none; }
         }
     </style>
 
