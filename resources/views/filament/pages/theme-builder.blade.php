@@ -199,6 +199,19 @@
         .tb-font-picker input[value="display"] + label.fi-btn { font-family: 'Calistoga', Georgia, serif !important; }
         .tb-font-picker input[value="serif"]   + label.fi-btn { font-family: Georgia, "Times New Roman", serif !important; font-style: italic; }
         .tb-font-picker input[value="mono"]    + label.fi-btn { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace !important; font-size: 0.85rem !important; }
+
+        /* ── Edit Text Block modal layout ──
+           The text-block edit form is heavy. The modal opens at 5xl wide,
+           but each card is capped narrower and aligned to the left so the
+           right side stays as empty breathing room — easier to scan than
+           a full-width wall of fields. */
+        .tb-text-card {
+            max-width: 640px !important;
+            margin-right: auto !important;
+        }
+        @media (max-width: 768px) {
+            .tb-text-card { max-width: 100% !important; }
+        }
     </style>
 
     <div

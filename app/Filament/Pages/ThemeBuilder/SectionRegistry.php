@@ -788,6 +788,7 @@ class SectionRegistry
 
             'text' => [
                 Section::make('Design')
+                    ->extraAttributes(['class' => 'tb-text-card'])
                     ->schema([
                         ToggleButtons::make('settings.variant')
                             ->label('Layout')
@@ -823,6 +824,7 @@ class SectionRegistry
                             ->helperText('Pick a layout. The selected one is highlighted in your brand color.'),
                     ])->columns(1),
                 Section::make('Content')
+                    ->extraAttributes(['class' => 'tb-text-card'])
                     ->schema([
                         Repeater::make('settings.blocks')
                             ->label('Content blocks')
@@ -958,6 +960,7 @@ class SectionRegistry
                             ->helperText('Two-column variant ignores alignment.'),
                     ])->columns(1),
                 Section::make('Style')
+                    ->extraAttributes(['class' => 'tb-text-card'])
                     ->schema([
                         ToggleButtons::make('settings.font')
                             ->label('Font')

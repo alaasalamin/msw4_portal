@@ -347,12 +347,13 @@ class ThemeBuilder extends Page
             ->label('Edit')
             ->icon('heroicon-m-pencil-square')
             ->modalWidth(function (array $arguments): string {
-                // Text blocks have a much heavier form (font picker,
-                // gradient presets, content blocks repeater, …), so give
-                // them an almost-full-screen modal. Other sections stay
-                // comfortable at 2xl.
+                // Text blocks carry a much heavier form (font picker,
+                // gradient presets, blocks repeater, …), so give them a
+                // wider modal. The content inside is capped narrower via
+                // .tb-text-card so the cards sit on the left and the
+                // right side stays empty for breathing room.
                 $section = $this->findSection($arguments['id'] ?? null);
-                return ($section['type'] ?? null) === 'text' ? 'screen' : '2xl';
+                return ($section['type'] ?? null) === 'text' ? '5xl' : '2xl';
             })
             ->modalSubmitActionLabel('Save')
             ->modalHeading(function (array $arguments): string {
