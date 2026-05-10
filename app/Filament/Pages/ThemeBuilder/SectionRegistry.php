@@ -298,6 +298,9 @@ class SectionRegistry
                 'calloutColor' => 'info', // used by the 'callout' variant
                 'align'        => 'left',
                 'bg'                 => '#ffffff',
+                'bgGradient'         => false,
+                'bgGradientTo'       => '#0ea5e9',
+                'bgGradientDir'      => 'to right',
                 'bgImage'            => null,
                 'bgImageOnCallout'   => true,
                 'fg'                 => '#0f172a', // legacy — kept so existing renders still pick up saved values
@@ -955,8 +958,52 @@ class SectionRegistry
                 Section::make('Style')
                     ->schema([
                         ColorPicker::make('settings.bg')
-                            ->label('Background color')
+                            ->label(fn (Get $get) => $get('settings.bgGradient') ? 'Gradient start color' : 'Background color')
+                            ->live()
                             ->helperText('Used when no background image is set.'),
+                        Toggle::make('settings.bgGradient')
+                            ->label('Use a gradient background')
+                            ->helperText('Blends the background color into a second color along the chosen direction.')
+                            ->default(false)
+                            ->live(),
+                        ColorPicker::make('settings.bgGradientTo')
+                            ->label('Gradient end color')
+                            ->default('#0ea5e9')
+                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient')),
+                        ToggleButtons::make('settings.bgGradientDir')
+                            ->label('Gradient direction')
+                            ->options([
+                                'to right'        => 'Right',
+                                'to bottom right' => 'Diagonal ↘',
+                                'to bottom'       => 'Down',
+                                'to bottom left'  => 'Diagonal ↙',
+                                'to top right'    => 'Diagonal ↗',
+                            ])
+                            ->icons([
+                                'to right'        => 'heroicon-o-arrow-right',
+                                'to bottom right' => 'heroicon-o-arrow-down-right',
+                                'to bottom'       => 'heroicon-o-arrow-down',
+                                'to bottom left'  => 'heroicon-o-arrow-down-left',
+                                'to top right'    => 'heroicon-o-arrow-up-right',
+                            ])
+                            ->tooltips([
+                                'to right'        => 'Left → right',
+                                'to bottom right' => 'Top-left → bottom-right',
+                                'to bottom'       => 'Top → bottom',
+                                'to bottom left'  => 'Top-right → bottom-left',
+                                'to top right'    => 'Bottom-left → top-right',
+                            ])
+                            ->colors([
+                                'to right'        => 'primary',
+                                'to bottom right' => 'primary',
+                                'to bottom'       => 'primary',
+                                'to bottom left'  => 'primary',
+                                'to top right'    => 'primary',
+                            ])
+                            ->hiddenButtonLabels()
+                            ->inline()
+                            ->default('to right')
+                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient')),
                         FileUpload::make('settings.bgImage')
                             ->label('Background image')
                             ->image()
@@ -966,7 +1013,7 @@ class SectionRegistry
                             ->imagePreviewHeight('80')
                             ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
                             ->live()
-                            ->helperText('Optional. Overrides the background color when set.'),
+                            ->helperText('Optional. Overrides the color or gradient when set.'),
                         Toggle::make('settings.bgImageOnCallout')
                             ->label('Use background image inside the callout box')
                             ->helperText('When off, the callout keeps its solid color and the image only shows around it.')

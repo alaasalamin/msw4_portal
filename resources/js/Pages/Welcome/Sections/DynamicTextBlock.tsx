@@ -15,6 +15,9 @@ interface TextSettings {
     calloutColor?: 'info' | 'success' | 'warning' | 'danger' | 'note' | 'neutral' | 'brand';
     align?: 'left' | 'center' | 'right';
     bg?: string;
+    bgGradient?: boolean;
+    bgGradientTo?: string;
+    bgGradientDir?: string;
     bgImage?: string | null;
     bgImageOnCallout?: boolean;
     fg?: string;
@@ -305,6 +308,7 @@ function Quote({ settings }: { settings: TextSettings }) {
 function Section({ settings, children }: { settings: TextSettings; children: React.ReactNode }) {
     const bgColor = settings.bg ?? '#ffffff';
     const hasImage = !!settings.bgImage;
+    const hasGradient = !!settings.bgGradient && !!settings.bgGradientTo;
 
     const sectionStyle: React.CSSProperties = {
         backgroundColor: bgColor,
@@ -319,6 +323,9 @@ function Section({ settings, children }: { settings: TextSettings; children: Rea
         sectionStyle.backgroundPosition = 'center';
         sectionStyle.backgroundRepeat = 'no-repeat';
         sectionStyle.minHeight = 'clamp(280px, 45vw, 520px)';
+    } else if (hasGradient) {
+        const dir = settings.bgGradientDir ?? 'to right';
+        sectionStyle.backgroundImage = `linear-gradient(${dir}, ${bgColor}, ${settings.bgGradientTo})`;
     }
 
     return (
