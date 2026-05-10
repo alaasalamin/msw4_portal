@@ -401,8 +401,10 @@ function Bubbles({ settings }: { settings: ReviewsSettings }) {
                 @media (max-width: 900px) {
                     .tb-reviews-bubbles-grid.tb-reviews-bubbles-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
                 }
-                @media (max-width: 560px) {
-                    .tb-reviews-bubbles-grid { grid-template-columns: 1fr !important; }
+                @media (max-width: 768px) {
+                    .tb-reviews-bubbles-grid.tb-reviews-bubbles-cols-1,
+                    .tb-reviews-bubbles-grid.tb-reviews-bubbles-cols-2,
+                    .tb-reviews-bubbles-grid.tb-reviews-bubbles-cols-3 { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </Wrapper>
