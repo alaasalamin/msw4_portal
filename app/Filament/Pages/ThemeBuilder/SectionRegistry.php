@@ -994,9 +994,10 @@ class SectionRegistry
                             ->helperText('Used when no background image is set.'),
                         Toggle::make('settings.bgGradient')
                             ->label('Use a gradient background')
-                            ->helperText('Blends the background color into a second color along the chosen direction.')
+                            ->helperText('Blends the background color into a second color along the chosen direction. Disabled when a background image is uploaded — clear the image to use a gradient instead.')
                             ->default(false)
-                            ->live(),
+                            ->live()
+                            ->visible(fn (Get $get) => blank($get('settings.bgImage'))),
                         ToggleButtons::make('settings.bgGradientPreset')
                             ->label('Gradient presets')
                             ->options([
@@ -1041,12 +1042,12 @@ class SectionRegistry
                                 }
                             })
                             ->extraAttributes(['class' => 'tb-gradient-presets'])
-                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient'))
+                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient') && blank($get('settings.bgImage')))
                             ->helperText('Pick one to fill in colors and direction. Tweak below if you want.'),
                         ColorPicker::make('settings.bgGradientTo')
                             ->label('Gradient end color')
                             ->default('#0ea5e9')
-                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient')),
+                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient') && blank($get('settings.bgImage'))),
                         ToggleButtons::make('settings.bgGradientDir')
                             ->label('Gradient direction')
                             ->options([
@@ -1080,7 +1081,7 @@ class SectionRegistry
                             ->hiddenButtonLabels()
                             ->inline()
                             ->default('to right')
-                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient')),
+                            ->visible(fn (Get $get) => (bool) $get('settings.bgGradient') && blank($get('settings.bgImage'))),
                         FileUpload::make('settings.bgImage')
                             ->label('Background image')
                             ->image()
@@ -1090,7 +1091,8 @@ class SectionRegistry
                             ->imagePreviewHeight('80')
                             ->dehydrateStateUsing(fn ($state) => is_array($state) ? ($state[0] ?? null) : $state)
                             ->live()
-                            ->helperText('Optional. Overrides the color or gradient when set.'),
+                            ->visible(fn (Get $get) => ! (bool) $get('settings.bgGradient'))
+                            ->helperText('Optional. Hidden while a gradient background is enabled — turn the gradient off to upload an image.'),
                         Toggle::make('settings.bgImageOnCallout')
                             ->label('Use background image inside the callout box')
                             ->helperText('When off, the callout keeps its solid color and the image only shows around it.')
