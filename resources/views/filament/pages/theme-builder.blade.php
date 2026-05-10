@@ -144,42 +144,6 @@
         .dark .fi-fo-toggle-buttons input:not(:checked) + label.fi-color:hover {
             background: color-mix(in srgb, var(--color-500) 28%, transparent) !important;
         }
-
-        /* ── Color-swatch ToggleButtons (settings.bg / settings.fg) ──
-           These options use raw hex values, so we paint each option with
-           its own hex via attribute selectors. The selected swatch gets
-           a thicker brand-colored ring so it pops without losing its color. */
-        .tb-color-swatches .fi-fo-toggle-buttons-btn-ctn { width: 2.25rem; }
-        .tb-color-swatches label.fi-btn {
-            width: 2.25rem; height: 2.25rem;
-            padding: 0 !important;
-            border-radius: 9999px !important;
-            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.15) !important;
-            transition: transform 120ms ease, box-shadow 120ms ease !important;
-        }
-        .tb-color-swatches label.fi-btn:hover { transform: scale(1.06); }
-        .tb-color-swatches input:checked + label.fi-btn {
-            box-shadow: 0 0 0 2px var(--color-primary-500), inset 0 0 0 2px #ffffff !important;
-        }
-        .tb-color-swatches label.fi-btn .fi-btn-label,
-        .tb-color-swatches label.fi-btn .fi-icon { display: none !important; }
-
-        /* Paint each swatch with the hex it represents. !important beats
-           Filament's bg-white default and our generic .fi-color tint above. */
-        .tb-color-swatches input[value="#ffffff"] + label.fi-btn { background: #ffffff !important; }
-        .tb-color-swatches input[value="#f8fafc"] + label.fi-btn { background: #f8fafc !important; }
-        .tb-color-swatches input[value="#fffbeb"] + label.fi-btn { background: #fffbeb !important; }
-        .tb-color-swatches input[value="#fef2f2"] + label.fi-btn { background: #fef2f2 !important; }
-        .tb-color-swatches input[value="#eff6ff"] + label.fi-btn { background: #eff6ff !important; }
-        .tb-color-swatches input[value="#f0fdf4"] + label.fi-btn { background: #f0fdf4 !important; }
-        .tb-color-swatches input[value="#fdf4ff"] + label.fi-btn { background: #fdf4ff !important; }
-        .tb-color-swatches input[value="#0f172a"] + label.fi-btn { background: #0f172a !important; }
-        .tb-color-swatches input[value="#1e293b"] + label.fi-btn { background: #1e293b !important; }
-        .tb-color-swatches input[value="#1d4ed8"] + label.fi-btn { background: #1d4ed8 !important; }
-        .tb-color-swatches input[value="#15803d"] + label.fi-btn { background: #15803d !important; }
-        .tb-color-swatches input[value="#b91c1c"] + label.fi-btn { background: #b91c1c !important; }
-        .tb-color-swatches input[value="#6d28d9"] + label.fi-btn { background: #6d28d9 !important; }
-        .tb-color-swatches input[value="#a16207"] + label.fi-btn { background: #a16207 !important; }
     </style>
 
     <div
