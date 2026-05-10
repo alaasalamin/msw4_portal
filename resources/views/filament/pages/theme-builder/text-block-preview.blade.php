@@ -40,7 +40,10 @@
             this.$refs.target.innerHTML = this.buildHtml(settings);
         },
 
-        readSettings() {
+        // Server-known settings (synced on Livewire commits — stale
+        // for any field bound with wire:model.blur, which is Filament's
+        // default for text inputs). Used as the baseline.
+        readWireSettings() {
             try {
                 const stack = this.$wire.mountedActions ?? [];
                 const top = stack[stack.length - 1] ?? {};
@@ -49,6 +52,66 @@
             } catch (e) {
                 return {};
             }
+        },
+
+        // Live form state — overlays the wire baseline with current
+        // DOM input values so typing into a textarea reflects in the
+        // preview without waiting for blur/server commit.
+        readSettings() {
+            const settings = this.readWireSettings();
+            const modal = this.$root.closest('.fi-modal-window')
+                ?? this.$root.closest('[role=&quot;dialog&quot;]');
+            if (! modal) return settings;
+
+            const setAt = (obj, pathParts, value) => {
+                let cursor = obj;
+                for (let i = 0; i < pathParts.length - 1; i++) {
+                    const part = pathParts[i];
+                    const idx = /^\d+$/.test(part) ? parseInt(part, 10) : null;
+                    const key = idx !== null ? idx : part;
+                    if (cursor[key] === undefined || cursor[key] === null) {
+                        cursor[key] = idx !== null ? [] : {};
+                    }
+                    cursor = cursor[key];
+                }
+                const last = pathParts[pathParts.length - 1];
+                const idx = /^\d+$/.test(last) ? parseInt(last, 10) : null;
+                cursor[idx !== null ? idx : last] = value;
+            };
+
+            // Iterate every form input inside the modal that has any
+            // flavour of wire:model attribute. Pull its current DOM
+            // value and write it into our settings object at the path
+            // after 'settings.'.
+            const candidates = modal.querySelectorAll('input, textarea, select');
+            candidates.forEach((el) => {
+                const attrs = el.getAttributeNames();
+                let path = null;
+                for (const a of attrs) {
+                    if (a === 'wire:model' || a.startsWith('wire:model.')) {
+                        path = el.getAttribute(a);
+                        break;
+                    }
+                }
+                if (! path) return;
+                const m = path.match(/^.*?settings\.(.+)$/);
+                if (! m) return;
+                const parts = m[1].split('.');
+
+                let value;
+                if (el.type === 'checkbox') value = el.checked;
+                else if (el.type === 'radio') {
+                    if (! el.checked) return;
+                    value = el.value;
+                } else if (el.type === 'number' || el.type === 'range') {
+                    value = el.value === '' ? null : Number(el.value);
+                } else {
+                    value = el.value;
+                }
+                setAt(settings, parts, value);
+            });
+
+            return settings;
         },
 
         // ── Renderer ─────────────────────────────────────────────
