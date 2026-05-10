@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Review {
     name?: string;
@@ -142,41 +142,53 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
     const showRole = settings.showRole !== false;
     const showDate = settings.showDate !== false;
 
-    // Carousel: show `cols` reviews at a time. Once there are more
-    // reviews than visible slots, prev/next arrows step the window
-    // through the list (wrapping around at both ends) so visitors can
-    // read every review without the section growing unbounded.
-    const [start, setStart] = useState(0);
+    // Carousel: show `cols` cards at full size in the middle plus a
+    // smaller, dimmer peek card on each side. Arrows step `active`
+    // (the index of the carousel's centre card) through the list,
+    // and the entire track translates left/right with a smooth ease
+    // so the next card glides into the centre.
     const total = reviews.length;
     const isCarousel = total > cols;
-    const visible: Review[] = isCarousel
-        ? Array.from({ length: cols }, (_, k) => reviews[(start + k) % total])
-        : reviews;
-    const next = () => setStart((s) => (s + 1) % Math.max(total, 1));
-    const prev = () => setStart((s) => (s - 1 + Math.max(total, 1)) % Math.max(total, 1));
+    const visibleSlots = cols + 2; // cols main + 2 peeks
+    const halfMain = Math.floor(cols / 2);
+    const minActive = halfMain;
+    const maxActive = Math.max(minActive, total - 1 - halfMain);
+    const [active, setActive] = useState(halfMain);
+    const clamp = (v: number) => Math.min(maxActive, Math.max(minActive, v));
+    const next = () => setActive((a) => clamp(a + 1));
+    const prev = () => setActive((a) => clamp(a - 1));
+
+    const trackRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const [cardWidth, setCardWidth] = useState(0);
+    useEffect(() => {
+        const el = viewportRef.current;
+        if (! el) return;
+        const update = () => setCardWidth(el.offsetWidth / visibleSlots);
+        update();
+        const ro = new ResizeObserver(update);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [visibleSlots]);
+
+    const trackOffset = isCarousel && cardWidth > 0
+        ? (cardWidth * visibleSlots) / 2 - (active + 0.5) * cardWidth
+        : 0;
 
     return (
         <Wrapper settings={settings}>
             <SectionHeader heading={settings.heading} subtitle={settings.subtitle} mutedFg={mutedFg} />
             {reviews.length === 0 ? (
                 <p style={{ textAlign: 'center', color: mutedFg, margin: 0 }}>No reviews yet — add some in the Website Builder.</p>
-            ) : (
-                <div style={{ position: 'relative' }}>
-                {isCarousel && (
-                    <CarouselArrow direction="prev" onClick={prev} fg={fg} cardBg={cardBg} />
-                )}
+            ) : ! isCarousel ? (
                 <div className={`tb-reviews-grid tb-reviews-cols-${cols}`} style={{
                     display: 'grid',
                     gap: 'clamp(20px, 2.5vw, 28px)',
                     gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
                 }}>
-                    {visible.map((r, i) => (
-                        // Re-key on `start` so React remounts each card on
-                        // every carousel step — that re-runs the staggered
-                        // CSS keyframe animation defined below.
+                    {reviews.map((r, i) => (
                         <article
-                            key={`${start}-${i}`}
-                            className="tb-review-card"
+                            key={i}
                             style={{
                                 background: cardBg,
                                 borderRadius: 16,
@@ -185,7 +197,6 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                                 flexDirection: 'column',
                                 gap: 14,
                                 boxShadow: '0 1px 2px rgba(15,23,42,.05), 0 4px 12px -4px rgba(15,23,42,.08)',
-                                animationDelay: `${i * 80}ms`,
                             }}
                         >
                             {showStars && r.rating != null && (
@@ -218,33 +229,83 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                         </article>
                     ))}
                 </div>
-                {isCarousel && (
-                    <CarouselArrow direction="next" onClick={next} fg={fg} cardBg={cardBg} />
-                )}
-                </div>
-            )}
-            {isCarousel && (
-                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 8 }}>
-                    {reviews.map((_, i) => {
-                        const active = i === start;
-                        return (
-                            <button
-                                key={i}
-                                type="button"
-                                onClick={() => setStart(i)}
-                                aria-label={`Show review ${i + 1}`}
-                                className="tb-review-dot"
-                                style={{
-                                    width: active ? 24 : 8,
-                                    height: 8,
-                                    borderRadius: 9999,
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    background: active ? fg : 'rgba(15,23,42,0.2)',
-                                }}
-                            />
-                        );
-                    })}
+            ) : (
+                <div ref={viewportRef} className="tb-reviews-carousel" style={{ position: 'relative', overflow: 'hidden' }}>
+                    <div
+                        ref={trackRef}
+                        className="tb-reviews-track"
+                        style={{
+                            display: 'flex',
+                            transform: `translateX(${trackOffset}px)`,
+                            willChange: 'transform',
+                        }}
+                    >
+                        {reviews.map((r, i) => {
+                            const distance = i - active;
+                            const absDist = Math.abs(distance);
+                            const isMain = absDist <= halfMain;
+                            const isPeek = absDist === halfMain + 1;
+                            const scale = isMain ? 1 : isPeek ? 0.78 : 0.6;
+                            const opacity = isMain ? 1 : isPeek ? 0.45 : 0;
+                            const pointer = isMain ? 'auto' : 'none';
+                            return (
+                                <div
+                                    key={i}
+                                    className="tb-reviews-slide"
+                                    style={{
+                                        flex: `0 0 ${cardWidth}px`,
+                                        padding: '0 12px',
+                                        boxSizing: 'border-box',
+                                        transform: `scale(${scale})`,
+                                        transformOrigin: 'center center',
+                                        opacity,
+                                        pointerEvents: pointer,
+                                    }}
+                                >
+                                    <article style={{
+                                        background: cardBg,
+                                        borderRadius: 16,
+                                        padding: 'clamp(20px, 2.5vw, 28px)',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 14,
+                                        height: '100%',
+                                        boxShadow: '0 1px 2px rgba(15,23,42,.05), 0 6px 18px -6px rgba(15,23,42,.12)',
+                                    }}>
+                                        {showStars && r.rating != null && (
+                                            <StarRow value={Number(r.rating) || 0} color={starColor} mutedColor="rgba(0,0,0,0.12)" />
+                                        )}
+                                        <p style={{ margin: 0, fontSize: '0.9375rem', lineHeight: 1.65, color: mutedFg }}>
+                                            “{r.quote ?? ''}”
+                                        </p>
+                                        <div style={{
+                                            marginTop: 'auto',
+                                            paddingTop: 12,
+                                            borderTop: '1px solid rgba(15,23,42,0.06)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 12,
+                                        }}>
+                                            {showPhotos && <Avatar review={r} mutedFg={mutedFg} fg={fg} />}
+                                            <div style={{ minWidth: 0, flex: 1, lineHeight: 1.3 }}>
+                                                {r.name && (
+                                                    <div style={{ color: fg, fontWeight: 700, fontSize: '0.9375rem', letterSpacing: '-0.005em' }}>{r.name}</div>
+                                                )}
+                                                {showRole && r.role && (
+                                                    <div style={{ color: mutedFg, fontSize: '0.8125rem', marginTop: 1 }}>{r.role}</div>
+                                                )}
+                                            </div>
+                                            {showDate && r.date && (
+                                                <div style={{ color: mutedFg, fontSize: '0.75rem', flexShrink: 0 }}>{r.date}</div>
+                                            )}
+                                        </div>
+                                    </article>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <CarouselArrow direction="prev" onClick={prev} fg={fg} cardBg={cardBg} disabled={active <= minActive} />
+                    <CarouselArrow direction="next" onClick={next} fg={fg} cardBg={cardBg} disabled={active >= maxActive} />
                 </div>
             )}
             <style>{`
@@ -255,79 +316,76 @@ function Cards({ settings }: { settings: ReviewsSettings }) {
                     .tb-reviews-grid { grid-template-columns: 1fr !important; }
                 }
 
-                /* Cards lift in with a soft fade + scale + slight upward
-                   motion, staggered by their column index. The remount
-                   key on each card restarts the animation on every
-                   carousel step, so the whole row feels alive. */
-                @keyframes tb-review-card-in {
-                    0%   { opacity: 0; transform: translateY(14px) scale(0.97); filter: blur(2px); }
-                    60%  { filter: blur(0); }
-                    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+                /* The track + every slide ease together: track translates
+                   with the active index, slides scale/fade based on
+                   their distance from the centre. Same easing curve so
+                   the whole motion reads as one fluid step. */
+                .tb-reviews-track {
+                    transition: transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1);
                 }
-                .tb-review-card {
-                    animation: tb-review-card-in 540ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+                .tb-reviews-slide {
+                    transition: transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                                opacity 480ms ease;
                     will-change: transform, opacity;
                 }
 
                 .tb-review-arrow {
                     transition: transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1),
                                 box-shadow 180ms ease,
-                                background 180ms ease;
+                                background 180ms ease,
+                                opacity 200ms ease;
                 }
-                .tb-review-arrow:hover {
+                .tb-review-arrow:hover:not([disabled]) {
                     transform: translateY(-50%) scale(1.08);
                     box-shadow: 0 4px 12px rgba(15,23,42,0.16), 0 12px 28px -10px rgba(15,23,42,0.22);
                 }
-                .tb-review-arrow:active {
+                .tb-review-arrow:active:not([disabled]) {
                     transform: translateY(-50%) scale(0.94);
                 }
 
-                .tb-review-dot {
-                    transition: width 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
-                                background 280ms ease,
-                                transform 180ms ease;
-                }
-                .tb-review-dot:hover { transform: scale(1.25); }
-
                 @media (prefers-reduced-motion: reduce) {
-                    .tb-review-card { animation: none; }
-                    .tb-review-arrow, .tb-review-dot { transition: none; }
+                    .tb-reviews-track,
+                    .tb-reviews-slide,
+                    .tb-review-arrow { transition: none; }
                 }
             `}</style>
         </Wrapper>
     );
 }
 
-function CarouselArrow({ direction, onClick, fg, cardBg }: {
+function CarouselArrow({ direction, onClick, fg, cardBg, disabled = false }: {
     direction: 'prev' | 'next';
     onClick: () => void;
     fg: string;
     cardBg: string;
+    disabled?: boolean;
 }) {
     const isPrev = direction === 'prev';
     return (
         <button
             type="button"
             onClick={onClick}
+            disabled={disabled}
             aria-label={isPrev ? 'Previous reviews' : 'Next reviews'}
             className="tb-review-arrow"
             style={{
                 position: 'absolute',
                 top: '50%',
-                [isPrev ? 'left' : 'right']: 'clamp(-20px, -1.5vw, -8px)',
+                [isPrev ? 'left' : 'right']: 'clamp(8px, 2vw, 24px)',
                 transform: 'translateY(-50%)',
-                width: 44,
-                height: 44,
+                width: 48,
+                height: 48,
                 borderRadius: 9999,
                 border: '1px solid rgba(15,23,42,0.10)',
                 background: cardBg,
                 color: fg,
-                cursor: 'pointer',
+                cursor: disabled ? 'default' : 'pointer',
+                opacity: disabled ? 0.35 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow: '0 2px 6px rgba(15,23,42,0.10), 0 8px 24px -8px rgba(15,23,42,0.18)',
-                zIndex: 2,
+                zIndex: 5,
             }}
         >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
