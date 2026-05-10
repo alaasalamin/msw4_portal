@@ -346,7 +346,14 @@ class ThemeBuilder extends Page
         return Action::make('editSection')
             ->label('Edit')
             ->icon('heroicon-m-pencil-square')
-            ->modalWidth('2xl')
+            ->modalWidth(function (array $arguments): string {
+                // Text blocks have a much heavier form (font picker,
+                // gradient presets, content blocks repeater, …), so give
+                // them an almost-full-screen modal. Other sections stay
+                // comfortable at 2xl.
+                $section = $this->findSection($arguments['id'] ?? null);
+                return ($section['type'] ?? null) === 'text' ? 'screen' : '2xl';
+            })
             ->modalSubmitActionLabel('Save')
             ->modalHeading(function (array $arguments): string {
                 $section = $this->findSection($arguments['id'] ?? null);
