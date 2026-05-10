@@ -12,8 +12,13 @@ class FormSubmissionController extends Controller
     {
         $form = CustomForm::with('fields')->findOrFail($formId);
 
-        // Build validation rules from the form fields
+        // Build validation rules from the form fields. We also map
+        // each field_{id} key to its human label so error messages
+        // read 'The Email field is required.' instead of the default
+        // 'The field 2 field is required.' that Laravel derives from
+        // the rule key.
         $rules = [];
+        $attributes = [];
         foreach ($form->fields as $field) {
             $key = 'field_' . $field->id;
             $rule = $field->is_required ? 'required' : 'nullable';
@@ -26,9 +31,10 @@ class FormSubmissionController extends Controller
             };
 
             $rules[$key] = $rule;
+            $attributes[$key] = $field->label;
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [], $attributes);
 
         // Map field IDs back to labels for readable storage
         $data = [];
