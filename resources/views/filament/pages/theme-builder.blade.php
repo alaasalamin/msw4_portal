@@ -206,7 +206,7 @@
            right side stays as empty breathing room — easier to scan than
            a full-width wall of fields. */
         .tb-text-card {
-            max-width: 540px !important;
+            max-width: 440px !important;
             margin-right: auto !important;
         }
         @media (max-width: 768px) {
