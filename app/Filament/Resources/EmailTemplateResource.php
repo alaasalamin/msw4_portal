@@ -75,7 +75,7 @@ class EmailTemplateResource extends Resource
 
                     Textarea::make('body')
                         ->label('Email body')
-                        ->placeholder("Dear {{customer_name}},\n\nYour {{brand}} {{model}} (Ticket: {{ticket_number}}) is ready for pickup.\n\nIssue reported: {{issue_description}}\n\nBest regards,\nMSW Repair Team")
+                        ->placeholder("Dear {{customer_name}},\n\nYour {{brand}} {{model}} (Ticket: {{ticket_number}}) is ready for pickup.\n\nIssue reported: {{issue_description}}\n\nBest regards,\nBizo Team")
                         ->required()
                         ->rows(14)
                         ->columnSpanFull(),

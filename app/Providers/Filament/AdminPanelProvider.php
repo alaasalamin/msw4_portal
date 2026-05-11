@@ -68,7 +68,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Indigo,
                 'purple'  => Color::Purple,
             ])
-            ->brandName('MSW 4')
+            ->brandName('Bizo')
             ->navigationGroups([
                 NavigationGroup::make('Operations'),
                 NavigationGroup::make('Workflow'),

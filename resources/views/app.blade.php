@@ -7,7 +7,7 @@
         @php
             use App\Models\Setting;
             $siteName    = Setting::get('site_name')
-                            ?: Setting::get('company_name', config('app.name', 'MSW4'));
+                            ?: Setting::get('company_name', config('app.name', 'Bizo'));
             $seoTitle    = Setting::get('seo_title', $siteName);
             $seoDesc     = Setting::get('seo_description', Setting::get('site_description'));
             $seoKeywords = Setting::get('seo_keywords');

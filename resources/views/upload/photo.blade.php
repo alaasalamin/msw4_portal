@@ -138,7 +138,7 @@
 </head>
 <body>
 
-    <div class="logo">MSW Repair</div>
+    <div class="logo">Bizo</div>
 
     <div class="card">
         <div class="card-header">

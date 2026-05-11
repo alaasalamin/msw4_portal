@@ -48,7 +48,7 @@ class SeoOptimizer extends Page
      */
     public function getSnippetState(): array
     {
-        $companyName = Setting::get('company_name') ?: Setting::get('site_name', config('app.name', 'MSW4'));
+        $companyName = Setting::get('company_name') ?: Setting::get('site_name', config('app.name', 'Bizo'));
         $faviconPath = Setting::get('favicon');
         $ogPath      = Setting::get('og_image');
         return [
@@ -313,7 +313,7 @@ HTML;
                     $url = url('/blog/' . $rec->fullSlug());
                 }
                 $siteName = Setting::get('company_name')
-                    ?: Setting::get('site_name', config('app.name', 'MSW4'));
+                    ?: Setting::get('site_name', config('app.name', 'Bizo'));
                 $fallbackTitle = $rec?->title ?? '';
                 $fallbackDesc  = '';
 

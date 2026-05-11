@@ -16,7 +16,7 @@
                     <tr>
                         <td style="background:#0f172a;border-radius:16px 16px 0 0;padding:28px 36px;text-align:center;">
                             <div style="font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#6366f1;">
-                                MSW Repair
+                                Bizo
                             </div>
                             @if ($ticketNumber)
                                 <div style="margin-top:6px;font-size:11px;color:#475569;letter-spacing:.05em;">
@@ -58,7 +58,7 @@
                     <tr>
                         <td style="padding:20px 0;text-align:center;">
                             <div style="font-size:11px;color:#94a3b8;">
-                                © {{ date('Y') }} MSW Repair
+                                © {{ date('Y') }} Bizo
                             </div>
                         </td>
                     </tr>

@@ -196,7 +196,7 @@ class AutomationRuleResource extends Resource
                         Textarea::make('action_config.body')
                             ->label('E-Mail-Text')
                             ->rows(6)
-                            ->default("Hallo {{customer}},\n\ndein {{brand}} {{model}} (Ticket {{ticket}}) ist fertig und kann abgeholt werden.\n\nBis bald,\nDas MSW-Team")
+                            ->default("Hallo {{customer}},\n\ndein {{brand}} {{model}} (Ticket {{ticket}}) ist fertig und kann abgeholt werden.\n\nBis bald,\nDas Bizo-Team")
                             ->columnSpanFull()
                             ->visible(fn (Get $get) => $get('action_type') === 'send_delayed_email'),
 

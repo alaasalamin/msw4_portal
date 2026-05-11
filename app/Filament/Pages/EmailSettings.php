@@ -90,7 +90,7 @@ class EmailSettings extends Page
                         ->maxLength(255),
                     TextInput::make('mail_from_name')
                         ->label('From Name')
-                        ->placeholder('MSW4 Portal')
+                        ->placeholder('Bizo')
                         ->maxLength(255),
                 ])->columns(2),
             ]);
@@ -151,8 +151,8 @@ class EmailSettings extends Page
         try {
             \Illuminate\Support\Facades\Mail::to($to)->send(
                 new \App\Mail\AutomationMail(
-                    subject:      'MSW — Test Email',
-                    body:         "This is a test email from MSW Repair.\n\nIf you received this, your email settings are working correctly.",
+                    subject:      'Bizo — Test Email',
+                    body:         "This is a test email from Bizo.\n\nIf you received this, your email settings are working correctly.",
                     ticketNumber: '',
                     deviceLabel:  '',
                 )
