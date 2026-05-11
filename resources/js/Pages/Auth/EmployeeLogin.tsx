@@ -246,8 +246,6 @@ export default function EmployeeLogin({ status }: EmployeeLoginProps) {
                         <p>
                             Kein Mitarbeiter?{' '}
                             <Link href={route('customer.login')} className="text-zinc-500 hover:text-zinc-300 transition">Kundenportal</Link>
-                            {' · '}
-                            <Link href={route('partner.login')} className="text-zinc-500 hover:text-zinc-300 transition">Partnerportal</Link>
                         </p>
                         <p>
                             <Link href="/" className="hover:text-zinc-400 transition">← moon.repair</Link>

@@ -2,27 +2,51 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Notifications\Notifiable;
 
 class Customer extends Authenticatable
 {
-    protected $table = 'users';
+    use Notifiable, SoftDeletes;
+
+    protected $table = 'customers';
 
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'company_name',
+        'customer_group_id',
         'email',
+        'phone',
+        'address_street',
+        'address_building_number',
+        'address_city',
+        'address_zip_code',
         'password',
     ];
 
-    protected static function booted(): void
-    {
-        static::addGlobalScope('type', function (Builder $builder) {
-            $builder->where('type', 'customer');
-        });
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-        static::creating(function ($model) {
-            $model->type = 'customer';
-        });
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password'          => 'hashed',
+        ];
+    }
+
+    public function getNameAttribute(): string
+    {
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(CustomerGroup::class, 'customer_group_id');
     }
 }

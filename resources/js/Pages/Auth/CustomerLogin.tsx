@@ -12,17 +12,16 @@ interface LoginFormData {
 }
 
 interface RegisterFormData {
-    name: string;
+    first_name: string;
+    last_name: string;
+    company_name: string;
     email: string;
     password: string;
     password_confirmation: string;
-}
-
-interface AddressData {
-    street: string;
-    house_number: string;
-    postal_code: string;
-    city: string;
+    address_street: string;
+    address_building_number: string;
+    address_zip_code: string;
+    address_city: string;
 }
 
 interface LoginFormProps {
@@ -219,18 +218,18 @@ function LoginForm({ canResetPassword }: LoginFormProps) {
 function RegisterForm() {
     const [step, setStep] = useState<RegisterStep>(1);
     const [showPw, setShowPw] = useState(false);
-    const [address, setAddress] = useState<AddressData>({
-        street: '',
-        house_number: '',
-        postal_code: '',
-        city: '',
-    });
 
     const { data, setData, post, processing, errors } = useForm<RegisterFormData>({
-        name: '',
+        first_name: '',
+        last_name: '',
+        company_name: '',
         email: '',
         password: '',
         password_confirmation: '',
+        address_street: '',
+        address_building_number: '',
+        address_zip_code: '',
+        address_city: '',
     });
 
     const goNext = (e: React.FormEvent<HTMLFormElement>) => {
@@ -240,7 +239,6 @@ function RegisterForm() {
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Address data is collected for CRM — not submitted to users table
         post(route('customer.register'));
     };
 
@@ -250,11 +248,25 @@ function RegisterForm() {
 
             {step === 1 && (
                 <form onSubmit={goNext} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                        <Field
+                            id="reg-first-name" label="Vorname"
+                            value={data.first_name} autoComplete="given-name" required
+                            placeholder="Max" error={errors.first_name}
+                            onChange={(e) => setData('first_name', e.target.value)}
+                        />
+                        <Field
+                            id="reg-last-name" label="Nachname"
+                            value={data.last_name} autoComplete="family-name" required
+                            placeholder="Mustermann" error={errors.last_name}
+                            onChange={(e) => setData('last_name', e.target.value)}
+                        />
+                    </div>
                     <Field
-                        id="reg-name" label="Vollständiger Name"
-                        value={data.name} autoComplete="name" required
-                        placeholder="Max Mustermann" error={errors.name}
-                        onChange={(e) => setData('name', e.target.value)}
+                        id="reg-company" label="Firmenname (optional)"
+                        value={data.company_name} autoComplete="organization"
+                        placeholder="Mustermann GmbH" error={errors.company_name}
+                        onChange={(e) => setData('company_name', e.target.value)}
                     />
                     <Field
                         id="reg-email" label="E-Mail-Adresse" type="email"
@@ -306,16 +318,16 @@ function RegisterForm() {
                         <div className="col-span-2">
                             <Field
                                 id="addr-street" label="Straße"
-                                value={address.street} autoComplete="address-line1" required
-                                placeholder="Hauptstraße"
-                                onChange={(e) => setAddress((a) => ({ ...a, street: e.target.value }))}
+                                value={data.address_street} autoComplete="address-line1" required
+                                placeholder="Hauptstraße" error={errors.address_street}
+                                onChange={(e) => setData('address_street', e.target.value)}
                             />
                         </div>
                         <Field
                             id="addr-house" label="Nr."
-                            value={address.house_number} autoComplete="address-line2" required
-                            placeholder="14"
-                            onChange={(e) => setAddress((a) => ({ ...a, house_number: e.target.value }))}
+                            value={data.address_building_number} autoComplete="address-line2" required
+                            placeholder="14" error={errors.address_building_number}
+                            onChange={(e) => setData('address_building_number', e.target.value)}
                         />
                     </div>
 
@@ -323,16 +335,16 @@ function RegisterForm() {
                     <div className="grid grid-cols-3 gap-3">
                         <Field
                             id="addr-plz" label="PLZ"
-                            value={address.postal_code} autoComplete="postal-code" required
-                            placeholder="91301"
-                            onChange={(e) => setAddress((a) => ({ ...a, postal_code: e.target.value }))}
+                            value={data.address_zip_code} autoComplete="postal-code" required
+                            placeholder="91301" error={errors.address_zip_code}
+                            onChange={(e) => setData('address_zip_code', e.target.value)}
                         />
                         <div className="col-span-2">
                             <Field
                                 id="addr-city" label="Stadt"
-                                value={address.city} autoComplete="address-level2" required
-                                placeholder="Forchheim"
-                                onChange={(e) => setAddress((a) => ({ ...a, city: e.target.value }))}
+                                value={data.address_city} autoComplete="address-level2" required
+                                placeholder="Forchheim" error={errors.address_city}
+                                onChange={(e) => setData('address_city', e.target.value)}
                             />
                         </div>
                     </div>
@@ -474,13 +486,6 @@ export default function CustomerLogin({ status, defaultTab = 'login' }: Customer
                     </div>
 
                     <div className="mt-6 space-y-2 text-center text-sm text-zinc-500">
-                        <p>
-                            B2B-Partner?{' '}
-                            <Link href={route('partner.login')}
-                                className="font-medium text-orange-600 hover:text-orange-700 focus:outline-none focus-visible:underline transition-colors">
-                                Zum Partnerportal →
-                            </Link>
-                        </p>
                         <p>
                             <Link href="/" className="text-zinc-400 hover:text-zinc-600 focus:outline-none focus-visible:underline transition-colors">
                                 ← Zurück zu moon.repair

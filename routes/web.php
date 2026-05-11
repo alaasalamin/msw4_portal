@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Auth\CustomerLoginController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Auth\EmployeeLoginController;
-use App\Http\Controllers\Auth\PartnerLoginController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceNoteController;
 use App\Http\Controllers\DevicePhotoUploadController;
@@ -86,6 +86,14 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::post('logout',    [CustomerLoginController::class, 'logout'])->name('logout');
 });
 
+// Admin API — customer CRUD
+Route::middleware(['auth:admin'])
+    ->prefix('admin/api')
+    ->name('admin.api.')
+    ->group(function () {
+        Route::apiResource('customers', CustomerController::class);
+    });
+
 // Admin API — board badge counts (used by real-time JS in the sidebar)
 Route::get('/admin/api/board-counts', function () {
     $counts = CustomPage::orderBy('sort_order')->get()->mapWithKeys(function (CustomPage $page) {
@@ -100,15 +108,6 @@ Route::get('/admin/api/board-counts', function () {
     });
     return response()->json($counts);
 })->middleware(['auth:admin'])->name('admin.board-counts');
-
-// Partner auth routes
-Route::prefix('partner')->name('partner.')->group(function () {
-    Route::get('login',      [PartnerLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login',     [PartnerLoginController::class, 'login']);
-    Route::get('register',   [PartnerLoginController::class, 'showRegisterForm'])->name('register');
-    Route::post('register',  [PartnerLoginController::class, 'register']);
-    Route::post('logout',    [PartnerLoginController::class, 'logout'])->name('logout');
-});
 
 // Public blog (order matters: static segments first)
 Route::get('/blog',                     [BlogController::class, 'index'])->name('blog.index');

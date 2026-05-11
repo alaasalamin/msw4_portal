@@ -2,31 +2,115 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://127.0.0.1:8000/</loc>
-    <lastmod>2026-04-18T18:16:38+00:00</lastmod>
+    <lastmod>2026-05-10T12:55:26+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>http://127.0.0.1:8000/test</loc>
-    <lastmod>2026-04-18T18:16:38+00:00</lastmod>
+    <loc>http://127.0.0.1:8000/blogspot</loc>
+    <lastmod>2026-05-10T12:55:26+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>http://127.0.0.1:8000/blog/category/test</loc>
-    <lastmod>2026-04-18T18:16:38+00:00</lastmod>
+    <lastmod>2026-05-10T12:55:26+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/category/engineering</loc>
+    <lastmod>2026-05-10T12:55:26+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>http://127.0.0.1:8000/blog/test/test-post</loc>
-    <lastmod>2026-04-14T14:35:18+00:00</lastmod>
+    <lastmod>2026-05-07T11:18:11+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>http://127.0.0.1:8000/blog/test/test-posts</loc>
     <lastmod>2026-04-14T14:37:15+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/what-i-wish-i-knew-about-customer-support</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/lessons-from-shipping-every-friday-for-a-year</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/building-a-brand-before-you-build-a-product</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/notes-on-hiring-your-first-engineer</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/a-practical-guide-to-reading-code-you-did-not-write</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/why-async-communication-wins-long-term</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/designing-interfaces-that-disappear</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/the-quiet-power-of-small-daily-habits</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/five-tools-every-founder-should-try</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/test/how-to-speed-up-your-workflow-in-2026</loc>
+    <lastmod>2026-05-07T11:24:25+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/engineering/database-migrations-without-the-drama</loc>
+    <lastmod>2026-05-08T16:55:35+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/engineering/a-pattern-for-reliable-background-jobs</loc>
+    <lastmod>2026-05-07T11:28:41+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>http://127.0.0.1:8000/blog/engineering/why-we-picked-laravel-for-the-backend</loc>
+    <lastmod>2026-05-07T11:28:41+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

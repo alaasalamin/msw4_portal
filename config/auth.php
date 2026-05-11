@@ -3,7 +3,6 @@
 use App\Models\Admin;
 use App\Models\Customer;
 use App\Models\Employee;
-use App\Models\Partner;
 use App\Models\User;
 
 return [
@@ -57,11 +56,6 @@ return [
             'provider' => 'customers',
         ],
 
-        'partner' => [
-            'driver'   => 'session',
-            'provider' => 'partners',
-        ],
-
         'admin' => [
             'driver'   => 'session',
             'provider' => 'admins',
@@ -99,11 +93,6 @@ return [
         'customers' => [
             'driver' => 'eloquent',
             'model'  => Customer::class,
-        ],
-
-        'partners' => [
-            'driver' => 'eloquent',
-            'model'  => Partner::class,
         ],
 
         'admins' => [

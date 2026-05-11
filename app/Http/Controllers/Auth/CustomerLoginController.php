@@ -52,17 +52,21 @@ class CustomerLoginController extends Controller
 
     public function register(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+        $data = $request->validate([
+            'first_name'              => ['required', 'string', 'max:255'],
+            'last_name'               => ['required', 'string', 'max:255'],
+            'company_name'            => ['nullable', 'string', 'max:255'],
+            'email'                   => ['required', 'email', 'max:255', 'unique:customers,email'],
+            'password'                => ['required', 'confirmed', Password::defaults()],
+            'phone'                   => ['nullable', 'string', 'max:50'],
+            'address_street'          => ['nullable', 'string', 'max:255'],
+            'address_building_number' => ['nullable', 'string', 'max:50'],
+            'address_city'            => ['nullable', 'string', 'max:255'],
+            'address_zip_code'        => ['nullable', 'string', 'max:20'],
         ]);
 
-        $customer = Customer::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $data['password'] = Hash::make($data['password']);
+        $customer = Customer::create($data);
 
         event(new Registered($customer));
 
