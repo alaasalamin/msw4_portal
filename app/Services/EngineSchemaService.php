@@ -14,7 +14,8 @@ class EngineSchemaService
      */
     public function tableFor(ObjectType $type): string
     {
-        return 'engine_' . Str::snake(Str::ascii($type->slug));
+        $slug = preg_replace('/[^a-z0-9_]/i', '_', Str::ascii($type->slug));
+        return 'engine_' . Str::lower(trim($slug, '_'));
     }
 
     public function tableExists(ObjectType $type): bool
