@@ -72,8 +72,8 @@ class AdminPanelProvider extends PanelProvider
                             z-index: 40;
                             /* Solid theme background so hover-expand doesn't bleed through main content. */
                             background-color: var(--color-white, #ffffff) !important;
-                            transition: width .3s cubic-bezier(0.4, 0, 0.2, 1),
-                                        box-shadow .3s cubic-bezier(0.4, 0, 0.2, 1);
+                            transition: width .45s cubic-bezier(0.32, 0.72, 0, 1),
+                                        box-shadow .45s cubic-bezier(0.32, 0.72, 0, 1);
                         }
                         .dark .fi-main-sidebar:not(.fi-sidebar-open),
                         html.dark .fi-main-sidebar:not(.fi-sidebar-open) {
