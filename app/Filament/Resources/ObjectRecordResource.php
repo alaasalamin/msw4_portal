@@ -27,9 +27,16 @@ class ObjectRecordResource extends Resource
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-squares-2x2'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Object Engine'; }
-    public static function getNavigationSort(): ?int                    { return 2; }
-    public static function getNavigationLabel(): string                 { return 'Records'; }
     public static function getModelLabel(): string                      { return 'Object Record'; }
+
+    /**
+     * Hidden from the sidebar — per-type entries are registered dynamically
+     * in AdminPanelProvider so each ObjectType gets its own nav item.
+     */
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $form): Schema
     {

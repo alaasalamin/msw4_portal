@@ -23,8 +23,8 @@ class ObjectTypeResource extends Resource
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-rectangle-stack'; }
     public static function getNavigationGroup(): string|\UnitEnum|null  { return 'Object Engine'; }
     public static function getNavigationSort(): ?int                    { return 1; }
-    public static function getNavigationLabel(): string                 { return 'Object Types'; }
-    public static function getModelLabel(): string                      { return 'Object Type'; }
+    public static function getNavigationLabel(): string                 { return 'Object Engine'; }
+    public static function getModelLabel(): string                      { return 'Object Engine'; }
 
     public static function form(Schema $form): Schema
     {
@@ -38,8 +38,9 @@ class ObjectTypeResource extends Resource
                 ->label('Icon')
                 ->options(ObjectType::ICON_CHOICES)
                 ->searchable()
+                ->required()
                 ->default('heroicon-o-cube')
-                ->helperText('Shown next to the object type in lists and (later) in the sidebar.'),
+                ->helperText('Used in lists and as the sidebar icon for this object\'s records.'),
 
             Repeater::make('attributes')
                 ->label('Attributes')

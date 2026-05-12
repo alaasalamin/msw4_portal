@@ -2,11 +2,15 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\ObjectRecordResource;
+use App\Models\ObjectType;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -29,6 +33,30 @@ class AdminPanelProvider extends PanelProvider
     public function register(): void
     {
         parent::register();
+
+        // Dynamic sidebar items — one per ObjectType, linking to its filtered
+        // ObjectRecord list. Runs on every request after the panel is wired,
+        // so newly-created object types appear without a restart/cache clear.
+        Filament::serving(function () {
+            try {
+                $items = ObjectType::orderBy('sort_order')->orderBy('name')
+                    ->get()
+                    ->map(fn (ObjectType $type) => NavigationItem::make($type->name)
+                        ->icon($type->icon ?: 'heroicon-o-cube')
+                        ->group('Object Engine')
+                        ->sort(10 + $type->id)
+                        ->url(ObjectRecordResource::getUrl('index', [
+                            'tableFilters' => ['object_type_id' => ['value' => $type->id]],
+                        ]))
+                        ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.resources.object-records.*')
+                            && (int) request()->query('tableFilters.object_type_id.value') === (int) $type->id))
+                    ->all();
+
+                Filament::registerNavigationItems($items);
+            } catch (\Throwable) {
+                // Migrations may not have run yet (deploy timing) — skip silently.
+            }
+        });
 
         FilamentView::registerRenderHook(
             PanelsRenderHook::GLOBAL_SEARCH_AFTER,
