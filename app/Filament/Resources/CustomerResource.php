@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
+use App\Models\CustomerTag;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -25,8 +26,8 @@ class CustomerResource extends Resource
     protected static ?string $model = Customer::class;
 
     public static function getNavigationIcon(): string|\BackedEnum|null { return 'heroicon-o-user-group'; }
-    public static function getNavigationGroup(): string|\UnitEnum|null  { return 'User Management'; }
-    public static function getNavigationSort(): ?int                    { return 2; }
+    public static function getNavigationGroup(): string|\UnitEnum|null  { return 'CRM'; }
+    public static function getNavigationSort(): ?int                    { return 1; }
 
     public static function form(Schema $form): Schema
     {
@@ -62,6 +63,18 @@ class CustomerResource extends Resource
                             ColorPicker::make('color'),
                         ])
                         ->createOptionUsing(fn (array $data) => CustomerGroup::create($data)->id)
+                        ->columnSpanFull(),
+                    Select::make('tags')
+                        ->label('Tags')
+                        ->relationship('tags', 'name')
+                        ->multiple()
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm([
+                            TextInput::make('name')->required()->maxLength(255),
+                            ColorPicker::make('color'),
+                        ])
+                        ->createOptionUsing(fn (array $data) => CustomerTag::create($data)->id)
                         ->columnSpanFull(),
                 ]),
 
@@ -103,6 +116,11 @@ class CustomerResource extends Resource
                     ->formatStateUsing(fn ($state) => $state ?: '—')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('tags.name')
+                    ->label('Tags')
+                    ->badge()
+                    ->separator(',')
+                    ->toggleable(),
                 TextColumn::make('email')->searchable()->sortable(),
                 TextColumn::make('phone')->searchable(),
                 TextColumn::make('address_city')->label('City')->searchable()->toggleable(),
@@ -112,6 +130,11 @@ class CustomerResource extends Resource
                 SelectFilter::make('customer_group_id')
                     ->label('Group')
                     ->options(fn () => CustomerGroup::orderBy('sort_order')->orderBy('name')->pluck('name', 'id')),
+                SelectFilter::make('tags')
+                    ->label('Tags')
+                    ->relationship('tags', 'name')
+                    ->multiple()
+                    ->preload(),
                 TrashedFilter::make(),
             ])
             ->actions([

@@ -74,6 +74,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Workflow'),
                 NavigationGroup::make('Content'),
                 NavigationGroup::make('Blog'),
+                NavigationGroup::make('CRM'),
                 NavigationGroup::make('User Management'),
                 NavigationGroup::make('Configuration'),
             ])
