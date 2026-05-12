@@ -2,11 +2,13 @@
     @php
         $customer = $this->getRecord();
         $types = \App\Models\ObjectType::orderBy('sort_order')->orderBy('name')->get();
-        $counts = \App\Models\ObjectRecord::query()
-            ->where('customer_id', $customer->id)
-            ->selectRaw('object_type_id, COUNT(*) as n')
-            ->groupBy('object_type_id')
-            ->pluck('n', 'object_type_id');
+        $counts = [];
+        foreach ($types as $t) {
+            $table = $t->engineTable();
+            $counts[$t->id] = \Illuminate\Support\Facades\Schema::hasTable($table)
+                ? (int) \Illuminate\Support\Facades\DB::table($table)->where('customer_id', $customer->id)->count()
+                : 0;
+        }
     @endphp
 
     {{-- Light + dark CSS variables (same pattern as Theme Builder / SEO Optimizer). --}}

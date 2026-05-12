@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\EngineSchemaService;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class ObjectType extends Model
@@ -61,10 +61,26 @@ class ObjectType extends Model
                 $type->slug = Str::slug($type->name);
             }
         });
+
+        // ── DDL lifecycle: each object type owns its own real table.
+        static::created(function (self $type) {
+            app(EngineSchemaService::class)->create($type);
+        });
+
+        static::updated(function (self $type) {
+            if ($type->wasChanged('attributes')) {
+                $previous = (array) ($type->getOriginal('attributes') ? json_decode($type->getOriginal('attributes'), true) : []);
+                app(EngineSchemaService::class)->syncColumns($type, $previous);
+            }
+        });
+
+        static::deleting(function (self $type) {
+            app(EngineSchemaService::class)->drop($type);
+        });
     }
 
-    public function records(): HasMany
+    public function engineTable(): string
     {
-        return $this->hasMany(ObjectRecord::class);
+        return app(EngineSchemaService::class)->tableFor($this);
     }
 }

@@ -3,8 +3,9 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\ObjectRecordResource;
-use App\Models\ObjectRecord;
 use App\Models\ObjectType;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -46,34 +47,9 @@ class AdminPanelProvider extends PanelProvider
                         ->icon($type->icon ?: 'heroicon-o-cube')
                         ->group('Object Engine')
                         ->sort(10 + $type->id)
-                        ->url(ObjectRecordResource::getUrl('index', [
-                            'filters' => ['object_type_id' => ['value' => $type->id]],
-                        ]))
-                        ->isActiveWhen(function () use ($type): bool {
-                            if (! request()->routeIs('filament.admin.resources.object-records.*')) {
-                                return false;
-                            }
-
-                            // Index page filtered by this type
-                            $filterId = (int) data_get(request()->query(), 'filters.object_type_id.value');
-                            if ($filterId === (int) $type->id) return true;
-
-                            // Create page launched from this type (?type=<id>)
-                            $createTypeId = (int) request()->query('type');
-                            if (request()->routeIs('filament.admin.resources.object-records.create')
-                                && $createTypeId === (int) $type->id) {
-                                return true;
-                            }
-
-                            // Edit page for a record of this type
-                            $recordId = request()->route('record');
-                            if ($recordId && request()->routeIs('filament.admin.resources.object-records.edit')) {
-                                $ownerTypeId = (int) ObjectRecord::whereKey($recordId)->value('object_type_id');
-                                if ($ownerTypeId === (int) $type->id) return true;
-                            }
-
-                            return false;
-                        }))
+                        ->url(ObjectRecordResource::getUrl('index', ['type' => $type->slug]))
+                        ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.resources.object-records.*')
+                            && (string) request()->query('type') === (string) $type->slug))
                     ->all();
 
                 Filament::registerNavigationItems($items);

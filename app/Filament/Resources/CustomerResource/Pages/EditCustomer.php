@@ -3,12 +3,13 @@
 namespace App\Filament\Resources\CustomerResource\Pages;
 
 use App\Filament\Resources\CustomerResource;
-use App\Models\ObjectRecord;
+use App\Models\EngineRecord;
 use App\Models\ObjectType;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Schema;
 
 class EditCustomer extends EditRecord
 {
@@ -73,9 +74,10 @@ class EditCustomer extends EditRecord
             ->modalWidth('2xl')
             ->modalContent(function (array $arguments) {
                 $type = ObjectType::find($arguments['type_id'] ?? null);
-                if (! $type) return null;
+                if (! $type || ! Schema::hasTable($type->engineTable())) return null;
 
-                $records = ObjectRecord::where('object_type_id', $type->id)
+                $records = EngineRecord::forType($type)
+                    ->newQuery()
                     ->where('customer_id', $this->getRecord()->id)
                     ->orderByDesc('id')
                     ->get();

@@ -110,9 +110,13 @@ class ObjectTypeResource extends Resource
                     ->label('Fields')
                     ->formatStateUsing(fn ($state) => is_array($state) ? count($state) : 0),
                 TextColumn::make('records_count')
-                    ->counts('records')
                     ->label('Records')
-                    ->sortable(),
+                    ->state(function (ObjectType $record): int {
+                        $table = $record->engineTable();
+                        return \Illuminate\Support\Facades\Schema::hasTable($table)
+                            ? (int) \Illuminate\Support\Facades\DB::table($table)->count()
+                            : 0;
+                    }),
                 TextColumn::make('created_at')->dateTime()->sortable()->toggleable(),
             ])
             ->actions([
