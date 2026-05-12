@@ -34,7 +34,7 @@ class EditObjectRecord extends EditRecord
 
         return [
             static::$resource::getUrl('index', [
-                'tableFilters' => ['object_type_id' => ['value' => $type->id]],
+                'filters' => ['object_type_id' => ['value' => $type->id]],
             ]) => $type->name,
             $this->getBreadcrumb(),
         ];

@@ -202,7 +202,7 @@ class ObjectRecordResource extends Resource
      */
     private static function activeType(): ?ObjectType
     {
-        $id = (int) data_get(request()->query(), 'tableFilters.object_type_id.value');
+        $id = (int) data_get(request()->query(), 'filters.object_type_id.value');
         return $id > 0 ? ObjectType::find($id) : null;
     }
 

@@ -43,7 +43,7 @@ class ListObjectRecords extends ListRecords
 
         return [
             static::$resource::getUrl('index', [
-                'tableFilters' => ['object_type_id' => ['value' => $type->id]],
+                'filters' => ['object_type_id' => ['value' => $type->id]],
             ]) => $type->name,
             $this->getBreadcrumb(),
         ];
@@ -61,7 +61,7 @@ class ListObjectRecords extends ListRecords
 
         $resolved = true;
         $id = (int) (
-            data_get(request()->query(), 'tableFilters.object_type_id.value')
+            data_get(request()->query(), 'filters.object_type_id.value')
             ?? data_get($this->tableFilters ?? [], 'object_type_id.value')
         );
         if ($id <= 0) return $type = null;

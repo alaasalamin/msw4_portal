@@ -47,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
                         ->group('Object Engine')
                         ->sort(10 + $type->id)
                         ->url(ObjectRecordResource::getUrl('index', [
-                            'tableFilters' => ['object_type_id' => ['value' => $type->id]],
+                            'filters' => ['object_type_id' => ['value' => $type->id]],
                         ]))
                         ->isActiveWhen(function () use ($type): bool {
                             if (! request()->routeIs('filament.admin.resources.object-records.*')) {
@@ -55,7 +55,7 @@ class AdminPanelProvider extends PanelProvider
                             }
 
                             // Index page filtered by this type
-                            $filterId = (int) data_get(request()->query(), 'tableFilters.object_type_id.value');
+                            $filterId = (int) data_get(request()->query(), 'filters.object_type_id.value');
                             if ($filterId === (int) $type->id) return true;
 
                             // Create page launched from this type (?type=<id>)
