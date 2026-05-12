@@ -10,13 +10,25 @@
                     <div style="font-size:11px; font-weight:600; letter-spacing:.04em; color:rgb(107 114 128); text-transform:uppercase; margin-bottom:6px;">
                         #{{ $record->id }} · {{ $record->created_at?->format('Y-m-d') }}
                     </div>
-                    @if (is_array($record->data) && count($record->data))
+                    @if (is_array($type->attributes ?? null) && count($type->attributes))
                         <dl style="display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0; font-size:13px;">
-                            @foreach ($record->data as $key => $value)
-                                @if ($value !== null && $value !== '')
-                                    <dt style="color:rgb(107 114 128); font-weight:500;">{{ $key }}</dt>
+                            @foreach ($type->attributes as $attr)
+                                @php
+                                    $key   = $attr['key']   ?? null;
+                                    $label = $attr['label'] ?? $key;
+                                    $kind  = $attr['type']  ?? 'text';
+                                    $value = $key ? ($record->{$key} ?? null) : null;
+                                @endphp
+                                @if ($key && $value !== null && $value !== '')
+                                    <dt style="color:rgb(107 114 128); font-weight:500;">{{ $label }}</dt>
                                     <dd style="margin:0; color:rgb(17 24 39);">
-                                        {{ is_bool($value) ? ($value ? 'yes' : 'no') : $value }}
+                                        @if ($kind === 'boolean')
+                                            {{ $value ? 'Yes' : 'No' }}
+                                        @elseif ($kind === 'date')
+                                            {{ \Illuminate\Support\Carbon::parse($value)->format('Y-m-d') }}
+                                        @else
+                                            {{ $value }}
+                                        @endif
                                     </dd>
                                 @endif
                             @endforeach

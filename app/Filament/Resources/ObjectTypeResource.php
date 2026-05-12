@@ -4,15 +4,21 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ObjectTypeResource\Pages;
 use App\Models\ObjectType;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Enums\IconSize;
+use Illuminate\Support\HtmlString;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -34,13 +40,29 @@ class ObjectTypeResource extends Resource
                 ->maxLength(255)
                 ->helperText('Anything — e.g. "Used Phones", "Spare Parts", "Tickets".'),
 
-            Select::make('icon')
-                ->label('Icon')
-                ->options(ObjectType::ICON_CHOICES)
-                ->searchable()
-                ->required()
+            Hidden::make('icon')
                 ->default('heroicon-o-cube')
-                ->helperText('Used in lists and as the sidebar icon for this object\'s records.'),
+                ->required(),
+
+            Actions::make([
+                Action::make('pickIcon')
+                    ->label(function (Get $get): HtmlString {
+                        $icon = $get('icon') ?: 'heroicon-o-cube';
+                        return new HtmlString(view('filament.forms.icon-picker-trigger', [
+                            'icon'  => $icon,
+                            'label' => 'Icon',
+                        ])->render());
+                    })
+                    ->modalHeading('Choose an icon')
+                    ->modalWidth('2xl')
+                    ->modalContent(fn () => view('filament.forms.icon-picker-grid'))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->color('gray')
+                    ->extraAttributes([
+                        'style' => 'min-width:120px; height:auto; padding:8px 12px;',
+                    ]),
+            ]),
 
             Repeater::make('attributes')
                 ->label('Attributes')
@@ -106,9 +128,9 @@ class ObjectTypeResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('slug')->toggleable(),
-                TextColumn::make('attributes')
+                TextColumn::make('attributes_count')
                     ->label('Fields')
-                    ->formatStateUsing(fn ($state) => is_array($state) ? count($state) : 0),
+                    ->state(fn (ObjectType $record): int => is_array($record->attributes) ? count($record->attributes) : 0),
                 TextColumn::make('records_count')
                     ->label('Records')
                     ->state(function (ObjectType $record): int {

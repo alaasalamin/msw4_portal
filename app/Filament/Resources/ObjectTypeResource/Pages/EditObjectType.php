@@ -14,4 +14,22 @@ class EditObjectType extends EditRecord
     {
         return [DeleteAction::make()];
     }
+
+    public function getTitle(): string
+    {
+        return 'Edit ' . $this->getRecord()->name;
+    }
+
+    public function getHeading(): string
+    {
+        return $this->getTitle();
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [
+            static::$resource::getUrl('index') => 'Object Engine',
+            $this->getRecord()->name,
+        ];
+    }
 }
