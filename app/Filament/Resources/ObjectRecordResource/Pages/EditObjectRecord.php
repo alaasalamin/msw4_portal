@@ -14,4 +14,29 @@ class EditObjectRecord extends EditRecord
     {
         return [DeleteAction::make()];
     }
+
+    public function getTitle(): string
+    {
+        $record = $this->getRecord();
+        $typeName = $record->type?->name ?? 'Object Record';
+        return '#' . $record->id . ' ' . $typeName;
+    }
+
+    public function getHeading(): string
+    {
+        return $this->getTitle();
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        $type = $this->getRecord()->type;
+        if (! $type) return parent::getBreadcrumbs();
+
+        return [
+            static::$resource::getUrl('index', [
+                'tableFilters' => ['object_type_id' => ['value' => $type->id]],
+            ]) => $type->name,
+            $this->getBreadcrumb(),
+        ];
+    }
 }

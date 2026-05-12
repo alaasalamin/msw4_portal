@@ -67,6 +67,7 @@ class ObjectTypeResource extends Resource
                             'date'    => 'Date',
                             'select'  => 'Select (dropdown)',
                             'boolean' => 'Boolean (toggle)',
+                            'random'  => 'Random ID (auto-generated)',
                         ])
                         ->required()
                         ->live()
@@ -80,6 +81,13 @@ class ObjectTypeResource extends Resource
                         ->visible(fn (Get $get) => $get('type') === 'select')
                         ->defaultItems(1)
                         ->columnSpanFull(),
+                    TextInput::make('length')
+                        ->numeric()
+                        ->minValue(4)
+                        ->maxValue(32)
+                        ->default(8)
+                        ->visible(fn (Get $get) => $get('type') === 'random')
+                        ->helperText('How many characters. Uses lowercase a–z and 0–9.'),
                     Toggle::make('required')->inline(false)->default(false),
                 ])
                 ->columns(2)

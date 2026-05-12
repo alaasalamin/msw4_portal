@@ -6,10 +6,13 @@ use App\Filament\Resources\ObjectRecordResource\Pages;
 use App\Models\Customer;
 use App\Models\ObjectRecord;
 use App\Models\ObjectType;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -97,6 +100,20 @@ class ObjectRecordResource extends Resource
                 'select'  => Select::make($statePath)->options(
                     collect($attr['options'] ?? [])->pluck('value', 'value')->all()
                 )->searchable(),
+                'random'  => (function () use ($statePath, $attr) {
+                    $length = (int) ($attr['length'] ?? 8);
+                    if ($length < 4 || $length > 64) $length = 8;
+                    return TextInput::make($statePath)
+                        ->default(fn () => static::randomId($length))
+                        ->dehydrated()
+                        ->readOnly()
+                        ->suffixAction(
+                            Action::make('regen_' . md5($statePath))
+                                ->icon('heroicon-o-arrow-path')
+                                ->tooltip('Generate a new value')
+                                ->action(fn (Set $set) => $set($statePath, static::randomId($length)))
+                        );
+                })(),
                 default   => TextInput::make($statePath)->maxLength(255),
             };
 
@@ -112,26 +129,51 @@ class ObjectRecordResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $type = static::activeType();
+
+        $columns = [
+            TextColumn::make('id')->sortable(),
+            TextColumn::make('type.name')
+                ->label('Type')
+                ->icon(fn (ObjectRecord $record) => $record->type?->icon ?: 'heroicon-o-cube')
+                ->badge()
+                ->sortable()
+                ->toggleable(isToggledHiddenByDefault: $type !== null),
+            TextColumn::make('customer.name')
+                ->label('Customer')
+                ->formatStateUsing(fn ($state) => $state ?: '—')
+                ->searchable()
+                ->toggleable(),
+        ];
+
+        // When viewing a single type, one column per attribute instead of a
+        // crammed-together summary string.
+        if ($type && is_array($type->attributes)) {
+            foreach ($type->attributes as $attr) {
+                $key   = $attr['key']   ?? null;
+                $label = $attr['label'] ?? $key;
+                $kind  = $attr['type']  ?? 'text';
+                if (! $key) continue;
+
+                $columns[] = TextColumn::make("data.{$key}")
+                    ->label($label)
+                    ->state(function (ObjectRecord $record) use ($key, $kind) {
+                        $value = data_get($record->data, $key);
+                        if ($value === null || $value === '') return null;
+                        if ($kind === 'boolean') return $value ? 'Yes' : 'No';
+                        return $value;
+                    })
+                    ->placeholder('—')
+                    ->searchable(['data->'.$key])
+                    ->toggleable();
+            }
+        }
+
+        $columns[] = TextColumn::make('created_at')->dateTime()->sortable()->toggleable();
+
         return $table
             ->defaultSort('id', 'desc')
-            ->columns([
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('type.name')
-                    ->label('Type')
-                    ->icon(fn (ObjectRecord $record) => $record->type?->icon ?: 'heroicon-o-cube')
-                    ->badge()
-                    ->sortable(),
-                TextColumn::make('customer.name')
-                    ->label('Customer')
-                    ->formatStateUsing(fn ($state) => $state ?: '—')
-                    ->searchable()
-                    ->toggleable(),
-                TextColumn::make('summary')
-                    ->label('Summary')
-                    ->state(fn (ObjectRecord $record): string => static::summarize($record))
-                    ->wrap(),
-                TextColumn::make('created_at')->dateTime()->sortable()->toggleable(),
-            ])
+            ->columns($columns)
             ->filters([
                 SelectFilter::make('object_type_id')
                     ->label('Type')
@@ -154,19 +196,22 @@ class ObjectRecordResource extends Resource
     }
 
     /**
-     * Compact one-line summary of the JSON data for the table.
+     * The ObjectType the list is currently filtered to (if any).
+     * Reads from the table-filter URL the dynamic sidebar items use.
      */
-    private static function summarize(ObjectRecord $record): string
+    private static function activeType(): ?ObjectType
     {
-        if (! is_array($record->data) || empty($record->data)) return '—';
+        $id = (int) data_get(request()->query(), 'tableFilters.object_type_id.value');
+        return $id > 0 ? ObjectType::find($id) : null;
+    }
 
-        $parts = [];
-        foreach ($record->data as $k => $v) {
-            if ($v === null || $v === '') continue;
-            $parts[] = "{$k}: " . (is_bool($v) ? ($v ? 'yes' : 'no') : (string) $v);
-            if (count($parts) >= 4) break;
-        }
-        return $parts ? implode(' · ', $parts) : '—';
+    /**
+     * Lowercase alphanumeric (a–z, 0–9) string of $length characters.
+     */
+    public static function randomId(int $length): string
+    {
+        // Str::random returns mixed-case alphanumeric; lowercasing gives a–z + 0–9.
+        return strtolower(Str::random($length));
     }
 
     public static function getPages(): array
