@@ -252,17 +252,25 @@
         $size       = 620;            // square container, px
         $center     = $size / 2;
         $radius     = 230;            // tile center distance from container center
+        $customerR  = 92;             // customer disk outer radius (lines start beyond this)
+        $tileHalf   = 56;             // tile half-size (lines end before this)
         $count      = $types->count();
         $n          = max($count, 1);
 
         $positions = [];
+        $lines     = [];
         foreach ($types as $i => $type) {
             // Start at the top (-90°) and walk clockwise.
             $angle  = (($i / $n) * 360) - 90;
             $rad    = deg2rad($angle);
-            $positions[$type->id] = [
-                'x' => $center + cos($rad) * $radius,
-                'y' => $center + sin($rad) * $radius,
+            $tx = $center + cos($rad) * $radius;
+            $ty = $center + sin($rad) * $radius;
+            $positions[$type->id] = ['x' => $tx, 'y' => $ty];
+            $lines[$type->id] = [
+                'x1' => $center + cos($rad) * $customerR,
+                'y1' => $center + sin($rad) * $customerR,
+                'x2' => $center + cos($rad) * ($radius - $tileHalf),
+                'y2' => $center + sin($rad) * ($radius - $tileHalf),
             ];
         }
     @endphp
@@ -289,10 +297,10 @@
                 >
                     @foreach ($types as $type)
                         <line
-                            x1="{{ $center }}"
-                            y1="{{ $center }}"
-                            x2="{{ $positions[$type->id]['x'] }}"
-                            y2="{{ $positions[$type->id]['y'] }}"
+                            x1="{{ $lines[$type->id]['x1'] }}"
+                            y1="{{ $lines[$type->id]['y1'] }}"
+                            x2="{{ $lines[$type->id]['x2'] }}"
+                            y2="{{ $lines[$type->id]['y2'] }}"
                             stroke="var(--cp-line)"
                             stroke-width="2"
                             stroke-linecap="round"
@@ -305,7 +313,7 @@
                     type="button"
                     class="cust-trigger"
                     wire:click="mountAction('edit')"
-                    style="position:absolute; left:{{ $center }}px; top:{{ $center }}px; transform:translate(-50%, -50%); padding:0;"
+                    style="position:absolute; left:{{ $center }}px; top:{{ $center }}px; transform:translate(-50%, -50%); padding:0; z-index:2;"
                 >
                     <span class="cust-icon-wrap">
                         {{-- Heroicon user (outline) --}}
