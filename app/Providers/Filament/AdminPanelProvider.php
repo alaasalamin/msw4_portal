@@ -124,6 +124,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('Content'),
                 NavigationGroup::make('Blog'),
                 NavigationGroup::make('CRM'),
+                NavigationGroup::make('Object Engine'),
                 NavigationGroup::make('User Management'),
                 NavigationGroup::make('Configuration'),
             ])
