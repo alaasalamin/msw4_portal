@@ -247,62 +247,100 @@
         {{ $this->viewObjectsAction }}
     </div>
 
-    <div class="cust-panel cust-graph">
-      <div class="cust-primary-col">
-        <button type="button" class="cust-trigger" wire:click="mountAction('edit')">
-            <span class="cust-icon-wrap">
-                {{-- Heroicon user (outline) --}}
-                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    @php
+        // Spider-web geometry: customer in the center, types radiating out.
+        $size       = 620;            // square container, px
+        $center     = $size / 2;
+        $radius     = 230;            // tile center distance from container center
+        $count      = $types->count();
+        $n          = max($count, 1);
+
+        $positions = [];
+        foreach ($types as $i => $type) {
+            // Start at the top (-90°) and walk clockwise.
+            $angle  = (($i / $n) * 360) - 90;
+            $rad    = deg2rad($angle);
+            $positions[$type->id] = [
+                'x' => $center + cos($rad) * $radius,
+                'y' => $center + sin($rad) * $radius,
+            ];
+        }
+    @endphp
+
+    <div class="cust-panel" style="display:flex; align-items:center; justify-content:center; min-height:70vh; padding:24px 16px;">
+        @if ($count === 0)
+            <div class="cust-empty">
+                No object types yet. Define one in
+                <a href="{{ route('filament.admin.resources.object-types.index') }}">Object Engine → Object Types</a>
+                and each will appear here, radiating out from this customer.
+            </div>
+        @else
+            <div
+                class="cust-spider"
+                style="position:relative; width:{{ $size }}px; height:{{ $size }}px; max-width:100%;"
+            >
+                {{-- Connector lines (behind the buttons) --}}
+                <svg
+                    width="{{ $size }}"
+                    height="{{ $size }}"
+                    viewBox="0 0 {{ $size }} {{ $size }}"
+                    style="position:absolute; inset:0; pointer-events:none;"
+                    aria-hidden="true"
+                >
+                    @foreach ($types as $type)
+                        <line
+                            x1="{{ $center }}"
+                            y1="{{ $center }}"
+                            x2="{{ $positions[$type->id]['x'] }}"
+                            y2="{{ $positions[$type->id]['y'] }}"
+                            stroke="var(--cp-line)"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        />
+                    @endforeach
                 </svg>
-                <span class="cust-edit-badge">
-                    {{-- Heroicon pencil-square (mini) --}}
-                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487 18.549 2.799a2.121 2.121 0 1 1 3 3L19.862 7.487M16.862 4.487 6.65 14.7a4.5 4.5 0 0 0-1.13 1.897l-1.04 3.46 3.46-1.04a4.5 4.5 0 0 0 1.897-1.13L19.862 7.487M16.862 4.487l3 3" />
-                    </svg>
-                </span>
-            </span>
 
-            <span style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-                <span class="cust-name">{{ $customer->name }}</span>
-                <span class="cust-email">{{ $customer->email }}</span>
-                <span class="cust-hint">Click to edit</span>
-            </span>
-        </button>
-      </div>
+                {{-- Customer in the dead center --}}
+                <button
+                    type="button"
+                    class="cust-trigger"
+                    wire:click="mountAction('edit')"
+                    style="position:absolute; left:{{ $center }}px; top:{{ $center }}px; transform:translate(-50%, -50%); padding:0;"
+                >
+                    <span class="cust-icon-wrap">
+                        {{-- Heroicon user (outline) --}}
+                        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        </svg>
+                        <span class="cust-edit-badge">
+                            {{-- Heroicon pencil-square (mini) --}}
+                            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487 18.549 2.799a2.121 2.121 0 1 1 3 3L19.862 7.487M16.862 4.487 6.65 14.7a4.5 4.5 0 0 0-1.13 1.897l-1.04 3.46 3.46-1.04a4.5 4.5 0 0 0 1.897-1.13L19.862 7.487M16.862 4.487l3 3" />
+                            </svg>
+                        </span>
+                    </span>
+                </button>
 
-      {{-- Right branch: one tile per ObjectType --}}
-      @if ($types->isNotEmpty())
-        <div class="cust-side">
-            <div class="cust-line-h" aria-hidden="true"></div>
-            <div class="cust-tiles">
+                {{-- Object tiles radiating around the customer --}}
                 @foreach ($types as $type)
                     @php
-                        $count = (int) ($counts[$type->id] ?? 0);
-                        $iconName = $type->icon ?: 'heroicon-o-cube';
+                        $tileCount = (int) ($counts[$type->id] ?? 0);
+                        $iconName  = $type->icon ?: 'heroicon-o-cube';
+                        $pos       = $positions[$type->id];
                     @endphp
                     <button
                         type="button"
                         class="cust-device"
                         title="{{ $type->name }}"
                         wire:click="mountAction('viewObjects', { type_id: {{ $type->id }} })"
+                        style="position:absolute; left:{{ $pos['x'] }}px; top:{{ $pos['y'] }}px; transform:translate(-50%, -50%);"
                     >
-                        <span class="cust-badge {{ $count > 0 ? 'cust-badge--danger' : 'cust-badge--zero' }}">{{ $count }}</span>
+                        <span class="cust-badge {{ $tileCount > 0 ? 'cust-badge--danger' : 'cust-badge--zero' }}">{{ $tileCount }}</span>
                         @svg($iconName, ['style' => 'width:36px;height:36px;'])
                         <span class="cust-device-label">{{ $type->name }}</span>
                     </button>
                 @endforeach
             </div>
-        </div>
-      @else
-        <div class="cust-side">
-            <div class="cust-line-h" aria-hidden="true"></div>
-            <div class="cust-empty">
-                No object types yet. Define one in
-                <a href="{{ route('filament.admin.resources.object-types.index') }}">Object Engine → Object Types</a>
-                and each will appear here.
-            </div>
-        </div>
-      @endif
+        @endif
     </div>
 </x-filament-panels::page>
