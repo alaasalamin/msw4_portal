@@ -18,7 +18,7 @@ class EditCustomer extends EditRecord
     public function getTitle(): string
     {
         $record = $this->getRecord();
-        return '#' . $record->id . ' ' . trim($record->first_name . ' ' . $record->last_name);
+        return '#' . $record->id . ' ' . $record->name;
     }
 
     public function getHeading(): string

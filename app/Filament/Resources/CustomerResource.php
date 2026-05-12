@@ -40,8 +40,7 @@ class CustomerResource extends Resource
             Section::make('Identity')
                 ->columns(2)
                 ->schema([
-                    TextInput::make('first_name')->required()->maxLength(255),
-                    TextInput::make('last_name')->required()->maxLength(255),
+                    TextInput::make('name')->required()->maxLength(255)->columnSpanFull(),
                     TextInput::make('email')
                         ->email()
                         ->required()
@@ -106,8 +105,7 @@ class CustomerResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('first_name')->searchable()->sortable(),
-                TextColumn::make('last_name')->searchable()->sortable(),
+                TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('company_name')->label('Company')->searchable()->toggleable(),
                 TextColumn::make('group.name')
                     ->label('Group')

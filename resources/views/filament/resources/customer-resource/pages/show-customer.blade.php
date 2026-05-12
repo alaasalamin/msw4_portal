@@ -268,7 +268,7 @@
             </span>
 
             <span style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-                <span class="cust-name">{{ trim($customer->first_name . ' ' . $customer->last_name) }}</span>
+                <span class="cust-name">{{ $customer->name }}</span>
                 <span class="cust-email">{{ $customer->email }}</span>
                 <span class="cust-hint">Click to edit</span>
             </span>

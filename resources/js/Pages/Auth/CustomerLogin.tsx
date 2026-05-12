@@ -12,8 +12,7 @@ interface LoginFormData {
 }
 
 interface RegisterFormData {
-    first_name: string;
-    last_name: string;
+    name: string;
     company_name: string;
     email: string;
     password: string;
@@ -220,8 +219,7 @@ function RegisterForm() {
     const [showPw, setShowPw] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm<RegisterFormData>({
-        first_name: '',
-        last_name: '',
+        name: '',
         company_name: '',
         email: '',
         password: '',
@@ -248,20 +246,12 @@ function RegisterForm() {
 
             {step === 1 && (
                 <form onSubmit={goNext} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                        <Field
-                            id="reg-first-name" label="Vorname"
-                            value={data.first_name} autoComplete="given-name" required
-                            placeholder="Max" error={errors.first_name}
-                            onChange={(e) => setData('first_name', e.target.value)}
-                        />
-                        <Field
-                            id="reg-last-name" label="Nachname"
-                            value={data.last_name} autoComplete="family-name" required
-                            placeholder="Mustermann" error={errors.last_name}
-                            onChange={(e) => setData('last_name', e.target.value)}
-                        />
-                    </div>
+                    <Field
+                        id="reg-name" label="Vollständiger Name"
+                        value={data.name} autoComplete="name" required
+                        placeholder="Max Mustermann" error={errors.name}
+                        onChange={(e) => setData('name', e.target.value)}
+                    />
                     <Field
                         id="reg-company" label="Firmenname (optional)"
                         value={data.company_name} autoComplete="organization"

@@ -53,8 +53,7 @@ class CustomerLoginController extends Controller
     public function register(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'first_name'              => ['required', 'string', 'max:255'],
-            'last_name'               => ['required', 'string', 'max:255'],
+            'name'                    => ['required', 'string', 'max:255'],
             'company_name'            => ['nullable', 'string', 'max:255'],
             'email'                   => ['required', 'email', 'max:255', 'unique:customers,email'],
             'password'                => ['required', 'confirmed', Password::defaults()],
