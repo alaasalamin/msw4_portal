@@ -54,6 +54,55 @@ class AdminPanelProvider extends PanelProvider
                 return "<style>{$css}</style>";
             },
         );
+
+        // Sidebar hover-to-expand: when collapsed (no .fi-sidebar-open), take it
+        // out of flow (position: fixed) and reserve its width on .fi-main-ctn so
+        // hover-expand overlays the main content without shifting it.
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            fn (): string => <<<'HTML'
+                <style>
+                    @media (min-width: 1024px) {
+                        .fi-main-sidebar:not(.fi-sidebar-open) {
+                            position: fixed;
+                            inset-block-start: 4rem; /* sit below the topbar */
+                            inset-block-end: 0;
+                            inset-inline-start: 0;
+                            height: calc(100vh - 4rem);
+                            z-index: 40;
+                            /* Solid theme background so hover-expand doesn't bleed through main content. */
+                            background-color: var(--color-white, #ffffff) !important;
+                            transition: width .3s cubic-bezier(0.4, 0, 0.2, 1),
+                                        box-shadow .3s cubic-bezier(0.4, 0, 0.2, 1);
+                        }
+                        .dark .fi-main-sidebar:not(.fi-sidebar-open),
+                        html.dark .fi-main-sidebar:not(.fi-sidebar-open) {
+                            background-color: var(--gray-900, #18181b) !important;
+                        }
+                        /* Reserve space for the now-absolutely-positioned collapsed sidebar.
+                           5rem matches Filament's collapsed width. */
+                        .fi-main-sidebar:not(.fi-sidebar-open) ~ .fi-main-ctn {
+                            margin-inline-start: 5rem;
+                        }
+                        .fi-main-sidebar:not(.fi-sidebar-open):hover {
+                            width: 16rem !important;
+                            box-shadow: 0 12px 28px rgba(0, 0, 0, .12);
+                        }
+                        .dark .fi-main-sidebar:not(.fi-sidebar-open):hover,
+                        html.dark .fi-main-sidebar:not(.fi-sidebar-open):hover {
+                            box-shadow: 0 12px 28px rgba(0, 0, 0, .45);
+                        }
+                        .fi-main-sidebar:not(.fi-sidebar-open):hover .fi-sidebar-item-label,
+                        .fi-main-sidebar:not(.fi-sidebar-open):hover .fi-sidebar-group-label,
+                        .fi-main-sidebar:not(.fi-sidebar-open):hover .fi-sidebar-header-logo-ctn {
+                            opacity: 1 !important;
+                            visibility: visible !important;
+                            display: inline-flex !important;
+                        }
+                    }
+                </style>
+            HTML,
+        );
     }
 
     public function panel(Panel $panel): Panel
@@ -78,6 +127,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('User Management'),
                 NavigationGroup::make('Configuration'),
             ])
+            ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
