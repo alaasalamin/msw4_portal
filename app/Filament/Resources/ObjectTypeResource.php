@@ -83,11 +83,11 @@ class ObjectTypeResource extends Resource
                         ->columnSpanFull(),
                     TextInput::make('length')
                         ->numeric()
-                        ->minValue(4)
+                        ->minValue(6)
                         ->maxValue(32)
                         ->default(8)
                         ->visible(fn (Get $get) => $get('type') === 'random')
-                        ->helperText('How many characters. Uses lowercase a–z and 0–9.'),
+                        ->helperText('How many characters. Uses lowercase a–z and 0–9. Auto-generated values stay unique within this object type.'),
                     Toggle::make('required')->inline(false)->default(false),
                 ])
                 ->columns(2)

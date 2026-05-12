@@ -100,18 +100,19 @@ class ObjectRecordResource extends Resource
                 'select'  => Select::make($statePath)->options(
                     collect($attr['options'] ?? [])->pluck('value', 'value')->all()
                 )->searchable(),
-                'random'  => (function () use ($statePath, $attr) {
-                    $length = (int) ($attr['length'] ?? 8);
-                    if ($length < 4 || $length > 64) $length = 8;
+                'random'  => (function () use ($statePath, $attr, $type, $key) {
+                    $length = max(6, min(64, (int) ($attr['length'] ?? 8)));
+                    $typeId = $type->id;
+                    $attrKey = $key;
                     return TextInput::make($statePath)
-                        ->default(fn () => static::randomId($length))
+                        ->default(fn () => static::uniqueRandomId($length, $typeId, $attrKey))
                         ->dehydrated()
                         ->readOnly()
                         ->suffixAction(
                             Action::make('regen_' . md5($statePath))
                                 ->icon('heroicon-o-arrow-path')
                                 ->tooltip('Generate a new value')
-                                ->action(fn (Set $set) => $set($statePath, static::randomId($length)))
+                                ->action(fn (Set $set) => $set($statePath, static::uniqueRandomId($length, $typeId, $attrKey)))
                         );
                 })(),
                 default   => TextInput::make($statePath)->maxLength(255),
@@ -212,6 +213,26 @@ class ObjectRecordResource extends Resource
     {
         // Str::random returns mixed-case alphanumeric; lowercasing gives a–z + 0–9.
         return strtolower(Str::random($length));
+    }
+
+    /**
+     * Like randomId(), but guaranteed unique for the given attribute key within
+     * an object type (e.g. no two "Used Phones" records share the same internal_id).
+     */
+    public static function uniqueRandomId(int $length, int $typeId, string $key): string
+    {
+        $length = max(6, $length);
+
+        for ($attempt = 0; $attempt < 16; $attempt++) {
+            $candidate = static::randomId($length);
+            $clash = ObjectRecord::where('object_type_id', $typeId)
+                ->where("data->{$key}", $candidate)
+                ->exists();
+            if (! $clash) return $candidate;
+        }
+
+        // 16 collisions in a row is astronomically unlikely — bump length and retry.
+        return static::uniqueRandomId($length + 2, $typeId, $key);
     }
 
     public static function getPages(): array
