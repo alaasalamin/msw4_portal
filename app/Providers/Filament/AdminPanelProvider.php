@@ -49,7 +49,7 @@ class AdminPanelProvider extends PanelProvider
                             'tableFilters' => ['object_type_id' => ['value' => $type->id]],
                         ]))
                         ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.resources.object-records.*')
-                            && (int) request()->query('tableFilters.object_type_id.value') === (int) $type->id))
+                            && (int) data_get(request()->query(), 'tableFilters.object_type_id.value') === (int) $type->id))
                     ->all();
 
                 Filament::registerNavigationItems($items);
