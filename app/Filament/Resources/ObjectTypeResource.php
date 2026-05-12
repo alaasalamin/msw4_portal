@@ -34,6 +34,13 @@ class ObjectTypeResource extends Resource
                 ->maxLength(255)
                 ->helperText('Anything — e.g. "Used Phones", "Spare Parts", "Tickets".'),
 
+            Select::make('icon')
+                ->label('Icon')
+                ->options(ObjectType::ICON_CHOICES)
+                ->searchable()
+                ->default('heroicon-o-cube')
+                ->helperText('Shown next to the object type in lists and (later) in the sidebar.'),
+
             Repeater::make('attributes')
                 ->label('Attributes')
                 ->helperText('Add as many fields as you want. Each becomes an input on the record form.')
@@ -85,7 +92,10 @@ class ObjectTypeResource extends Resource
             ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('name')
+                    ->icon(fn (ObjectType $record) => $record->icon ?: 'heroicon-o-cube')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('slug')->toggleable(),
                 TextColumn::make('attributes')
                     ->label('Fields')

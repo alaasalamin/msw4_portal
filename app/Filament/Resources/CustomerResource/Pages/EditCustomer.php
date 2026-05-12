@@ -3,11 +3,12 @@
 namespace App\Filament\Resources\CustomerResource\Pages;
 
 use App\Filament\Resources\CustomerResource;
+use App\Models\ObjectRecord;
+use App\Models\ObjectType;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\HtmlString;
 
 class EditCustomer extends EditRecord
 {
@@ -56,39 +57,34 @@ class EditCustomer extends EditRecord
             });
     }
 
-    public function notesAction(): Action
+    /**
+     * Single dynamic action for any object type tile. The blade passes
+     * `type_id` so the modal can resolve which type and which records to show.
+     */
+    public function viewObjectsAction(): Action
     {
-        return $this->placeholderTileAction('notes', 'Notes', 'heroicon-o-pencil-square');
-    }
-
-    public function devicesAction(): Action
-    {
-        return $this->placeholderTileAction('devices', 'Devices', 'heroicon-o-device-phone-mobile');
-    }
-
-    public function insuranceAction(): Action
-    {
-        return $this->placeholderTileAction('insurance', 'Insurance', 'heroicon-o-shield-check');
-    }
-
-    public function invoicesAction(): Action
-    {
-        return $this->placeholderTileAction('invoices', 'Invoices', 'heroicon-o-document-text');
-    }
-
-    protected function placeholderTileAction(string $name, string $heading, string $icon): Action
-    {
-        return Action::make($name)
-            ->modalHeading($heading)
-            ->modalIcon($icon)
+        return Action::make('viewObjects')
+            ->modalHeading(function (array $arguments): string {
+                return ObjectType::find($arguments['type_id'] ?? null)?->name ?? 'Records';
+            })
+            ->modalIcon(function (array $arguments): ?string {
+                return ObjectType::find($arguments['type_id'] ?? null)?->icon ?: 'heroicon-o-cube';
+            })
             ->modalWidth('2xl')
-            ->modalContent(new HtmlString(
-                '<div style="padding:8px 4px 4px;">' .
-                    '<p style="font-size:14px; line-height:1.6; color:rgb(107 114 128); margin:0;">' .
-                        e($heading) . ' for this customer will appear here once wired to the data model.' .
-                    '</p>' .
-                '</div>'
-            ))
+            ->modalContent(function (array $arguments) {
+                $type = ObjectType::find($arguments['type_id'] ?? null);
+                if (! $type) return null;
+
+                $records = ObjectRecord::where('object_type_id', $type->id)
+                    ->where('customer_id', $this->getRecord()->id)
+                    ->orderByDesc('id')
+                    ->get();
+
+                return view('filament.resources.customer-resource.modals.object-records', [
+                    'type'    => $type,
+                    'records' => $records,
+                ]);
+            })
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Close');
     }

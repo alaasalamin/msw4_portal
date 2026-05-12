@@ -109,7 +109,11 @@ class ObjectRecordResource extends Resource
             ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('type.name')->label('Type')->badge()->sortable(),
+                TextColumn::make('type.name')
+                    ->label('Type')
+                    ->icon(fn (ObjectRecord $record) => $record->type?->icon ?: 'heroicon-o-cube')
+                    ->badge()
+                    ->sortable(),
                 TextColumn::make('customer.name')
                     ->label('Customer')
                     ->formatStateUsing(fn ($state) => $state ?: '—')

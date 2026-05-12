@@ -1,5 +1,13 @@
 <x-filament-panels::page>
-    @php($customer = $this->getRecord())
+    @php
+        $customer = $this->getRecord();
+        $types = \App\Models\ObjectType::orderBy('sort_order')->orderBy('name')->get();
+        $counts = \App\Models\ObjectRecord::query()
+            ->where('customer_id', $customer->id)
+            ->selectRaw('object_type_id, COUNT(*) as n')
+            ->groupBy('object_type_id')
+            ->pluck('n', 'object_type_id');
+    @endphp
 
     {{-- Light + dark CSS variables (same pattern as Theme Builder / SEO Optimizer). --}}
     <style>
@@ -36,6 +44,7 @@
             justify-content: center;
             min-height: 60vh;
             padding: 32px 16px;
+            gap: 0;
         }
 
         .cust-primary-col {
@@ -47,30 +56,25 @@
         .cust-side {
             display: flex;
             align-items: center;
+            gap: 12px;
         }
 
-        .cust-devices-row {
+        .cust-tiles {
             display: flex;
-            justify-content: center;
-            gap: 24px;
             flex-wrap: wrap;
-        }
-
-        .cust-line {
-            width: 2px;
-            height: 56px;
-            background: var(--cp-line);
-            border-radius: 1px;
+            gap: 18px;
+            max-width: 480px;
         }
 
         .cust-line-h {
-            width: 72px;
+            width: 56px;
             height: 2px;
             background: var(--cp-line);
             border-radius: 1px;
+            flex-shrink: 0;
         }
 
-        /* ── Device tile (square) ─────────────────────────────────────── */
+        /* ── Tile (square) ────────────────────────────────────────────── */
         .cust-device {
             position: relative;
             width: 112px;
@@ -87,6 +91,7 @@
             cursor: pointer;
             font: inherit;
             transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            text-align: center;
         }
         .cust-device:focus { outline: none; }
         .cust-device:focus-visible {
@@ -134,7 +139,28 @@
             letter-spacing: .04em;
             color: var(--cp-muted);
             text-transform: uppercase;
+            padding: 0 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
         }
+
+        /* ── Empty-state hint ────────────────────────────────────────── */
+        .cust-empty {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px dashed var(--cp-border);
+            background: var(--cp-card-bg);
+            color: var(--cp-muted);
+            font-size: 12px;
+            max-width: 240px;
+        }
+        .cust-empty a { color: var(--cp-accent); text-decoration: none; font-weight: 600; }
+        .cust-empty a:hover { text-decoration: underline; }
 
         /* ── Customer trigger ─────────────────────────────────────────── */
         .cust-trigger {
@@ -216,43 +242,11 @@
     {{-- Hidden triggers — render modal wiring; visible buttons call mountAction(...) --}}
     <div style="display:none;">
         {{ $this->editAction }}
-        {{ $this->notesAction }}
-        {{ $this->devicesAction }}
-        {{ $this->insuranceAction }}
-        {{ $this->invoicesAction }}
+        {{ $this->viewObjectsAction }}
     </div>
 
     <div class="cust-panel cust-graph">
-      {{-- Left branch: notes + horizontal line --}}
-      <div class="cust-side">
-        <button type="button" class="cust-device" title="Notes" wire:click="mountAction('notes')">
-            <span class="cust-badge cust-badge--danger">3</span>
-            {{-- Heroicon pencil-square --}}
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487 18.549 2.799a2.121 2.121 0 1 1 3 3L19.862 7.487M16.862 4.487 6.65 14.7a4.5 4.5 0 0 0-1.13 1.897l-1.04 3.46 3.46-1.04a4.5 4.5 0 0 0 1.897-1.13L19.862 7.487M16.862 4.487l3 3M5.625 21h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125Z" />
-            </svg>
-            <span class="cust-device-label">Notes</span>
-        </button>
-        <div class="cust-line-h" aria-hidden="true"></div>
-      </div>
-
       <div class="cust-primary-col">
-        {{-- Devices above --}}
-        <div class="cust-devices-row">
-            <button type="button" class="cust-device" title="Device" wire:click="mountAction('devices')">
-                <span class="cust-badge cust-badge--zero">0</span>
-                {{-- Heroicon device-phone-mobile --}}
-                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                </svg>
-                <span class="cust-device-label">Device</span>
-            </button>
-        </div>
-
-        {{-- Connector line --}}
-        <div class="cust-line" aria-hidden="true"></div>
-
-        {{-- Customer below --}}
         <button type="button" class="cust-trigger" wire:click="mountAction('edit')">
             <span class="cust-icon-wrap">
                 {{-- Heroicon user (outline) --}}
@@ -273,35 +267,40 @@
                 <span class="cust-hint">Click to edit</span>
             </span>
         </button>
+      </div>
 
-        {{-- Connector line (downward) --}}
-        <div class="cust-line" aria-hidden="true"></div>
-
-        {{-- Insurance below --}}
-        <div class="cust-devices-row">
-            <button type="button" class="cust-device" title="Insurance" wire:click="mountAction('insurance')">
-                <span class="cust-badge cust-badge--zero">0</span>
-                {{-- Heroicon shield-check --}}
-                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                </svg>
-                <span class="cust-device-label">Insurance</span>
-            </button>
+      {{-- Right branch: one tile per ObjectType --}}
+      @if ($types->isNotEmpty())
+        <div class="cust-side">
+            <div class="cust-line-h" aria-hidden="true"></div>
+            <div class="cust-tiles">
+                @foreach ($types as $type)
+                    @php
+                        $count = (int) ($counts[$type->id] ?? 0);
+                        $iconName = $type->icon ?: 'heroicon-o-cube';
+                    @endphp
+                    <button
+                        type="button"
+                        class="cust-device"
+                        title="{{ $type->name }}"
+                        wire:click="mountAction('viewObjects', { type_id: {{ $type->id }} })"
+                    >
+                        <span class="cust-badge {{ $count > 0 ? 'cust-badge--danger' : 'cust-badge--zero' }}">{{ $count }}</span>
+                        @svg($iconName, ['style' => 'width:36px;height:36px;'])
+                        <span class="cust-device-label">{{ $type->name }}</span>
+                    </button>
+                @endforeach
+            </div>
         </div>
-      </div>
-
-      {{-- Right branch: horizontal line + invoices --}}
-      <div class="cust-side">
-        <div class="cust-line-h" aria-hidden="true"></div>
-        <button type="button" class="cust-device" title="Invoices" wire:click="mountAction('invoices')">
-            <span class="cust-badge cust-badge--danger">5</span>
-            {{-- Heroicon document-text --}}
-            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 3h6m-6 3h3" />
-            </svg>
-            <span class="cust-device-label">Invoices</span>
-        </button>
-      </div>
+      @else
+        <div class="cust-side">
+            <div class="cust-line-h" aria-hidden="true"></div>
+            <div class="cust-empty">
+                No object types yet. Define one in
+                <a href="{{ route('filament.admin.resources.object-types.index') }}">Object Engine → Object Types</a>
+                and each will appear here.
+            </div>
+        </div>
+      @endif
     </div>
 </x-filament-panels::page>
