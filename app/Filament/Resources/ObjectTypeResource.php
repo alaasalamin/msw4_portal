@@ -7,9 +7,11 @@ use App\Models\ObjectType;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Group;
@@ -114,6 +116,21 @@ class ObjectTypeResource extends Resource
                 ])
                 ->columns(2)
                 ->addActionLabel('Add attribute'),
+
+            Section::make('Contract template')
+                ->description('Optional. Use {{ field_key }} to insert record values (e.g. {{ brand }}, {{ model }}). For customer fields use {{ customer.name }}, {{ customer.email }}, {{ customer.address_city }}. Also available: {{ date }}, {{ date_long }}, {{ id }}, {{ type }}.')
+                ->collapsible()
+                ->collapsed(fn ($record) => blank($record?->contract_template))
+                ->schema([
+                    RichEditor::make('contract_template')
+                        ->label('')
+                        ->toolbarButtons([
+                            'bold', 'italic', 'underline', 'strike',
+                            'h2', 'h3', 'bulletList', 'orderedList',
+                            'link', 'undo', 'redo',
+                        ])
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 

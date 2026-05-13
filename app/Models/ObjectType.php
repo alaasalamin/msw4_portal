@@ -13,6 +13,7 @@ class ObjectType extends Model
         'slug',
         'icon',
         'attributes',
+        'contract_template',
         'sort_order',
     ];
 

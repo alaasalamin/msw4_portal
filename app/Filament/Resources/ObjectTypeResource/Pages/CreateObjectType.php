@@ -7,6 +7,7 @@ use App\Models\ObjectType;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -131,6 +132,21 @@ class CreateObjectType extends CreateRecord
                         ])
                         ->columns(2)
                         ->addActionLabel('Add attribute'),
+                ]),
+
+            Step::make('Contract')
+                ->description('Optional formal template')
+                ->icon('heroicon-o-document-text')
+                ->schema([
+                    RichEditor::make('contract_template')
+                        ->label('Contract template')
+                        ->helperText('Optional. Use {{ field_key }} for record values, {{ customer.name }} for customer fields. Also: {{ date }}, {{ date_long }}, {{ id }}, {{ type }}.')
+                        ->toolbarButtons([
+                            'bold', 'italic', 'underline', 'strike',
+                            'h2', 'h3', 'bulletList', 'orderedList',
+                            'link', 'undo', 'redo',
+                        ])
+                        ->columnSpanFull(),
                 ]),
         ];
     }

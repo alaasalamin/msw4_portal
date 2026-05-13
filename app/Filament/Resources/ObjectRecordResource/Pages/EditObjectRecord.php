@@ -3,9 +3,13 @@
 namespace App\Filament\Resources\ObjectRecordResource\Pages;
 
 use App\Filament\Resources\ObjectRecordResource;
+use App\Services\EngineContractRenderer;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EditObjectRecord extends EditRecord
 {
@@ -27,7 +31,26 @@ class EditObjectRecord extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [DeleteAction::make()];
+        return [
+            Action::make('downloadContract')
+                ->label('Contract')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('primary')
+                ->visible(fn (): bool => filled($this->getRecord()->type?->contract_template))
+                ->action(function (): StreamedResponse {
+                    $record = $this->getRecord();
+                    $pdf    = app(EngineContractRenderer::class)->pdf($record);
+
+                    $name = Str::slug(($record->type?->name ?? 'contract') . '-' . $record->id) . '.pdf';
+
+                    return response()->streamDownload(
+                        fn () => print($pdf),
+                        $name,
+                        ['Content-Type' => 'application/pdf'],
+                    );
+                }),
+            DeleteAction::make(),
+        ];
     }
 
     public function getTitle(): string
