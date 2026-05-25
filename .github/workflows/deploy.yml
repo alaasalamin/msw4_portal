@@ -91,7 +91,7 @@ jobs:
               fi
             }
 
-            set_env APP_URL "https://msw.bizo.technology"
+            set_env APP_URL "https://bizo.technology"
             set_env APP_NAME "$APP_NAME"
             set_env REVERB_APP_ID "$REVERB_APP_ID"
             set_env REVERB_APP_KEY "$REVERB_APP_KEY"
@@ -102,7 +102,7 @@ jobs:
             set_env REVERB_SCHEME "http"
             # Browser connects via Nginx SSL proxy on port 443
             set_env VITE_REVERB_APP_KEY "$REVERB_APP_KEY"
-            set_env VITE_REVERB_HOST "msw.bizo.technology"
+            set_env VITE_REVERB_HOST "bizo.technology"
             set_env VITE_REVERB_PORT "443"
             set_env VITE_REVERB_SCHEME "https"
             set_env BROADCAST_CONNECTION "reverb"
@@ -192,7 +192,13 @@ jobs:
             sed -i 's/^post_max_size.*/post_max_size = 25M/' /etc/php/8.4/fpm/php.ini
             systemctl restart php8.4-fpm
 
+            # Remove the legacy msw.bizo.technology site so that hostname is
+            # free for the separate app that will be deployed there. Safe to
+            # re-run: -f swallows missing files.
+            rm -f /etc/nginx/sites-enabled/msw.bizo.technology
+            rm -f /etc/nginx/sites-available/msw.bizo.technology
+
             # Update Nginx config and reload
-            cp /var/www/msw/deploy/nginx.conf /etc/nginx/sites-available/msw.bizo.technology
-            ln -sf /etc/nginx/sites-available/msw.bizo.technology /etc/nginx/sites-enabled/msw.bizo.technology
+            cp /var/www/msw/deploy/nginx.conf /etc/nginx/sites-available/bizo.technology
+            ln -sf /etc/nginx/sites-available/bizo.technology /etc/nginx/sites-enabled/bizo.technology
             nginx -t && systemctl reload nginx

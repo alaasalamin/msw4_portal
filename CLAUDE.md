@@ -9,7 +9,7 @@
 - VPS: `217.160.255.189`
 - SSH: `root@217.160.255.189`
 - Web root: `/var/www/msw`
-- Domain: `msw.bizo.technology`
+- Domain: `bizo.technology`
 
 ## Database
 - MySQL, database: `msw`, user: `alaeddin`
